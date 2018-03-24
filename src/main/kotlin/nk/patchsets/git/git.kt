@@ -123,17 +123,39 @@ fun reCommitPatched(repositoryPath: String, commitInfo: CommitInfo, suffix: Stri
     val repository = configureRepository(repositoryPath)
     val git = Git(repository)
 
+    val addCommand = git.add()
     for (fileAction in commitInfo.fileActions) {
         val path = fileAction.newPath + ".$suffix"
         val newFile = File(repositoryPath, path)
         newFile.parentFile.mkdirs()
         newFile.writeText(fileAction.content)
-        git.add().addFilepattern(path).call()
+        addCommand.addFilepattern(path)
     }
+    addCommand.call()
 
     git.commit()
             .setAuthor(commitInfo.author)
             .setMessage("$suffix: ${commitInfo.message}")
+            .call()
+}
+
+enum class ChangeType { ADD, REMOVE, MODIFY }
+class FileChange(val type: ChangeType, val file: File)
+
+fun commitChanges(repositoryPath: String, changeFiles: Set<FileChange>, title: String) {
+    val repoPath = File(repositoryPath)
+
+    val repository = configureRepository(repositoryPath)
+    val git = Git(repository)
+
+    val addCommand = git.add()
+    for (changeFile in changeFiles) {
+        addCommand.addFilepattern(changeFile.file.relativeTo(repoPath).path.replace('\\', '/'))
+    }
+    addCommand.call()
+
+    git.commit()
+            .setMessage(title)
             .call()
 }
 

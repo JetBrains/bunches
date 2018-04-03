@@ -7,17 +7,28 @@ import nk.patchsets.git.FileChange
 import nk.patchsets.git.commitChanges
 import java.io.File
 
-val rule = "173->172->171->as30"
-val repoPath = "patches"
-val commitTitile = "==== switch ===="
+class Settings(val rule: String, val repoPath: String, val commitTitle: String = "==== switch ====")
+
+
+val patchesSettings = Settings(
+        rule = "173->172->171->as30",
+        repoPath = "patches"
+)
+
+val kotlinSettings = Settings(
+        rule = "173->172->171->as30",
+        repoPath = "C:/Projects/kotlin"
+)
 
 fun main(args: Array<String>) {
-    val suffixes = rule.split("->")
+    val settings = kotlinSettings
+
+    val suffixes = settings.rule.split("->")
 
     val originBranchExtension = suffixes.first()
     val donorExtensionsPrioritized = suffixes.subList(1, suffixes.size).reversed().toSet()
 
-    val root = File(".")
+    val root = File(settings.repoPath)
 
     if (!root.exists() || !root.isDirectory) {
         System.err.println("Repository directory with branch is expected")
@@ -68,7 +79,7 @@ fun main(args: Array<String>) {
         changedFiles.add(FileChange(originFileModificationType, originFile))
     }
 
-    commitChanges(repoPath, changedFiles, commitTitile)
+    commitChanges(settings.repoPath, changedFiles, settings.commitTitle)
 }
 
 private fun File.toPatchFile(extension: String) = File(parentFile, "$name.$extension")

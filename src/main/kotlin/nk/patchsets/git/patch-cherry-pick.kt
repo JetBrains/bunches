@@ -16,9 +16,9 @@ private val localSettings = Settings(
 
 private val kotlinSettings = Settings(
         gitPath = "C:/Projects/kotlin",
-        branch = "origin/master_172",
-        untilHash = "27fa8e964c858832e233fa16f51d6627d5ce380b",
-        suffix = "172"
+        branch = "origin/master_182",
+        untilHash = "c1125219e44aed60b8ba033ddae5b8f5c748052e",
+        suffix = "182"
 )
 
 fun main(args: Array<String>) {

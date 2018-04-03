@@ -1,4 +1,5 @@
 @file:Suppress("PackageDirectoryMismatch")
+@file:JvmName("PatchRestore")
 
 package nk.patchsets.git.restore
 

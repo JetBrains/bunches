@@ -1,4 +1,5 @@
 @file:Suppress("PackageDirectoryMismatch")
+@file:JvmName("PatchCherryPick")
 
 package nk.patchsets.git.cp
 

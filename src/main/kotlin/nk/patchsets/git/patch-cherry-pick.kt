@@ -1,5 +1,5 @@
 @file:Suppress("PackageDirectoryMismatch")
-@file:JvmName("PatchCherryPick")
+@file:JvmName("BunchCherryPick")
 
 package nk.patchsets.git.cp
 
@@ -28,6 +28,10 @@ private val kotlinSettings = Settings(
 )
 
 fun main(args: Array<String>) {
+    cherryPick(args)
+}
+
+fun cherryPick(args: Array<String>) {
     if (args.size != 4) {
         System.err.println("""
             Usage: <git-path> <since-ref> <until-ref> <suffix>
@@ -45,7 +49,7 @@ fun main(args: Array<String>) {
     }
 
     val settings = Settings(args[0], args[1], args[2], args[3])
-    with (settings) {
+    with(settings) {
         val commits = readCommits(gitPath, branch, untilHash)
 
         for (commit in commits.reversed()) {

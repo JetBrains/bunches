@@ -1,5 +1,5 @@
 @file:Suppress("PackageDirectoryMismatch")
-@file:JvmName("PatchRestore")
+@file:JvmName("BunchRestore")
 
 package nk.patchsets.git.restore
 
@@ -21,6 +21,10 @@ val kotlinSettings = Settings(
 )
 
 fun main(args: Array<String>) {
+    restore(args)
+}
+
+fun restore(args: Array<String>) {
     if (args.size != 3 && args.size != 2) {
         System.err.println("""
             Usage: <git-path> <branches-rule> <commit-title>?
@@ -39,7 +43,7 @@ fun main(args: Array<String>) {
 
     val settings = Settings(
             repoPath = args[0],
-            rule = args[2],
+            rule = args[1],
             commitTitle = args.getOrElse(2, { "==== switch ====" })
     )
 
@@ -59,7 +63,7 @@ fun main(args: Array<String>) {
     val affectedOriginFiles: Set<File> = root
             .walkTopDown()
             .filter { child -> child.extension in donorExtensionsPrioritized }
-            .mapTo(HashSet(), { child -> File(child.parentFile, child.nameWithoutExtension)})
+            .mapTo(HashSet(), { child -> File(child.parentFile, child.nameWithoutExtension) })
 
     for (originFile in affectedOriginFiles) {
         val originFileModificationType: ChangeType

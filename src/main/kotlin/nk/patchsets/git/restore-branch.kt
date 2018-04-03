@@ -7,21 +7,40 @@ import nk.patchsets.git.FileChange
 import nk.patchsets.git.commitChanges
 import java.io.File
 
-class Settings(val rule: String, val repoPath: String, val commitTitle: String = "==== switch ====")
-
+class Settings(val repoPath: String, val rule: String, val commitTitle: String = "==== switch ====")
 
 val patchesSettings = Settings(
-        rule = "173->172->171->as30",
-        repoPath = "patches"
+        repoPath = "patches",
+        rule = "173->172->171->as30"
 )
 
 val kotlinSettings = Settings(
-        rule = "173->172->171->as30",
-        repoPath = "C:/Projects/kotlin"
+        repoPath = "C:/Projects/kotlin",
+        rule = "173->172->171->as30"
 )
 
 fun main(args: Array<String>) {
-    val settings = kotlinSettings
+    if (args.size != 3 && args.size != 2) {
+        System.err.println("""
+            Usage: <git-path> <branches-rule> <commit-title>?
+
+            <git-path> - Directory with repository (parent directory for .git folder)
+            <branches-rule> - Set of file suffixes separated with `->` showing what files should be affected and priority
+                              of application.
+            <commit-title> - Title for switch commit. "==== switch ====" is used by default.
+
+            Example:
+            <program> C:/Projects/kotlin 173->172->171->as30
+            """.trimIndent())
+
+        return
+    }
+
+    val settings = Settings(
+            repoPath = args[0],
+            rule = args[2],
+            commitTitle = args.getOrElse(2, { "==== switch ====" })
+    )
 
     val suffixes = settings.rule.split("->")
 

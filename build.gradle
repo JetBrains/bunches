@@ -14,6 +14,11 @@ buildscript {
     }
 }
 
+distZip {
+    filesMatching("**/bin/*") { mode = 0b111101101 }
+    filesMatching("**/bin/*.bat") { mode = 0b110100100 }
+}
+
 allprojects {
     group 'nk'
     version '0.0.1'

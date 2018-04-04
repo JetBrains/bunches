@@ -15,14 +15,14 @@ fun main(args: Array<String>) {
             restore - for restore branch state
 
             Example:
-            <program> restore C:/Projects/kotlin 173->172->171->as30
+            <program> restore . 173_as31_as32
             """.trimIndent())
 
         return
     }
 
     val command = args[0]
-    val commandArgs = args.sliceArray(1..args.size)
+    val commandArgs = args.toList().drop(1).toTypedArray()
 
     when (command) {
         "cp" -> cherryPick(commandArgs)

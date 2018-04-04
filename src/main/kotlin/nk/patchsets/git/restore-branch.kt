@@ -8,7 +8,7 @@ import nk.patchsets.git.FileChange
 import nk.patchsets.git.commitChanges
 import java.io.File
 
-class Settings(val repoPath: String, val rule: String, val commitTitle: String = "==== switch ====")
+data class Settings(val repoPath: String, val rule: String, val commitTitle: String = "==== switch ====")
 
 val patchesSettings = Settings(
         repoPath = "patches",
@@ -30,12 +30,12 @@ fun restore(args: Array<String>) {
             Usage: <git-path> <branches-rule> <commit-title>?
 
             <git-path> - Directory with repository (parent directory for .git folder)
-            <branches-rule> - Set of file suffixes separated with `->` showing what files should be affected and priority
+            <branches-rule> - Set of file suffixes separated with `_` showing what files should be affected and priority
                               of application.
             <commit-title> - Title for switch commit. "==== switch ====" is used by default.
 
             Example:
-            <program> C:/Projects/kotlin 173->172->171->as30
+            <program> C:/Projects/kotlin 173_as31_as32
             """.trimIndent())
 
         return
@@ -47,7 +47,11 @@ fun restore(args: Array<String>) {
             commitTitle = args.getOrElse(2, { "==== switch ====" })
     )
 
-    val suffixes = settings.rule.split("->")
+    val suffixes = settings.rule.split("_")
+    if (suffixes.size < 2) {
+        System.err.println("There should be at least source and target branches in pattern: ${settings.rule}")
+        return
+    }
 
     val originBranchExtension = suffixes.first()
     val donorExtensionsPrioritized = suffixes.subList(1, suffixes.size).reversed().toSet()
@@ -76,7 +80,7 @@ fun restore(args: Array<String>) {
             val branchCopyFile = originFile.toPatchFile(originBranchExtension)
 
             if (branchCopyFile.exists()) {
-                System.err.println("Can't store copy of origin file, because branch file is already exist: ${branchCopyFile}")
+                System.err.println("Can't store copy of the origin file, because branch file is already exist: ${branchCopyFile}")
                 return
             }
 

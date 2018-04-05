@@ -181,16 +181,31 @@ fun collectActions(git: Git, commit: RevCommit): List<FileAction> {
         setNewTree(newTreeIterator)
     }
 
-    return diffCommand.call().map { entry: DiffEntry ->
-        val content = if (entry.changeType != DiffEntry.ChangeType.DELETE) {
-            val loader = git.repository.open(entry.newId.toObjectId())
-            String(loader.bytes)
-        } else {
-            ""
-        }
+    return diffCommand.call().flatMap { entry: DiffEntry ->
+        when (entry.changeType) {
+            DiffEntry.ChangeType.RENAME -> {
+                listOf(
+                        FileAction(entry.changeType, entry.oldPath, ""),
+                        FileAction(entry.changeType, entry.newPath, entry.readNewContent(git))
+                )
+            }
+            DiffEntry.ChangeType.DELETE -> {
+                listOf(FileAction(entry.changeType, entry.oldPath, ""))
+            }
 
-        FileAction(entry.changeType, entry.newPath, content)
+            DiffEntry.ChangeType.ADD,
+            DiffEntry.ChangeType.MODIFY,
+            DiffEntry.ChangeType.COPY -> {
+                listOf(FileAction(entry.changeType, entry.newPath, entry.readNewContent(git)))
+            }
+            else -> listOf()
+        }
     }
+}
+
+fun DiffEntry.readNewContent(git: Git): String {
+    val loader = git.repository.open(newId.toObjectId())
+    return String(loader.bytes)
 }
 
 data class FileAction(

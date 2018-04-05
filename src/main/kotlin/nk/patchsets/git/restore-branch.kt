@@ -29,11 +29,12 @@ fun restore(args: Array<String>) {
         System.err.println("""
             Usage: <git-path> <branches-rule> <commit-title>?
 
-            <git-path> - Directory with repository (parent directory for .git folder)
+            <git-path> - Directory with repository (parent directory for .git folder).
             <branches-rule> - Set of file suffixes separated with `_` showing what files should be affected and priority
-                              of application.
-            <commit-title> - Title for switch commit. "==== switch ====" is used by default.
-
+                              of application. If only target branch is given file <git-path>/.bunch will be checked for
+                              pattern.
+            <commit-title> - Title for switch commit. "==== switch {target} ====" is used by default. {target} pattern
+                             in message will be replaced with target branch suffix.
             Example:
             <program> C:/Projects/kotlin 173_as31_as32
             """.trimIndent())
@@ -44,12 +45,11 @@ fun restore(args: Array<String>) {
     val settings = Settings(
             repoPath = args[0],
             rule = args[1],
-            commitTitle = args.getOrElse(2, { "==== switch ====" })
+            commitTitle = args.getOrElse(2, { "==== switch {target} ====" })
     )
 
-    val suffixes = settings.rule.split("_")
-    if (suffixes.size < 2) {
-        System.err.println("There should be at least source and target branches in pattern: ${settings.rule}")
+    val suffixes = getRuleSuffixes(settings)
+    if (suffixes.isEmpty()) {
         return
     }
 
@@ -107,7 +107,50 @@ fun restore(args: Array<String>) {
         changedFiles.add(FileChange(originFileModificationType, originFile))
     }
 
-    commitChanges(settings.repoPath, changedFiles, settings.commitTitle)
+    commitChanges(settings.repoPath, changedFiles, settings.commitTitle.replace("{target}", suffixes.last()))
 }
 
 private fun File.toPatchFile(extension: String) = File(parentFile, "$name.$extension")
+
+fun getRuleSuffixes(settings: Settings): List<String> {
+    val suffixes = settings.rule.split("_")
+    return when {
+        suffixes.isEmpty() -> {
+            System.err.println("There should be at target branch in pattern: ${settings.rule}")
+            emptyList()
+        }
+
+        suffixes.size == 1 -> {
+            val ruleFromFile = readRuleFromFile(suffixes.first(), settings.repoPath) ?: return emptyList()
+            ruleFromFile.split("_")
+        }
+
+        else -> suffixes
+    }
+}
+
+fun readRuleFromFile(endSuffix: String, path: String): String? {
+    val file = File(path, ".bunch")
+    if (!file.exists()) {
+        System.err.println("Can't build rule for restore branch from '$endSuffix'. File '${file.canonicalPath}' doesn't exist ")
+        return null
+    }
+
+    val branchRules = file.readLines().map { it.trim() }.filter { it.isNotEmpty() }
+
+    val currentBranchSuffix = branchRules.firstOrNull()
+    if (currentBranchSuffix == null) {
+        System.err.println("First line in '${file.canonicalPath}' should contain current branch name")
+        return null
+    }
+
+    val requestedRule = branchRules.find { it == endSuffix || it.startsWith(endSuffix + "_") }
+    if (requestedRule == null) {
+        System.err.println("Can't find rule for '$endSuffix' in file '${file.canonicalPath}'")
+        return null
+    }
+
+    val ruleTargetToCurrent = (requestedRule + "_$currentBranchSuffix").split("_")
+
+    return ruleTargetToCurrent.reversed().joinToString(separator = "_")
+}

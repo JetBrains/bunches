@@ -126,7 +126,14 @@ fun getRuleSuffixes(settings: Settings): List<String> {
 
         suffixes.size == 1 -> {
             val ruleFromFile = readRuleFromFile(suffixes.first(), settings.repoPath) ?: return emptyList()
-            ruleFromFile.split("_")
+            val fileRuleSuffixes = ruleFromFile.split("_")
+
+            if (fileRuleSuffixes.size < 2) {
+                System.err.println("Only target branch is given in pattern. Do nothing.")
+                emptyList()
+            } else {
+                fileRuleSuffixes
+            }
         }
 
         else -> suffixes
@@ -137,7 +144,7 @@ fun readRuleFromFile(endSuffix: String, path: String): String? {
     val file = File(path, ".bunch")
     if (!file.exists()) {
         System.err.println("Can't build rule for restore branch from '$endSuffix'. File '${file.canonicalPath}' doesn't exist ")
-        return null
+        return endSuffix
     }
 
     val branchRules = file.readLines().map { it.trim() }.filter { it.isNotEmpty() }
@@ -146,6 +153,10 @@ fun readRuleFromFile(endSuffix: String, path: String): String? {
     if (currentBranchSuffix == null) {
         System.err.println("First line in '${file.canonicalPath}' should contain current branch name")
         return null
+    }
+
+    if (currentBranchSuffix == endSuffix) {
+        return endSuffix
     }
 
     val requestedRule = branchRules.find { it == endSuffix || it.startsWith(endSuffix + "_") }

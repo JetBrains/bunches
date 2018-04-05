@@ -64,10 +64,14 @@ fun restore(args: Array<String>) {
 
     val changedFiles = HashSet<FileChange>()
 
-    val affectedOriginFiles: Set<File> = root
+    val filesWithDonorExtensions = root
             .walkTopDown()
+            .onEnter { dir -> !(dir.name == "resources" && dir.parentFile.name == "build") }
             .filter { child -> child.extension in donorExtensionsPrioritized }
-            .mapTo(HashSet(), { child -> File(child.parentFile, child.nameWithoutExtension) })
+            .toList()
+
+    val affectedOriginFiles: Set<File> =
+            filesWithDonorExtensions.mapTo(HashSet(), { child -> File(child.parentFile, child.nameWithoutExtension) })
 
     for (originFile in affectedOriginFiles) {
         val originFileModificationType: ChangeType

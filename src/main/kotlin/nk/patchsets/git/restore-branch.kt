@@ -75,6 +75,7 @@ fun restore(args: Array<String>) {
 
     for (originFile in affectedOriginFiles) {
         val originFileModificationType: ChangeType
+
         if (originFile.exists()) {
             if (originFile.isDirectory) {
                 System.err.println("Patch specific directories are not supported: ${originFile}")
@@ -87,7 +88,6 @@ fun restore(args: Array<String>) {
                 System.err.println("Can't store copy of the origin file, because branch file is already exist: ${branchCopyFile}")
                 return
             }
-
             originFile.copyTo(branchCopyFile)
             changedFiles.add(FileChange(ChangeType.ADD, branchCopyFile))
 
@@ -103,12 +103,27 @@ fun restore(args: Array<String>) {
                 .first { it.exists() }
 
         if (targetFile.isDirectory) {
-            System.err.println("Patch specific directories are not supported: ${targetFile}")
+            System.err.println("Patch specific directories are not supported: $targetFile")
             return
         }
 
-        targetFile.copyTo(originFile)
-        changedFiles.add(FileChange(originFileModificationType, originFile))
+        val isTargetRemoved = targetFile.readText().trim().isEmpty()
+        if (!isTargetRemoved) {
+            targetFile.copyTo(originFile)
+            changedFiles.add(FileChange(originFileModificationType, originFile))
+        } else {
+            when (originFileModificationType) {
+                ChangeType.ADD -> {
+                    // Original file was copied, but there's nothing to add instead. Do nothing.
+                }
+                ChangeType.MODIFY -> {
+                    changedFiles.add(FileChange(ChangeType.REMOVE, originFile))
+                }
+                ChangeType.REMOVE -> {
+                    throw IllegalStateException("REMOVE state isn't expected for original file modification")
+                }
+            }
+        }
     }
 
     commitChanges(settings.repoPath, changedFiles, settings.commitTitle.replace("{target}", suffixes.last()))

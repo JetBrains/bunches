@@ -149,10 +149,22 @@ fun commitChanges(repositoryPath: String, changeFiles: Set<FileChange>, title: S
     val git = Git(repository)
 
     val addCommand = git.add()
+    val rmCommand = git.rm().setCached(true)
+
     for (changeFile in changeFiles) {
-        addCommand.addFilepattern(changeFile.file.relativeTo(repoPath).path.replace('\\', '/'))
+        val filePath = changeFile.file.relativeTo(repoPath).path.replace('\\', '/')
+        when (changeFile.type) {
+            ChangeType.ADD,
+            ChangeType.MODIFY -> {
+                addCommand.addFilepattern(filePath)
+            }
+            ChangeType.REMOVE -> {
+                rmCommand.addFilepattern(filePath)
+            }
+        }
     }
     addCommand.call()
+    rmCommand.call()
 
     git.commit()
             .setMessage(title)

@@ -142,29 +142,40 @@ fun reCommitPatched(repositoryPath: String, commitInfo: CommitInfo, suffix: Stri
 enum class ChangeType { ADD, REMOVE, MODIFY }
 class FileChange(val type: ChangeType, val file: File)
 
-fun commitChanges(repositoryPath: String, changeFiles: Set<FileChange>, title: String) {
+fun commitChanges(repositoryPath: String, changeFiles: Collection<FileChange>, title: String) {
     val repoPath = File(repositoryPath)
 
     val repository = configureRepository(repositoryPath)
     val git = Git(repository)
 
     val addCommand = git.add()
+    var hasAdd: Boolean = false
+
     val rmCommand = git.rm().setCached(true)
+    var hasRm: Boolean = false
 
     for (changeFile in changeFiles) {
         val filePath = changeFile.file.relativeTo(repoPath).path.replace('\\', '/')
         when (changeFile.type) {
             ChangeType.ADD,
             ChangeType.MODIFY -> {
+                hasAdd = true
                 addCommand.addFilepattern(filePath)
             }
             ChangeType.REMOVE -> {
+                hasRm = true
                 rmCommand.addFilepattern(filePath)
             }
         }
     }
-    addCommand.call()
-    rmCommand.call()
+
+    if (hasAdd) {
+        addCommand.call()
+    }
+
+    if (hasRm) {
+        rmCommand.call()
+    }
 
     git.commit()
             .setMessage(title)

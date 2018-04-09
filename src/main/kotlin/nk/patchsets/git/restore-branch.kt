@@ -5,6 +5,7 @@ package nk.patchsets.git.restore
 
 import nk.patchsets.git.ChangeType
 import nk.patchsets.git.FileChange
+import nk.patchsets.git.cleanup.cleanup
 import nk.patchsets.git.commitChanges
 import nk.patchsets.git.file.readRuleFromFile
 import java.io.File
@@ -128,6 +129,8 @@ fun restore(args: Array<String>) {
     }
 
     commitChanges(settings.repoPath, changedFiles, settings.commitTitle.replace("{target}", suffixes.last()))
+
+    cleanup(nk.patchsets.git.cleanup.Settings(settings.repoPath, "==== restore cleanup ====", false))
 }
 
 private fun File.toPatchFile(extension: String) = File(parentFile, "$name.$extension")

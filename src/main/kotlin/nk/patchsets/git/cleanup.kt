@@ -4,6 +4,8 @@ import nk.patchsets.git.ChangeType
 import nk.patchsets.git.FileChange
 import nk.patchsets.git.commitChanges
 import nk.patchsets.git.file.readExtensionFromFile
+import nk.patchsets.git.restore.isGitDir
+import nk.patchsets.git.restore.isGradleDir
 import java.io.File
 
 const val DEFAULT_CLEANUP_COMMIT_TITLE = "==== cleanup ===="
@@ -55,6 +57,7 @@ fun cleanup(settings: Settings) {
     val root = File(settings.repoPath)
     val filesWithExtensions = root
             .walkTopDown()
+            .onEnter { dir -> !(isGitDir(dir) || isGradleDir(dir)) }
             .filter { child -> child.extension in extensions }
             .toList()
 

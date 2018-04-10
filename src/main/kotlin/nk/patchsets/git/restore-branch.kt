@@ -10,26 +10,22 @@ import nk.patchsets.git.commitChanges
 import nk.patchsets.git.file.readRuleFromFile
 import java.io.File
 
-data class Settings(val repoPath: String, val rule: String, val commitTitle: String = "==== switch ====")
-
-val patchesSettings = Settings(
-        repoPath = "patches",
-        rule = "173->172->171->as30"
-)
-
-val kotlinSettings = Settings(
-        repoPath = "C:/Projects/kotlin",
-        rule = "173->172->171->as30"
-)
+data class Settings(
+        val repoPath: String,
+        val rule: String,
+        val commitTitle: String = "==== switch ====",
+        val doCleanup: Boolean)
 
 fun main(args: Array<String>) {
     restore(args)
 }
 
+private const val CLEAN_UP = "--cleanup"
+
 fun restore(args: Array<String>) {
-    if (args.size != 3 && args.size != 2) {
+    if (args.size != 4 && args.size != 3 && args.size != 2) {
         System.err.println("""
-            Usage: <git-path> <branches-rule> <commit-title>?
+            Usage: <git-path> <branches-rule> <commit-title>? $CLEAN_UP?
 
             <git-path> - Directory with repository (parent directory for .git folder).
             <branches-rule> - Set of file suffixes separated with `_` showing what files should be affected and priority
@@ -37,6 +33,7 @@ fun restore(args: Array<String>) {
                               pattern.
             <commit-title> - Title for switch commit. "==== switch {target} ====" is used by default. {target} pattern
                              in message will be replaced with target branch suffix.
+            $CLEAN_UP      - Remove bunch files after restore branch
             Example:
             <program> C:/Projects/kotlin 173_as31_as32
             """.trimIndent())
@@ -44,10 +41,16 @@ fun restore(args: Array<String>) {
         return
     }
 
+    if (args.size == 4 && args[3] != CLEAN_UP) {
+        System.err.println("Last parameter should be $CLEAN_UP or absent")
+        return
+    }
+
     val settings = Settings(
             repoPath = args[0],
             rule = args[1],
-            commitTitle = args.getOrElse(2, { "==== switch {target} ====" })
+            commitTitle = args.getOrNull(2)?.takeIf { it != CLEAN_UP } ?: "==== switch {target} ====",
+            doCleanup = CLEAN_UP == (args.getOrNull(3) ?: args.getOrNull(2))
     )
 
     val suffixes = getRuleSuffixes(settings)
@@ -55,6 +58,16 @@ fun restore(args: Array<String>) {
         return
     }
 
+    if (suffixes.size != 1) {
+        doRestore(suffixes, settings)
+    }
+
+    if (settings.doCleanup) {
+        cleanup(nk.patchsets.git.cleanup.Settings(settings.repoPath, "==== restore cleanup ====", false))
+    }
+}
+
+private fun doRestore(suffixes: List<String>, settings: Settings) {
     val originBranchExtension = suffixes.first()
     val donorExtensionsPrioritized = suffixes.subList(1, suffixes.size).reversed().toSet()
 
@@ -129,8 +142,6 @@ fun restore(args: Array<String>) {
     }
 
     commitChanges(settings.repoPath, changedFiles, settings.commitTitle.replace("{target}", suffixes.last()))
-
-    cleanup(nk.patchsets.git.cleanup.Settings(settings.repoPath, "==== restore cleanup ====", false))
 }
 
 private fun File.toPatchFile(extension: String) = File(parentFile, "$name.$extension")
@@ -145,14 +156,7 @@ fun getRuleSuffixes(settings: Settings): List<String> {
 
         suffixes.size == 1 -> {
             val ruleFromFile = readRuleFromFile(suffixes.first(), settings.repoPath) ?: return emptyList()
-            val fileRuleSuffixes = ruleFromFile.split("_")
-
-            if (fileRuleSuffixes.size < 2) {
-                System.err.println("Only target branch is given in pattern. Do nothing.")
-                emptyList()
-            } else {
-                fileRuleSuffixes
-            }
+            return ruleFromFile.split("_")
         }
 
         else -> suffixes

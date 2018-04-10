@@ -6,7 +6,7 @@ fun readRuleFromFile(endSuffix: String, path: String): String? {
     val file = File(path, ".bunch")
     if (!file.exists()) {
         System.err.println("Can't build rule for restore branch from '$endSuffix'. File '${file.canonicalPath}' doesn't exist ")
-        return endSuffix
+        return null
     }
 
     val branchRules = file.readLines().map { it.trim() }.filter { it.isNotEmpty() }

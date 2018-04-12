@@ -10,10 +10,13 @@ import nk.patchsets.git.commitChanges
 import nk.patchsets.git.file.readRuleFromFile
 import java.io.File
 
+const val RESTORE_COMMIT_TITLE = "~~~~ switch {target} ~~~~"
+const val RESTORE_CLEANUP_COMMIT_TITLE = "~~~~ restore cleanup ~~~~"
+
 data class Settings(
         val repoPath: String,
         val rule: String,
-        val commitTitle: String = "==== switch ====",
+        val commitTitle: String = RESTORE_COMMIT_TITLE,
         val doCleanup: Boolean)
 
 fun main(args: Array<String>) {
@@ -31,7 +34,7 @@ fun restore(args: Array<String>) {
             <branches-rule> - Set of file suffixes separated with `_` showing what files should be affected and priority
                               of application. If only target branch is given file <git-path>/.bunch will be checked for
                               pattern.
-            <commit-title> - Title for switch commit. "==== switch {target} ====" is used by default. {target} pattern
+            <commit-title> - Title for switch commit. "$RESTORE_COMMIT_TITLE" is used by default. {target} pattern
                              in message will be replaced with target branch suffix.
             $CLEAN_UP      - Remove bunch files after restore branch
             Example:
@@ -49,7 +52,7 @@ fun restore(args: Array<String>) {
     val settings = Settings(
             repoPath = args[0],
             rule = args[1],
-            commitTitle = args.getOrNull(2)?.takeIf { it != CLEAN_UP } ?: "==== switch {target} ====",
+            commitTitle = args.getOrNull(2)?.takeIf { it != CLEAN_UP } ?: RESTORE_COMMIT_TITLE,
             doCleanup = CLEAN_UP == (args.getOrNull(3) ?: args.getOrNull(2))
     )
 
@@ -63,7 +66,7 @@ fun restore(args: Array<String>) {
     }
 
     if (settings.doCleanup) {
-        cleanup(nk.patchsets.git.cleanup.Settings(settings.repoPath, "==== restore cleanup ====", false))
+        cleanup(nk.patchsets.git.cleanup.Settings(settings.repoPath, RESTORE_CLEANUP_COMMIT_TITLE, false))
     }
 }
 

@@ -8,7 +8,7 @@ import nk.patchsets.git.restore.isGitDir
 import nk.patchsets.git.restore.isGradleDir
 import java.io.File
 
-const val DEFAULT_CLEANUP_COMMIT_TITLE = "==== cleanup ===="
+const val DEFAULT_CLEANUP_COMMIT_TITLE = "~~~~ cleanup ~~~~"
 const val NO_COMMIT_ = "--no-commit"
 
 data class Settings(val repoPath: String, val commitTitle: String? = DEFAULT_CLEANUP_COMMIT_TITLE, val isNoCommit: Boolean)

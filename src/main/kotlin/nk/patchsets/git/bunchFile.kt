@@ -32,6 +32,33 @@ fun readRuleFromFile(endSuffix: String, path: String): String? {
     return ruleTargetToCurrent.reversed().joinToString(separator = "_")
 }
 
+data class UpdateInfo(val base: String, val rules: List<List<String>>)
+
+fun readUpdatePairsFromFile(path: String): UpdateInfo? {
+    val file = File(path, ".bunch")
+    if (!file.exists()) {
+        System.err.println("File '${file.canonicalPath}' doesn't exist ")
+        return null
+    }
+
+    val lines = file.readLines().map { it.trim() }.filter { it.isNotEmpty() }
+
+    val currentBranchSuffix = lines.firstOrNull()
+    if (currentBranchSuffix == null) {
+        System.err.println("First line in '${file.canonicalPath}' should contain current branch name")
+        return null
+    }
+
+    val rules = ArrayList<List<String>>()
+
+    val branchRules = lines.drop(1)
+    for (branchRule in branchRules) {
+        rules.add((branchRule + "_$currentBranchSuffix").split("_").reversed())
+    }
+
+    return UpdateInfo(currentBranchSuffix, rules)
+}
+
 fun readExtensionFromFile(rootPath: String): List<String>? {
     val file = File(rootPath, ".bunch")
     if (!file.exists()) {

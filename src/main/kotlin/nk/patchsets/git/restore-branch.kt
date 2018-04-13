@@ -101,7 +101,7 @@ private fun doRestore(suffixes: List<String>, settings: Settings) {
                 return
             }
 
-            val branchCopyFile = originFile.toPatchFile(originBranchExtension)
+            val branchCopyFile = originFile.toBunchFile(originBranchExtension)
 
             if (branchCopyFile.exists()) {
                 System.err.println("Can't store copy of the origin file, because branch file is already exist: ${branchCopyFile}")
@@ -118,7 +118,7 @@ private fun doRestore(suffixes: List<String>, settings: Settings) {
 
         val targetFile = donorExtensionsPrioritized
                 .asSequence()
-                .map { extension -> originFile.toPatchFile(extension) }
+                .map { extension -> originFile.toBunchFile(extension) }
                 .first { it.exists() }
 
         if (targetFile.isDirectory) {
@@ -148,7 +148,7 @@ private fun doRestore(suffixes: List<String>, settings: Settings) {
     commitChanges(settings.repoPath, changedFiles, settings.commitTitle.replace("{target}", suffixes.last()))
 }
 
-private fun File.toPatchFile(extension: String) = File(parentFile, "$name.$extension")
+fun File.toBunchFile(extension: String) = File(parentFile, "$name.$extension")
 
 fun getRuleSuffixes(settings: Settings): List<String> {
     val suffixes = settings.rule.split("_")

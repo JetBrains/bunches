@@ -66,7 +66,8 @@ fun restore(args: Array<String>) {
     }
 
     if (settings.doCleanup) {
-        cleanup(nk.patchsets.git.cleanup.Settings(settings.repoPath, RESTORE_CLEANUP_COMMIT_TITLE, false))
+        cleanup(nk.patchsets.git.cleanup.Settings(
+                settings.repoPath, extension = null, commitTitle =  RESTORE_CLEANUP_COMMIT_TITLE, isNoCommit = false))
     }
 }
 

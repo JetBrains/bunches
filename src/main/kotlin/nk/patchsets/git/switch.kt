@@ -1,5 +1,5 @@
 @file:Suppress("PackageDirectoryMismatch")
-@file:JvmName("BunchRestore")
+@file:JvmName("BunchSwitch")
 
 package nk.patchsets.git.restore
 
@@ -25,20 +25,25 @@ fun main(args: Array<String>) {
 
 private const val CLEAN_UP = "--cleanup"
 
+const val SWITCH_DESCRIPTION = "Restores state of files for the particular branch by replacing base files with bunch counterparts."
+
 fun restore(args: Array<String>) {
     if (args.size != 4 && args.size != 3 && args.size != 2) {
         System.err.println("""
-            Usage: <git-path> <branches-rule> <commit-title>? $CLEAN_UP?
+            Usage: <git-path> <branches-rule> [<commit-title>] [$CLEAN_UP]
 
-            <git-path> - Directory with repository (parent directory for .git folder).
-            <branches-rule> - Set of file suffixes separated with `_` showing what files should be affected and priority
-                              of application. If only target branch is given file <git-path>/.bunch will be checked for
-                              pattern.
-            <commit-title> - Title for switch commit. "$RESTORE_COMMIT_TITLE" is used by default. {target} pattern
-                             in message will be replaced with target branch suffix.
-            $CLEAN_UP      - Remove bunch files after restore branch
+            $SWITCH_DESCRIPTION
+
+            <git-path>        - Directory with repository (parent directory for .git).
+            <branches-rule>   - Set of file suffixes separated with `_` showing what files should be affected and priority
+                                of application. If only target branch is given file <git-path>/.bunch will be checked for
+                                pattern.
+            <commit-title>    - Title for the switch commit. "$RESTORE_COMMIT_TITLE" is used by default. {target} pattern
+                                in message will be replaced with the target branch suffix.
+            $CLEAN_UP         - Remove bunch files after branch restore (executes 'cleanup' command with default arguments).
+
             Example:
-            <program> C:/Projects/kotlin 173_as31_as32
+            bunch switch C:/Projects/kotlin as32
             """.trimIndent())
 
         return

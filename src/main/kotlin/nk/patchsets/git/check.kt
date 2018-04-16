@@ -10,19 +10,23 @@ fun main(args: Array<String>) {
     check(args)
 }
 
-fun check(args: Array<String>) {
-    if (args.size != 3) {
-        System.err.println("""
-            Usage: <git-path> <since-ref> <until-ref> <extensions>?
-            Check if commits has forgotten bunch files in HEAD of given directory.
+const val CHECK_DESCRIPTION = "Check if commits have forgotten bunch files according to the HEAD of the given directory."
 
-            <git-path> - Directory with repository (parent directory for .git folder)
-            <since-ref> - Reference to most recent commit that should be checked
-            <until-ref> - Parent of the last commit that should be checked
-            <extensions> - Set of extensions to check with '_' separator. .bunch file will be used if absent.
+fun check(args: Array<String>) {
+    if (args.size !in 3..4) {
+        System.err.println("""
+            Usage: <git-path> <since-ref> <until-ref> [<extensions>]
+
+            $CHECK_DESCRIPTION
+
+            <git-path>   - Directory with repository (parent directory for .git).
+            <since-ref>  - Reference to the most recent commit that should be checked.
+            <until-ref>  - Parent of the last commit that should be checked.
+            <extensions> - Set of extensions to check with '_' separator. '.bunch' file will be used if
+                           the option is missing.
 
             Example:
-            <program> C:/Projects/kotlin HEAD 377572896b7dc09a5e2aa6af29825ffe07f71e58
+            bunch check C:/Projects/kotlin HEAD 377572896b7dc09a5e2aa6af29825ffe07f71e58
             """.trimIndent())
 
         return

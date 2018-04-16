@@ -13,16 +13,19 @@ fun main(args: Array<String>) {
     reduce(args)
 }
 
+const val REDUCE_DESCRIPTION = "Check repository for unneeded files with the same content."
+
 fun reduce(args: Array<String>) {
     if (args.size != 1) {
         System.err.println("""
             Usage: <git-path>
-            Check repository for unneeded files with same content
 
-            <git-path> - Directory with repository (parent directory for .git folder)
+            $REDUCE_DESCRIPTION
+
+            <git-path> - Directory with repository (parent directory for .git)
 
             Example:
-            <program> C:/Projects/kotlin
+            bunch reduce C:/Projects/kotlin
             """.trimIndent())
 
         return

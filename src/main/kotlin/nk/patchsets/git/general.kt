@@ -3,25 +3,30 @@
 
 package nk.patchsets.git.general
 
+import nk.patchsets.git.check.CHECK_DESCRIPTION
 import nk.patchsets.git.check.check
+import nk.patchsets.git.cleanup.CLEANUP_DESCRIPTION
 import nk.patchsets.git.cleanup.cleanup
+import nk.patchsets.git.cp.CHERRY_PICK_DESCRIPTION
 import nk.patchsets.git.cp.cherryPick
+import nk.patchsets.git.reduce.REDUCE_DESCRIPTION
 import nk.patchsets.git.reduce.reduce
+import nk.patchsets.git.restore.SWITCH_DESCRIPTION
 import nk.patchsets.git.restore.restore
 
 fun main(args: Array<String>) {
     if (args.isEmpty()) {
         System.err.println("""
-            Usage: cp|restore|cleanup|check|reduce <args>
+            Usage: switch|cp|cleanup|check|reduce <args>
 
-            cp - for commits cherry pick
-            restore - for restore branch state
-            cleanup - removes all files with prefixes found in .bunch file
-            check - check commits for forgotten bunch files updates
-            reduce - scan repository for unneeded files
+            switch  - $SWITCH_DESCRIPTION
+            cp      - $CHERRY_PICK_DESCRIPTION
+            cleanup - $CLEANUP_DESCRIPTION
+            check   - $CHECK_DESCRIPTION
+            reduce  - $REDUCE_DESCRIPTION
 
             Example:
-            <program> restore . 173_as31_as32
+            bunch switch . as32
             """.trimIndent())
 
         return
@@ -33,6 +38,7 @@ fun main(args: Array<String>) {
     when (command) {
         "cp" -> cherryPick(commandArgs)
         "restore" -> restore(commandArgs)
+        "switch" -> restore(commandArgs)
         "cleanup" -> cleanup(commandArgs)
         "check" -> check(commandArgs)
         "reduce" -> reduce(commandArgs)

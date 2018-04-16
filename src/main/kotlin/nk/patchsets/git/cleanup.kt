@@ -11,7 +11,7 @@ import java.io.File
 const val EXT_PATTERN = "{ext}"
 const val DEFAULT_CLEANUP_COMMIT_TITLE = "~~~~ cleanup$EXT_PATTERN ~~~~"
 const val NO_COMMIT_ = "--no-commit"
-const val EXT_ = "-ext="
+const val EXT__ = "--ext="
 
 data class Settings(
         val repoPath: String,
@@ -23,26 +23,30 @@ fun main(args: Array<String>) {
     cleanup(args)
 }
 
+const val CLEANUP_DESCRIPTION = "Removes bunch file from repository directory."
+
 fun cleanup(args: Array<String>) {
     if (!(args.size in 1..3)) {
         System.err.println("""
-            Usage: <git-path> ($EXT_<file-extension>)? (<commit-title>|$NO_COMMIT_)?
+            Usage: <git-path> [$EXT__<file-extension>] [<commit-title>|$NO_COMMIT_]
 
-            <git-path>            - Directory with repository (parent directory for .git folder).
-            $EXT_<file-extension> - Particular extension for remove.
-                                    All files with extensions found in .bunch file will be removed if not set.
-            <commit-title>        - Title for cleanup commit. "$DEFAULT_CLEANUP_COMMIT_TITLE" is used by default.
-            $NO_COMMIT_           - option to cancel cleanup commit.
+            $CLEANUP_DESCRIPTION
+
+            <git-path>             - Directory with repository (parent directory for .git).
+            $EXT__<file-extension> - Particular extension for remove.
+                                     All files with extensions found in '.bunch' file will be removed if not set.
+            <commit-title>         - Title for the cleanup commit. "$DEFAULT_CLEANUP_COMMIT_TITLE" is used by default.
+            $NO_COMMIT_            - Do not commit changes.
 
             Example:
-            <program> C:/Projects/kotlin $NO_COMMIT_
+            bunch cleanup C:/Projects/kotlin
             """.trimIndent())
 
         return
     }
 
     val repoPath = args[0]
-    val extension = args.getOrNull(1)?.takeIf { it.startsWith(EXT_) }?.substringAfter(EXT_)
+    val extension = args.getOrNull(1)?.takeIf { it.startsWith(EXT__) }?.substringAfter(EXT__)
     val commitIndex = if (extension == null) 1 else 2
 
     val commitTitleOrNoCommit = args.getOrNull(commitIndex)

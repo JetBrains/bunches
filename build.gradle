@@ -21,7 +21,7 @@ distZip {
 
 allprojects {
     group 'nk'
-    version '0.0.2'
+    version '0.0.3'
 
     ext.applyKotlin = {
         apply plugin: 'kotlin'

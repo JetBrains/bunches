@@ -1,10 +1,7 @@
 package nk.patchsets.git.reduce
 
 import nk.patchsets.git.file.readUpdatePairsFromFile
-import nk.patchsets.git.restore.isGitDir
-import nk.patchsets.git.restore.isGradleBuildDir
-import nk.patchsets.git.restore.isGradleDir
-import nk.patchsets.git.restore.toBunchFile
+import nk.patchsets.git.restore.*
 import java.io.File
 
 data class Settings(val repoPath: String)
@@ -55,7 +52,7 @@ fun doReduce(settings: Settings) {
 
     val filesWithDonorExtensions = root
             .walkTopDown()
-            .onEnter { dir -> !(isGitDir(dir) || isGradleBuildDir(dir) || isGradleDir(dir)) }
+            .onEnter { dir -> !(isGitDir(dir) || isOutDir(dir, root) || isGradleBuildDir(dir) || isGradleDir(dir)) }
             .filter { child -> child.extension in extensions }
             .toList()
 

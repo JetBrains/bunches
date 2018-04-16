@@ -90,7 +90,7 @@ private fun doRestore(suffixes: List<String>, settings: Settings) {
 
     val filesWithDonorExtensions = root
             .walkTopDown()
-            .onEnter { dir -> !(isGitDir(dir) || isGradleBuildDir(dir) || isGradleDir(dir)) }
+            .onEnter { dir -> !(isGitDir(dir) || isOutDir(dir, root) || isGradleBuildDir(dir) || isGradleDir(dir)) }
             .filter { child -> child.extension in donorExtensionsPrioritized }
             .toList()
 
@@ -174,6 +174,12 @@ fun getRuleSuffixes(settings: Settings): List<String> {
 
 fun isGradleDir(dir: File) = dir.name == ".gradle"
 fun isGitDir(dir: File) = dir.name == ".git"
+
+fun isOutDir(dir: File, baseDir: File): Boolean {
+    if (dir.name != "out") return false
+    return dir.parentFile == baseDir
+}
+
 fun isGradleBuildDir(dir: File): Boolean {
     if (dir.name != "build") return false
     if (File(dir.parentFile, "build.gradle.kts").exists()) return true

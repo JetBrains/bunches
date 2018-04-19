@@ -1,6 +1,8 @@
 package nk.patchsets.git.check
 
 import nk.patchsets.git.file.readExtensionFromFile
+import nk.patchsets.git.general.exitWithError
+import nk.patchsets.git.general.exitWithUsageError
 import nk.patchsets.git.readCommits
 import java.io.File
 
@@ -14,7 +16,7 @@ const val CHECK_DESCRIPTION = "Check if commits have forgotten bunch files accor
 
 fun check(args: Array<String>) {
     if (args.size !in 3..4) {
-        System.err.println("""
+        exitWithUsageError("""
             Usage: <git-path> <since-ref> <until-ref> [<extensions>]
 
             $CHECK_DESCRIPTION
@@ -28,8 +30,6 @@ fun check(args: Array<String>) {
             Example:
             bunch check C:/Projects/kotlin HEAD 377572896b7dc09a5e2aa6af29825ffe07f71e58
             """.trimIndent())
-
-        return
     }
 
     val settings = Settings(
@@ -43,7 +43,7 @@ fun check(args: Array<String>) {
 }
 
 fun doCheck(settings: Settings) {
-    val extensions = settings.extensions?.split('_') ?: readExtensionFromFile(settings.repoPath) ?: return
+    val extensions = settings.extensions?.split('_') ?: readExtensionFromFile(settings.repoPath) ?: exitWithError()
 
     val commits = readCommits(settings.repoPath, null, settings.untilRef)
     var problemCommitsFound = false
@@ -82,8 +82,10 @@ fun doCheck(settings: Settings) {
         }
     }
 
-    if (!problemCommitsFound) {
-        println("${commits.size} commits have been checked. No problem commits found.")
+    if (problemCommitsFound) {
+        exitWithError()
     }
+
+    println("${commits.size} commits have been checked. No problem commits found.")
 }
 

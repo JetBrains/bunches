@@ -8,6 +8,8 @@ import nk.patchsets.git.FileChange
 import nk.patchsets.git.cleanup.cleanup
 import nk.patchsets.git.commitChanges
 import nk.patchsets.git.file.readRuleFromFile
+import nk.patchsets.git.general.exitWithError
+import nk.patchsets.git.general.exitWithUsageError
 import java.io.File
 
 const val RESTORE_COMMIT_TITLE = "~~~~ switch {target} ~~~~"
@@ -29,7 +31,7 @@ const val SWITCH_DESCRIPTION = "Restores state of files for the particular branc
 
 fun restore(args: Array<String>) {
     if (args.size != 4 && args.size != 3 && args.size != 2) {
-        System.err.println("""
+        exitWithUsageError("""
             Usage: <git-path> <branches-rule> [<commit-title>] [$CLEAN_UP]
 
             $SWITCH_DESCRIPTION
@@ -45,13 +47,10 @@ fun restore(args: Array<String>) {
             Example:
             bunch switch C:/Projects/kotlin as32
             """.trimIndent())
-
-        return
     }
 
     if (args.size == 4 && args[3] != CLEAN_UP) {
-        System.err.println("Last parameter should be $CLEAN_UP or absent")
-        return
+        exitWithUsageError("Last parameter should be $CLEAN_UP or absent")
     }
 
     val settings = Settings(
@@ -63,7 +62,7 @@ fun restore(args: Array<String>) {
 
     val suffixes = getRuleSuffixes(settings)
     if (suffixes.isEmpty()) {
-        return
+        exitWithError()
     }
 
     if (suffixes.size != 1) {
@@ -83,7 +82,7 @@ private fun doRestore(suffixes: List<String>, settings: Settings) {
     val root = File(settings.repoPath)
 
     if (!root.exists() || !root.isDirectory) {
-        System.err.println("Repository directory with branch is expected")
+        exitWithError("Repository directory with branch is expected")
     }
 
     val changedFiles = HashSet<FileChange>()
@@ -102,15 +101,13 @@ private fun doRestore(suffixes: List<String>, settings: Settings) {
 
         if (originFile.exists()) {
             if (originFile.isDirectory) {
-                System.err.println("Patch specific directories are not supported: ${originFile}")
-                return
+                exitWithError("Patch specific directories are not supported: ${originFile}")
             }
 
             val branchCopyFile = originFile.toBunchFile(originBranchExtension)
 
             if (branchCopyFile.exists()) {
-                System.err.println("Can't store copy of the origin file, because branch file is already exist: ${branchCopyFile}")
-                return
+                exitWithError("Can't store copy of the origin file, because branch file is already exist: ${branchCopyFile}")
             }
             originFile.copyTo(branchCopyFile)
             changedFiles.add(FileChange(ChangeType.ADD, branchCopyFile))
@@ -127,8 +124,7 @@ private fun doRestore(suffixes: List<String>, settings: Settings) {
                 .first { it.exists() }
 
         if (targetFile.isDirectory) {
-            System.err.println("Patch specific directories are not supported: $targetFile")
-            return
+            exitWithError("Patch specific directories are not supported: $targetFile")
         }
 
         val isTargetRemoved = targetFile.readText().trim().isEmpty()

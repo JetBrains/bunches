@@ -13,10 +13,23 @@ import nk.patchsets.git.reduce.REDUCE_DESCRIPTION
 import nk.patchsets.git.reduce.reduce
 import nk.patchsets.git.restore.SWITCH_DESCRIPTION
 import nk.patchsets.git.restore.restore
+import kotlin.system.exitProcess
+
+fun exitWithUsageError(message: String): Nothing {
+    System.err.println(message)
+    exitProcess(1)
+}
+
+fun exitWithError(message: String? = null): Nothing {
+    if (message != null) {
+        System.err.println(message)
+    }
+    exitProcess(2)
+}
 
 fun main(args: Array<String>) {
     if (args.isEmpty()) {
-        System.err.println("""
+        exitWithUsageError("""
             Usage: switch|cp|cleanup|check|reduce <args>
 
             switch  - $SWITCH_DESCRIPTION
@@ -28,8 +41,6 @@ fun main(args: Array<String>) {
             Example:
             bunch switch . as32
             """.trimIndent())
-
-        return
     }
 
     val command = args[0]
@@ -43,8 +54,7 @@ fun main(args: Array<String>) {
         "check" -> check(commandArgs)
         "reduce" -> reduce(commandArgs)
         else -> {
-            System.err.println("Unknown command: $command")
-            return
+            exitWithUsageError("Unknown command: $command")
         }
     }
 }

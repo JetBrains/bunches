@@ -1,6 +1,8 @@
 package nk.patchsets.git.reduce
 
 import nk.patchsets.git.file.readUpdatePairsFromFile
+import nk.patchsets.git.general.exitWithError
+import nk.patchsets.git.general.exitWithUsageError
 import nk.patchsets.git.restore.*
 import java.io.File
 
@@ -14,7 +16,7 @@ const val REDUCE_DESCRIPTION = "Check repository for unneeded files with the sam
 
 fun reduce(args: Array<String>) {
     if (args.size != 1) {
-        System.err.println("""
+        exitWithUsageError("""
             Usage: <git-path>
 
             $REDUCE_DESCRIPTION
@@ -24,13 +26,9 @@ fun reduce(args: Array<String>) {
             Example:
             bunch reduce C:/Projects/kotlin
             """.trimIndent())
-
-        return
     }
 
-    val settings = Settings(
-            repoPath = args[0]
-    )
+    val settings = Settings(repoPath = args[0])
 
     doReduce(settings)
 }
@@ -40,12 +38,12 @@ private data class UpdatePair(val from: String, val to: String)
 fun doReduce(settings: Settings) {
     val root = File(settings.repoPath)
     if (!root.exists() || !root.isDirectory) {
-        System.err.println("Repository directory with branch is expected")
+        exitWithError("Repository directory with branch is expected")
     }
 
-    val (base, rules) = readUpdatePairsFromFile(settings.repoPath) ?: return
+    val (base, rules) = readUpdatePairsFromFile(settings.repoPath) ?: exitWithError()
     if (rules.isEmpty()) {
-        return
+        exitWithError()
     }
 
     val extensions = rules.map { it.last() }.toSet() + base

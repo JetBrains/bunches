@@ -4,6 +4,8 @@ import nk.patchsets.git.ChangeType
 import nk.patchsets.git.FileChange
 import nk.patchsets.git.commitChanges
 import nk.patchsets.git.file.readExtensionFromFile
+import nk.patchsets.git.general.exitWithError
+import nk.patchsets.git.general.exitWithUsageError
 import nk.patchsets.git.restore.isGitDir
 import nk.patchsets.git.restore.isGradleDir
 import java.io.File
@@ -26,8 +28,8 @@ fun main(args: Array<String>) {
 const val CLEANUP_DESCRIPTION = "Removes bunch file from repository directory."
 
 fun cleanup(args: Array<String>) {
-    if (!(args.size in 1..3)) {
-        System.err.println("""
+    if (args.size !in 1..3) {
+        exitWithUsageError("""
             Usage: <git-path> [$EXT__<file-extension>] [<commit-title>|$NO_COMMIT_]
 
             $CLEANUP_DESCRIPTION
@@ -41,8 +43,6 @@ fun cleanup(args: Array<String>) {
             Example:
             bunch cleanup C:/Projects/kotlin
             """.trimIndent())
-
-        return
     }
 
     val repoPath = args[0]
@@ -51,8 +51,7 @@ fun cleanup(args: Array<String>) {
 
     val commitTitleOrNoCommit = args.getOrNull(commitIndex)
     if (commitIndex == 1 && args.size == 3) {
-        System.err.println("Unknown parameter: '${args[2]}'")
-        return
+        exitWithUsageError("Unknown parameter: '${args[2]}'")
     }
 
     val isNoCommit = commitTitleOrNoCommit == NO_COMMIT_
@@ -75,7 +74,7 @@ fun cleanup(settings: Settings) {
         readExtensionFromFile(settings.repoPath)?.toSet()
     }?.map { ".$it" }
 
-    if (extensions == null) return
+    if (extensions == null) exitWithError()
 
     val root = File(settings.repoPath)
     val filesWithExtensions = root
@@ -87,8 +86,7 @@ fun cleanup(settings: Settings) {
     val changedFiles = ArrayList<FileChange>()
     for (cleanupFile in filesWithExtensions) {
         if (cleanupFile.isDirectory) {
-            System.err.println("Bunch directories are not supported: $cleanupFile")
-            return
+            exitWithError("Bunch directories are not supported: $cleanupFile")
         }
 
         cleanupFile.delete()

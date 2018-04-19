@@ -45,7 +45,7 @@ fun check(args: Array<String>) {
 fun doCheck(settings: Settings) {
     val extensions = settings.extensions?.split('_') ?: readExtensionFromFile(settings.repoPath) ?: exitWithError()
 
-    val commits = readCommits(settings.repoPath, null, settings.untilRef)
+    val commits = readCommits(settings.repoPath, settings.sinceRef, settings.untilRef)
     var problemCommitsFound = false
 
     println("Found commits:")

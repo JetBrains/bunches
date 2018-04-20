@@ -76,11 +76,14 @@ private val Repository.fullBranchWithWorkTree: String
         }
     }
 
+private fun Repository.resolveOrFail(revStr: String) =
+        resolve(revStr) ?: throw IllegalArgumentException("revision '$revStr' was not found")
+
 fun readCommits(repositoryPath: String, untilRevString: String?, sinceRevString: String): List<CommitInfo> {
     return readCommits(repositoryPath) { git ->
         val untilQuery = untilRevString ?: repository.fullBranchWithWorkTree
-        val untilCommitObjectId = git.repository.resolve(untilQuery)
-        val sinceCommitObjectId = git.repository.resolve(sinceRevString)
+        val untilCommitObjectId = git.repository.resolveOrFail(untilQuery)
+        val sinceCommitObjectId = git.repository.resolveOrFail(sinceRevString)
 
         addRange(sinceCommitObjectId, untilCommitObjectId)
     }
@@ -89,7 +92,7 @@ fun readCommits(repositoryPath: String, untilRevString: String?, sinceRevString:
 fun readCommits(repositoryPath: String, revString: String?, numberOfCommits: Int): List<CommitInfo> {
     return readCommits(repositoryPath) { git ->
         val resolveQuery = revString ?: repository.fullBranchWithWorkTree
-        val startCommitObjectId = git.repository.resolve(resolveQuery)
+        val startCommitObjectId = git.repository.resolveOrFail(resolveQuery)
 
         add(startCommitObjectId).setMaxCount(numberOfCommits)
     }

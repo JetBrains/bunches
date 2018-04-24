@@ -19,9 +19,9 @@ Such fake branches have several advantages for plugin development over classic a
 * No tedious git branch administration.
 
 ```
-This approach works well when number of bunch-files is reasonable small or they never change. The best practice it to 
-have bunch files only for solving API compatibility issues, and maintain same source for all supported IDEA-versions 
-in other files.
+This approach works well when number of bunch-files is reasonable small or they never change. 
+The best practice it to have bunch files only for solving API compatibility issues, and maintain 
+same source for all supported IDEA-versions in other files.
 ```
 
 This tool set is used in [Kotlin](https://github.com/JetBrains/kotlin) project.  

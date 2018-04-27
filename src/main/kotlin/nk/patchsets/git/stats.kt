@@ -53,10 +53,17 @@ fun doStats(settings: Settings) {
             bunchFiles.mapTo(HashSet()) { child -> File(child.parentFile, child.nameWithoutExtension) }
 
     println("Number of affected origin files: ${affectedOriginFiles.size}")
-    println("Number of bunch files: ${bunchFiles.size}")
     println()
 
     println("${"%-6s".format("Ext")}|${"%6s".format("exists")} |${"%6s".format("del")} |${"%6s".format("total")}")
+
+    val all = bunchFiles.size
+    val allDeleted = bunchFiles.count { isDeletedBunchFile(it) }
+    print("%-6s".format("all"))
+    print("|${"%6d".format(all - allDeleted)} ")
+    print("|${"%6d".format(allDeleted)} ")
+    print("|${"%6d".format(all)}")
+    println()
 
     for (extension in extensions) {
         val currentExtensionFiles = groupedFiles[extension] ?: listOf()

@@ -3,6 +3,7 @@
 
 package nk.patchsets.git.general
 
+import nk.patchsets.git.STATS_DESCRIPTION
 import nk.patchsets.git.check.CHECK_DESCRIPTION
 import nk.patchsets.git.check.check
 import nk.patchsets.git.cleanup.CLEANUP_DESCRIPTION
@@ -13,6 +14,7 @@ import nk.patchsets.git.reduce.REDUCE_DESCRIPTION
 import nk.patchsets.git.reduce.reduce
 import nk.patchsets.git.restore.SWITCH_DESCRIPTION
 import nk.patchsets.git.restore.restore
+import nk.patchsets.git.stats
 import kotlin.system.exitProcess
 
 fun exitWithUsageError(message: String): Nothing {
@@ -30,13 +32,14 @@ fun exitWithError(message: String? = null): Nothing {
 fun main(args: Array<String>) {
     if (args.isEmpty()) {
         exitWithUsageError("""
-            Usage: switch|cp|cleanup|check|reduce <args>
+            Usage: switch|cp|cleanup|check|reduce|stats <args>
 
             switch  - $SWITCH_DESCRIPTION
             cp      - $CHERRY_PICK_DESCRIPTION
             cleanup - $CLEANUP_DESCRIPTION
             check   - $CHECK_DESCRIPTION
             reduce  - $REDUCE_DESCRIPTION
+            stats   - $STATS_DESCRIPTION
 
             Example:
             bunch switch . as32
@@ -53,6 +56,7 @@ fun main(args: Array<String>) {
         "cleanup" -> cleanup(commandArgs)
         "check" -> check(commandArgs)
         "reduce" -> reduce(commandArgs)
+        "stats" -> stats(commandArgs)
         else -> {
             exitWithUsageError("Unknown command: $command")
         }

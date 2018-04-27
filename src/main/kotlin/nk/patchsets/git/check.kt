@@ -72,10 +72,10 @@ fun doCheck(settings: Settings) {
         }
 
         val deletedCache: MutableMap<String, Boolean> = HashMap()
-        fun isBunchFileDeleted(bunchFilePath: String): Boolean {
+        fun isDeletedWithCache(bunchFilePath: String): Boolean {
             return deletedCache.getOrPut(bunchFilePath) {
                 val bunchFile = File(settings.repoPath, bunchFilePath)
-                bunchFile.exists() && bunchFile.readText().trim().isEmpty()
+                isDeletedBunchFile(bunchFile)
             }
         }
 
@@ -84,7 +84,7 @@ fun doCheck(settings: Settings) {
 
             println("${commit.hash} ${commit.title}")
             for (forgottenPath in forgottenFilesPaths) {
-                println("    $forgottenPath ${if (isBunchFileDeleted(forgottenPath)) "[deleted]" else ""}")
+                println("    $forgottenPath ${if (isDeletedWithCache(forgottenPath)) "[deleted]" else ""}")
             }
             println()
         }
@@ -96,4 +96,6 @@ fun doCheck(settings: Settings) {
 
     println("${commits.size} commits have been checked. No problem commits found.")
 }
+
+fun isDeletedBunchFile(bunchFile: File): Boolean = bunchFile.exists() && bunchFile.readText().trim().isEmpty()
 

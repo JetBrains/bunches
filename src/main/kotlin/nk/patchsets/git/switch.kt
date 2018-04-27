@@ -66,7 +66,7 @@ fun restore(args: Array<String>) {
     }
 
     if (suffixes.size != 1) {
-        doRestore(suffixes, settings)
+        doSwitch(suffixes, settings)
     }
 
     if (settings.doCleanup) {
@@ -75,7 +75,7 @@ fun restore(args: Array<String>) {
     }
 }
 
-private fun doRestore(suffixes: List<String>, settings: Settings) {
+private fun doSwitch(suffixes: List<String>, settings: Settings) {
     val originBranchExtension = suffixes.first()
     val donorExtensionsPrioritized = suffixes.subList(1, suffixes.size).reversed().toSet()
 
@@ -94,27 +94,32 @@ private fun doRestore(suffixes: List<String>, settings: Settings) {
             .toList()
 
     val affectedOriginFiles: Set<File> =
-            filesWithDonorExtensions.mapTo(HashSet(), { child -> File(child.parentFile, child.nameWithoutExtension) })
+            filesWithDonorExtensions.mapTo(HashSet()) { child -> File(child.parentFile, child.nameWithoutExtension) }
 
     for (originFile in affectedOriginFiles) {
         val originFileModificationType: ChangeType
 
+        val baseCopiedFile = originFile.toBunchFile(originBranchExtension)
+        if (baseCopiedFile.exists()) {
+            exitWithError("Can't store copy of the origin file, because branch file is already exist: $baseCopiedFile")
+        }
+
         if (originFile.exists()) {
             if (originFile.isDirectory) {
-                exitWithError("Patch specific directories are not supported: ${originFile}")
+                exitWithError("Patch specific directories are not supported: $originFile")
             }
 
-            val branchCopyFile = originFile.toBunchFile(originBranchExtension)
-
-            if (branchCopyFile.exists()) {
-                exitWithError("Can't store copy of the origin file, because branch file is already exist: ${branchCopyFile}")
-            }
-            originFile.copyTo(branchCopyFile)
-            changedFiles.add(FileChange(ChangeType.ADD, branchCopyFile))
+            originFile.copyTo(baseCopiedFile)
+            changedFiles.add(FileChange(ChangeType.ADD, baseCopiedFile))
 
             originFile.delete()
             originFileModificationType = ChangeType.MODIFY
         } else {
+            // File was absent and going to be introduced.
+            // Create empty bunch files to show it's going to be removed in old branch.
+            baseCopiedFile.createNewFile()
+            changedFiles.add(FileChange(ChangeType.ADD, baseCopiedFile))
+
             originFileModificationType = ChangeType.ADD
         }
 

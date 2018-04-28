@@ -1,3 +1,4 @@
+@file:JvmName("BunchReduce")
 package nk.patchsets.git.reduce
 
 import nk.patchsets.git.ChangeType

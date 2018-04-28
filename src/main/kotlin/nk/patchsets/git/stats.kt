@@ -1,4 +1,6 @@
-package nk.patchsets.git
+@file:Suppress("PackageDirectoryMismatch")
+@file:JvmName("BunchStats")
+package nk.patchsets.git.stats
 
 import nk.patchsets.git.check.isDeletedBunchFile
 import nk.patchsets.git.file.readExtensionFromFile

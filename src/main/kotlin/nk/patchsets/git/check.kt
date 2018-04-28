@@ -1,3 +1,4 @@
+@file:JvmName("BunchCheck")
 package nk.patchsets.git.check
 
 import nk.patchsets.git.file.readExtensionFromFile

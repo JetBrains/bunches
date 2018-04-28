@@ -3,7 +3,7 @@
 
 package nk.patchsets.git.general
 
-import nk.patchsets.git.STATS_DESCRIPTION
+import nk.patchsets.git.stats.STATS_DESCRIPTION
 import nk.patchsets.git.check.CHECK_DESCRIPTION
 import nk.patchsets.git.check.check
 import nk.patchsets.git.cleanup.CLEANUP_DESCRIPTION
@@ -14,7 +14,7 @@ import nk.patchsets.git.reduce.REDUCE_DESCRIPTION
 import nk.patchsets.git.reduce.reduce
 import nk.patchsets.git.restore.SWITCH_DESCRIPTION
 import nk.patchsets.git.restore.restore
-import nk.patchsets.git.stats
+import nk.patchsets.git.stats.stats
 import kotlin.system.exitProcess
 
 fun exitWithUsageError(message: String): Nothing {

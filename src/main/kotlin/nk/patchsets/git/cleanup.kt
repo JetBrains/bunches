@@ -1,3 +1,4 @@
+@file:JvmName("BunchCleanup")
 package nk.patchsets.git.cleanup
 
 import nk.patchsets.git.ChangeType

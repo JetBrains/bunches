@@ -7,7 +7,7 @@ Set of tools for storing similar git-branches in single branch by moving files t
 
 ```
 plugin.xml
-plugin.xml.172 <-- Bunch file for Idea 2017.3
+plugin.xml.172 <-- Bunch file for Idea 2017.2
 SomeAction.java
 SomeAction.java.181 <-- Bunch file for Idea 2018.1
 ```

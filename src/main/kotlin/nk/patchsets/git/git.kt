@@ -4,10 +4,9 @@ package nk.patchsets.git
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.LogCommand
 import org.eclipse.jgit.diff.DiffEntry
-import org.eclipse.jgit.lib.Constants
-import org.eclipse.jgit.lib.ObjectId
-import org.eclipse.jgit.lib.PersonIdent
-import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.errors.RepositoryNotFoundException
+import org.eclipse.jgit.internal.storage.file.FileRepository
+import org.eclipse.jgit.lib.*
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
@@ -20,49 +19,60 @@ class ConfigureGitException(path: String, cause: Throwable? = null) :
 
 private val COMMON_DIR_FILE_NAME = "commondir"
 
-private fun configureRepository(path: String): Repository {
-    val pathFile = File(path)
-    val gitFile = if (pathFile.name == Constants.DOT_GIT) {
-        pathFile
-    } else {
-        File(pathFile.absolutePath, Constants.DOT_GIT)
+fun configureRepository(path: String): Repository = GitRepositoryBuilder.create(path)
+
+open class GitRepositoryBuilder : BaseRepositoryBuilder<GitRepositoryBuilder, Repository>() {
+    fun setGitDirFromWorkTree(): GitRepositoryBuilder {
+        setupGitDir()
+
+        val gitCommonDirRelativePath = File(gitDir, COMMON_DIR_FILE_NAME).readText().trim()
+        val gitCommonDirFile = File(gitDir, gitCommonDirRelativePath)
+
+
+        indexFile = File(gitDir, "index")
+        gitDir = gitCommonDirFile
+
+        return self()
     }
 
-    if (!gitFile.exists()) {
-        throw ConfigureGitException(path)
-    }
-
-    val isWorkTree = gitFile.isFile
-    if (!isWorkTree) {
-        return FileRepositoryBuilder.create(gitFile)
-    }
-
-    class PatchedFileRepositoryBuilder : FileRepositoryBuilder() {
-        override fun setWorkTree(workTree: File?): PatchedFileRepositoryBuilder {
-            super.setWorkTree(workTree)
-            return this
+    @Throws(IOException::class)
+    override fun build(): Repository {
+        val repo = FileRepository(this.setup())
+        return if (this.isMustExist && !repo.objectDatabase.exists()) {
+            throw RepositoryNotFoundException(this.gitDir)
+        } else {
+            repo
         }
+    }
 
-        fun setGitDirFromWorkTree(): PatchedFileRepositoryBuilder {
-            setupGitDir()
+    companion object {
+        fun create(path: String): Repository {
+            val pathFile = File(path)
+            val gitFile = if (pathFile.name == Constants.DOT_GIT) {
+                pathFile
+            } else {
+                File(pathFile.absolutePath, Constants.DOT_GIT)
+            }
+
+            if (!gitFile.exists()) {
+                throw ConfigureGitException(path)
+            }
+
+            val isWorkTree = gitFile.isFile
+            if (!isWorkTree) {
+                return FileRepositoryBuilder.create(gitFile)
+            }
 
             try {
-                val gitCommonDirRelativePath = File(gitDir, COMMON_DIR_FILE_NAME).readText().trim()
-                val gitCommonDirFile = File(gitDir, gitCommonDirRelativePath)
-
-                gitDir = gitCommonDirFile
+                return GitRepositoryBuilder()
+                        .setWorkTree(gitFile.parentFile)
+                        .setGitDirFromWorkTree()
+                        .build()
             } catch (io: IOException) {
                 throw ConfigureGitException(path, io)
             }
-
-            return this
         }
     }
-
-    return PatchedFileRepositoryBuilder()
-            .setWorkTree(gitFile.parentFile)
-            .setGitDirFromWorkTree()
-            .build()
 }
 
 private val Repository.fullBranchWithWorkTree: String
@@ -86,15 +96,6 @@ fun readCommits(repositoryPath: String, untilRevString: String?, sinceRevString:
         val sinceCommitObjectId = git.repository.resolveOrFail(sinceRevString)
 
         addRange(sinceCommitObjectId, untilCommitObjectId)
-    }
-}
-
-fun readCommits(repositoryPath: String, revString: String?, numberOfCommits: Int): List<CommitInfo> {
-    return readCommits(repositoryPath) { git ->
-        val resolveQuery = revString ?: repository.fullBranchWithWorkTree
-        val startCommitObjectId = git.repository.resolveOrFail(resolveQuery)
-
-        add(startCommitObjectId).setMaxCount(numberOfCommits)
     }
 }
 
@@ -152,10 +153,10 @@ fun commitChanges(repositoryPath: String, changeFiles: Collection<FileChange>, t
     val git = Git(repository)
 
     val addCommand = git.add()
-    var hasAdd: Boolean = false
+    var hasAdd = false
 
     val rmCommand = git.rm().setCached(true)
-    var hasRm: Boolean = false
+    var hasRm = false
 
     for (changeFile in changeFiles) {
         val filePath = changeFile.file.relativeTo(repoPath).path.replace('\\', '/')

@@ -75,7 +75,7 @@ open class GitRepositoryBuilder : BaseRepositoryBuilder<GitRepositoryBuilder, Re
     }
 }
 
-private val Repository.fullBranchWithWorkTree: String
+val Repository.fullBranchWithWorkTree: String
     get() {
         if (workTree == null) {
             return fullBranch

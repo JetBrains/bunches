@@ -1,6 +1,7 @@
 @file:JvmName("BunchCheck")
 package nk.patchsets.git.check
 
+import nk.patchsets.git.CommitInfo
 import nk.patchsets.git.file.readExtensionFromFile
 import nk.patchsets.git.general.exitWithError
 import nk.patchsets.git.general.exitWithUsageError
@@ -83,7 +84,7 @@ fun doCheck(settings: Settings) {
         if (!forgottenFilesPaths.isEmpty()) {
             problemCommitsFound = true
 
-            println("${commit.hash} ${commit.title}")
+            println("${commit.hash} ${commitAuthorString(commit)} ${commit.title}")
             for (forgottenPath in forgottenFilesPaths) {
                 println("    $forgottenPath ${if (isDeletedWithCache(forgottenPath)) "[deleted]" else ""}")
             }
@@ -99,4 +100,19 @@ fun doCheck(settings: Settings) {
 }
 
 fun isDeletedBunchFile(bunchFile: File): Boolean = bunchFile.exists() && bunchFile.readText().trim().isEmpty()
+
+fun commitAuthorString(commit: CommitInfo): String {
+    val committer = commit.committer?.name
+    var author = commit.author?.name
+    if (author == null && committer != null) {
+        author = committer
+    }
+
+    return when {
+        author == null -> ""
+        author == committer || committer == null -> "[$author]"
+        else -> "[$author ($committer)]"
+    }
+
+}
 

@@ -113,6 +113,5 @@ fun commitAuthorString(commit: CommitInfo): String {
         author == committer || committer == null -> "[$author]"
         else -> "[$author ($committer)]"
     }
-
 }
 

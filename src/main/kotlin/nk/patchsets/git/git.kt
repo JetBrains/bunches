@@ -13,13 +13,66 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import org.eclipse.jgit.treewalk.EmptyTreeIterator
 import java.io.File
 import java.io.IOException
+import java.util.*
 
 class ConfigureGitException(path: String, cause: Throwable? = null) :
         Throwable("Couldn't configure git at ${File(path).absolutePath}", cause)
 
-private val COMMON_DIR_FILE_NAME = "commondir"
+private const val COMMON_DIR_FILE_NAME = "commondir"
 
 fun configureRepository(path: String): Repository = GitRepositoryBuilder.create(path)
+
+fun Repository.resolveEx(revstr: String): ObjectId? {
+    return resolve(if (isBare) revstr else revstr.replace(Constants.HEAD, fullBranchWithWorkTree))
+}
+
+fun CommitCommandEx.callEx() {
+    if (repository.isBare) {
+        call()
+    } else {
+        nativeCall(repository.workTree)
+    }
+}
+
+fun Git.commitEx() = CommitCommandEx(repository)
+
+private fun CommitCommandEx.nativeCall(dir: File) {
+    val args = ArrayList<String>().apply {
+        add("git")
+        add("commit")
+        add("--quiet")
+        add("-m")
+        add(message.replace("\"", "\\\""))
+    }
+
+    if (author != null) {
+        args.add("--author=${author!!.toExternalString()}")
+    }
+
+    (when {
+        committer != null -> "committer"
+        isAll() -> "-a"
+        isAllowEmpty() -> "--allow-empty"
+        isNoVerify() -> "--no-verify"
+        isAmend() -> "--amend"
+        onlyPaths().isNotEmpty() -> "--only"
+        else -> null
+    })?.let { unsupportedOption -> throw IllegalStateException("$unsupportedOption is currently unsupported for in native commit") }
+
+    val pb = ProcessBuilder(args)
+        .inheritIO()
+        .directory(dir)
+
+    val process = pb.start()
+    process.waitFor()
+    val exitValue = process.exitValue()
+
+    process.destroy()
+
+    if (exitValue != 0) {
+        System.exit(exitValue)
+    }
+}
 
 open class GitRepositoryBuilder : BaseRepositoryBuilder<GitRepositoryBuilder, Repository>() {
     fun setGitDirFromWorkTree(): GitRepositoryBuilder {
@@ -75,7 +128,7 @@ open class GitRepositoryBuilder : BaseRepositoryBuilder<GitRepositoryBuilder, Re
     }
 }
 
-val Repository.fullBranchWithWorkTree: String
+private val Repository.fullBranchWithWorkTree: String
     get() {
         if (workTree == null) {
             return fullBranch
@@ -87,11 +140,11 @@ val Repository.fullBranchWithWorkTree: String
     }
 
 private fun Repository.resolveOrFail(revStr: String) =
-        resolve(revStr) ?: throw IllegalArgumentException("revision '$revStr' was not found")
+        resolveEx(revStr) ?: throw IllegalArgumentException("revision '$revStr' was not found")
 
 fun readCommits(repositoryPath: String, untilRevString: String?, sinceRevString: String): List<CommitInfo> {
     return readCommits(repositoryPath) { git ->
-        val untilQuery = untilRevString ?: repository.fullBranchWithWorkTree
+        val untilQuery = untilRevString ?: Constants.HEAD
         val untilCommitObjectId = git.repository.resolveOrFail(untilQuery)
         val sinceCommitObjectId = git.repository.resolveOrFail(sinceRevString)
 
@@ -137,10 +190,10 @@ fun reCommitPatched(repositoryPath: String, commitInfo: CommitInfo, suffix: Stri
     }
     addCommand.call()
 
-    git.commit()
-            .setAuthor(commitInfo.author)
-            .setMessage("$suffix: ${commitInfo.message}")
-            .call()
+    git.commitEx()
+        .setAuthor(commitInfo.author)
+        .setMessage("$suffix: ${commitInfo.message}")
+        .callEx()
 }
 
 enum class ChangeType { ADD, REMOVE, MODIFY }
@@ -181,9 +234,9 @@ fun commitChanges(repositoryPath: String, changeFiles: Collection<FileChange>, t
         rmCommand.call()
     }
 
-    git.commit()
+    git.commitEx()
             .setMessage(title)
-            .call()
+            .callEx()
 }
 
 fun collectActions(git: Git, commit: RevCommit): List<FileAction> {

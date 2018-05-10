@@ -1,7 +1,7 @@
 ## 0.9.0
 
 - Experimental git worktree feature support
-- Set correct index file when working tree repository is used Nikolay Krasko
+- Set correct index file when working tree repository is used
 - Throw exceptions on unresolved revisions *(thanks to Nicolay Mitropolsky)*
 - `cp` command doc updates *(thanks to Nicolay Mitropolsky)*
 - Compare only neighbour files in `reduce` command

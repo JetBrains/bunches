@@ -1,4 +1,4 @@
-package nk.patchsets.git
+package org.jetbrains.bunches.git
 
 import org.eclipse.jgit.api.CommitCommand
 import org.eclipse.jgit.lib.PersonIdent

@@ -1,4 +1,4 @@
-package nk.patchsets.git.file
+package org.jetbrains.bunches.file
 
 import java.io.File
 

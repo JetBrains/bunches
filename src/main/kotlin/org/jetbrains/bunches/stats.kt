@@ -1,15 +1,15 @@
 @file:Suppress("PackageDirectoryMismatch")
 @file:JvmName("BunchStats")
-package nk.patchsets.git.stats
+package org.jetbrains.bunches.stats
 
-import nk.patchsets.git.check.isDeletedBunchFile
-import nk.patchsets.git.file.readExtensionFromFile
-import nk.patchsets.git.general.exitWithError
-import nk.patchsets.git.general.exitWithUsageError
-import nk.patchsets.git.restore.isGitDir
-import nk.patchsets.git.restore.isGradleBuildDir
-import nk.patchsets.git.restore.isGradleDir
-import nk.patchsets.git.restore.isOutDir
+import org.jetbrains.bunches.check.isDeletedBunchFile
+import org.jetbrains.bunches.file.readExtensionFromFile
+import org.jetbrains.bunches.general.exitWithError
+import org.jetbrains.bunches.general.exitWithUsageError
+import org.jetbrains.bunches.restore.isGitDir
+import org.jetbrains.bunches.restore.isGradleBuildDir
+import org.jetbrains.bunches.restore.isGradleDir
+import org.jetbrains.bunches.restore.isOutDir
 import java.io.File
 
 data class Settings(val repoPath: String)

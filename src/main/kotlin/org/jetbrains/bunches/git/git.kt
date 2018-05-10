@@ -1,5 +1,4 @@
-package nk.patchsets.git
-
+package org.jetbrains.bunches.git
 
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.LogCommand
@@ -20,7 +19,8 @@ class ConfigureGitException(path: String, cause: Throwable? = null) :
 
 private const val COMMON_DIR_FILE_NAME = "commondir"
 
-fun configureRepository(path: String): Repository = GitRepositoryBuilder.create(path)
+fun configureRepository(path: String): Repository =
+    GitRepositoryBuilder.create(path)
 
 fun Repository.resolveEx(revstr: String): ObjectId? {
     return resolve(if (isBare) revstr else revstr.replace(Constants.HEAD, fullBranchWithWorkTree))
@@ -162,14 +162,14 @@ fun readCommits(repositoryPath: String, logCommandSetup: LogCommand.(git: Git) -
                 .map { commit ->
                     with(commit) {
                         CommitInfo(
-                                hash = ObjectId.toString(id),
-                                parentHashes = parents.map { ObjectId.toString(it) },
-                                author = authorIdent,
-                                committer = committerIdent,
-                                time = commitTime,
-                                title = shortMessage,
-                                message = fullMessage,
-                                fileActions = collectActions(git, commit)
+                            hash = ObjectId.toString(id),
+                            parentHashes = parents.map { ObjectId.toString(it) },
+                            author = authorIdent,
+                            committer = committerIdent,
+                            time = commitTime,
+                            title = shortMessage,
+                            message = fullMessage,
+                            fileActions = collectActions(git, commit)
                         )
                     }
                 }
@@ -265,8 +265,8 @@ fun collectActions(git: Git, commit: RevCommit): List<FileAction> {
         when (entry.changeType) {
             DiffEntry.ChangeType.RENAME -> {
                 listOf(
-                        FileAction(entry.changeType, entry.oldPath, ""),
-                        FileAction(entry.changeType, entry.newPath, entry.readNewContent(git))
+                    FileAction(entry.changeType, entry.oldPath, ""),
+                    FileAction(entry.changeType, entry.newPath, entry.readNewContent(git))
                 )
             }
             DiffEntry.ChangeType.DELETE -> {

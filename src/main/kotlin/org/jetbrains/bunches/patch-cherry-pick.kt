@@ -1,11 +1,11 @@
 @file:Suppress("PackageDirectoryMismatch")
 @file:JvmName("BunchCherryPick")
 
-package nk.patchsets.git.cp
+package org.jetbrains.bunches.cp
 
-import nk.patchsets.git.general.exitWithUsageError
-import nk.patchsets.git.reCommitPatched
-import nk.patchsets.git.readCommits
+import org.jetbrains.bunches.general.exitWithUsageError
+import org.jetbrains.bunches.git.reCommitPatched
+import org.jetbrains.bunches.git.readCommits
 
 data class Settings(
         val gitPath: String,

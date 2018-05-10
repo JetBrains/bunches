@@ -1,5 +1,5 @@
 apply plugin: 'application'
-mainClassName = "nk.patchsets.git.general.Bunch"
+mainClassName = "org.jetbrains.bunches.general.Bunch"
 
 buildscript {
     ext.kotlin_version = '1.2.30'

@@ -1,20 +1,20 @@
 @file:Suppress("PackageDirectoryMismatch")
 @file:JvmName("Bunch")
 
-package nk.patchsets.git.general
+package org.jetbrains.bunches.general
 
-import nk.patchsets.git.stats.STATS_DESCRIPTION
-import nk.patchsets.git.check.CHECK_DESCRIPTION
-import nk.patchsets.git.check.check
-import nk.patchsets.git.cleanup.CLEANUP_DESCRIPTION
-import nk.patchsets.git.cleanup.cleanup
-import nk.patchsets.git.cp.CHERRY_PICK_DESCRIPTION
-import nk.patchsets.git.cp.cherryPick
-import nk.patchsets.git.reduce.REDUCE_DESCRIPTION
-import nk.patchsets.git.reduce.reduce
-import nk.patchsets.git.restore.SWITCH_DESCRIPTION
-import nk.patchsets.git.restore.restore
-import nk.patchsets.git.stats.stats
+import org.jetbrains.bunches.check.CHECK_DESCRIPTION
+import org.jetbrains.bunches.check.check
+import org.jetbrains.bunches.cleanup.CLEANUP_DESCRIPTION
+import org.jetbrains.bunches.cleanup.cleanup
+import org.jetbrains.bunches.cp.CHERRY_PICK_DESCRIPTION
+import org.jetbrains.bunches.cp.cherryPick
+import org.jetbrains.bunches.reduce.REDUCE_DESCRIPTION
+import org.jetbrains.bunches.reduce.reduce
+import org.jetbrains.bunches.restore.SWITCH_DESCRIPTION
+import org.jetbrains.bunches.restore.restore
+import org.jetbrains.bunches.stats.STATS_DESCRIPTION
+import org.jetbrains.bunches.stats.stats
 import kotlin.system.exitProcess
 
 fun exitWithUsageError(message: String): Nothing {

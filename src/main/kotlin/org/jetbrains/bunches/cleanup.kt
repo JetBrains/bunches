@@ -1,14 +1,14 @@
 @file:JvmName("BunchCleanup")
-package nk.patchsets.git.cleanup
+package org.jetbrains.bunches.cleanup
 
-import nk.patchsets.git.ChangeType
-import nk.patchsets.git.FileChange
-import nk.patchsets.git.commitChanges
-import nk.patchsets.git.file.readExtensionFromFile
-import nk.patchsets.git.general.exitWithError
-import nk.patchsets.git.general.exitWithUsageError
-import nk.patchsets.git.restore.isGitDir
-import nk.patchsets.git.restore.isGradleDir
+import org.jetbrains.bunches.file.readExtensionFromFile
+import org.jetbrains.bunches.general.exitWithError
+import org.jetbrains.bunches.general.exitWithUsageError
+import org.jetbrains.bunches.git.ChangeType
+import org.jetbrains.bunches.git.FileChange
+import org.jetbrains.bunches.git.commitChanges
+import org.jetbrains.bunches.restore.isGitDir
+import org.jetbrains.bunches.restore.isGradleDir
 import java.io.File
 
 const val EXT_PATTERN = "{ext}"

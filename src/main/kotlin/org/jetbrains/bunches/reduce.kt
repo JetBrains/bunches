@@ -1,13 +1,13 @@
 @file:JvmName("BunchReduce")
-package nk.patchsets.git.reduce
+package org.jetbrains.bunches.reduce
 
-import nk.patchsets.git.ChangeType
-import nk.patchsets.git.FileChange
-import nk.patchsets.git.commitChanges
-import nk.patchsets.git.file.readUpdatePairsFromFile
-import nk.patchsets.git.general.exitWithError
-import nk.patchsets.git.general.exitWithUsageError
-import nk.patchsets.git.restore.*
+import org.jetbrains.bunches.file.readUpdatePairsFromFile
+import org.jetbrains.bunches.general.exitWithError
+import org.jetbrains.bunches.general.exitWithUsageError
+import org.jetbrains.bunches.git.ChangeType
+import org.jetbrains.bunches.git.FileChange
+import org.jetbrains.bunches.git.commitChanges
+import org.jetbrains.bunches.restore.*
 import java.io.File
 
 enum class ReduceAction {

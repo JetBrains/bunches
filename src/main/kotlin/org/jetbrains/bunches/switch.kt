@@ -1,15 +1,15 @@
 @file:Suppress("PackageDirectoryMismatch")
 @file:JvmName("BunchSwitch")
 
-package nk.patchsets.git.restore
+package org.jetbrains.bunches.restore
 
-import nk.patchsets.git.ChangeType
-import nk.patchsets.git.FileChange
-import nk.patchsets.git.cleanup.cleanup
-import nk.patchsets.git.commitChanges
-import nk.patchsets.git.file.readRuleFromFile
-import nk.patchsets.git.general.exitWithError
-import nk.patchsets.git.general.exitWithUsageError
+import org.jetbrains.bunches.cleanup.cleanup
+import org.jetbrains.bunches.file.readRuleFromFile
+import org.jetbrains.bunches.general.exitWithError
+import org.jetbrains.bunches.general.exitWithUsageError
+import org.jetbrains.bunches.git.ChangeType
+import org.jetbrains.bunches.git.FileChange
+import org.jetbrains.bunches.git.commitChanges
 import java.io.File
 
 const val RESTORE_COMMIT_TITLE = "~~~~ switch {target} ~~~~"
@@ -70,7 +70,7 @@ fun restore(args: Array<String>) {
     }
 
     if (settings.doCleanup) {
-        cleanup(nk.patchsets.git.cleanup.Settings(
+        cleanup(org.jetbrains.bunches.cleanup.Settings(
                 settings.repoPath, extension = null, commitTitle =  RESTORE_CLEANUP_COMMIT_TITLE, isNoCommit = false))
     }
 }
@@ -110,7 +110,12 @@ private fun doSwitch(suffixes: List<String>, settings: Settings) {
             }
 
             originFile.copyTo(baseCopiedFile)
-            changedFiles.add(FileChange(ChangeType.ADD, baseCopiedFile))
+            changedFiles.add(
+                FileChange(
+                    ChangeType.ADD,
+                    baseCopiedFile
+                )
+            )
 
             originFile.delete()
             originFileModificationType = ChangeType.MODIFY
@@ -118,7 +123,12 @@ private fun doSwitch(suffixes: List<String>, settings: Settings) {
             // File was absent and going to be introduced.
             // Create empty bunch files to show it's going to be removed in old branch.
             baseCopiedFile.createNewFile()
-            changedFiles.add(FileChange(ChangeType.ADD, baseCopiedFile))
+            changedFiles.add(
+                FileChange(
+                    ChangeType.ADD,
+                    baseCopiedFile
+                )
+            )
 
             originFileModificationType = ChangeType.ADD
         }
@@ -142,7 +152,12 @@ private fun doSwitch(suffixes: List<String>, settings: Settings) {
                     // Original file was copied, but there's nothing to add instead. Do nothing.
                 }
                 ChangeType.MODIFY -> {
-                    changedFiles.add(FileChange(ChangeType.REMOVE, originFile))
+                    changedFiles.add(
+                        FileChange(
+                            ChangeType.REMOVE,
+                            originFile
+                        )
+                    )
                 }
                 ChangeType.REMOVE -> {
                     throw IllegalStateException("REMOVE state isn't expected for original file modification")
@@ -151,7 +166,11 @@ private fun doSwitch(suffixes: List<String>, settings: Settings) {
         }
     }
 
-    commitChanges(settings.repoPath, changedFiles, settings.commitTitle.replace("{target}", suffixes.last()))
+    commitChanges(
+        settings.repoPath,
+        changedFiles,
+        settings.commitTitle.replace("{target}", suffixes.last())
+    )
 }
 
 fun File.toBunchFile(extension: String) = File(parentFile, "$name.$extension")

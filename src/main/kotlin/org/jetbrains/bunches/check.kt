@@ -1,11 +1,11 @@
 @file:JvmName("BunchCheck")
-package nk.patchsets.git.check
+package org.jetbrains.bunches.check
 
-import nk.patchsets.git.CommitInfo
-import nk.patchsets.git.file.readExtensionFromFile
-import nk.patchsets.git.general.exitWithError
-import nk.patchsets.git.general.exitWithUsageError
-import nk.patchsets.git.readCommits
+import org.jetbrains.bunches.file.readExtensionFromFile
+import org.jetbrains.bunches.general.exitWithError
+import org.jetbrains.bunches.general.exitWithUsageError
+import org.jetbrains.bunches.git.CommitInfo
+import org.jetbrains.bunches.git.readCommits
 import java.io.File
 
 data class Settings(val repoPath: String, val sinceRef: String, val untilRef: String, val extensions: String?)

@@ -113,8 +113,10 @@ fun doReduce(settings: Settings) {
                 val fromContent = contentMap[fromExtension] ?: continue
                 val toContent = contentMap[toExtension] ?: continue
 
-                if (!checkedPairs.add(UpdatePair(fromExtension, toExtension)) && toContent == fromContent) {
-                    reduceFiles.add(affectedOriginFile.toBunchFile(toExtension))
+                if (checkedPairs.add(UpdatePair(fromExtension, toExtension))) {
+                    if (toContent == fromContent) {
+                        reduceFiles.add(affectedOriginFile.toBunchFile(toExtension))
+                    }
                 }
 
                 fromExtension = toExtension

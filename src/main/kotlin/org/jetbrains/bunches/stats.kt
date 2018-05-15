@@ -3,7 +3,7 @@
 package org.jetbrains.bunches.stats
 
 import org.jetbrains.bunches.check.isDeletedBunchFile
-import org.jetbrains.bunches.file.readExtensionFromFile
+import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError
 import org.jetbrains.bunches.restore.isGitDir
@@ -12,7 +12,7 @@ import org.jetbrains.bunches.restore.isGradleDir
 import org.jetbrains.bunches.restore.isOutDir
 import java.io.File
 
-data class Settings(val repoPath: String)
+data class Settings(val path: String)
 
 fun main(args: Array<String>) {
     stats(args)
@@ -27,7 +27,8 @@ fun stats(args: Array<String>) {
 
             $STATS_DESCRIPTION
 
-            <git-path>   - Directory with repository (parent directory for .git).
+            <git-path>  - Directory to process. Should be within .git repository as repository root will be used
+                          to spot bunches file with extensions.
 
             Example:
             bunch stats C:/Projects/kotlin
@@ -39,13 +40,22 @@ fun stats(args: Array<String>) {
     doStats(settings)
 }
 
-fun doStats(settings: Settings) {
-    val extensions = readExtensionFromFile(settings.repoPath) ?: exitWithError()
+private fun File.parents(): Sequence<File> = generateSequence(this.absoluteFile) { it.parentFile }
+private fun findGitRoot(dir: File) = dir.parents().firstOrNull { File(it, ".git").exists() }
 
-    val root = File(settings.repoPath)
-    val bunchFiles = root
+fun doStats(settings: Settings) {
+    val statsDir = File(settings.path)
+    when {
+        !statsDir.exists() -> exitWithUsageError("$statsDir directory doesn't exist")
+        !statsDir.isDirectory -> exitWithUsageError("$statsDir is not directory")
+    }
+
+    val gitRoot = findGitRoot(statsDir) ?: exitWithUsageError("Couldn't find git root directory")
+    val extensions = readExtensionsFromFile(gitRoot) ?: exitWithError()
+
+    val bunchFiles = statsDir
             .walkTopDown()
-            .onEnter { dir -> !(isGitDir(dir) || isOutDir(dir, root) || isGradleBuildDir(dir) || isGradleDir(dir)) }
+            .onEnter { dir -> !(isGitDir(dir) || isOutDir(dir, gitRoot) || isGradleBuildDir(dir) || isGradleDir(dir)) }
             .filter { child -> child.extension in extensions }
             .toList()
 
@@ -54,6 +64,17 @@ fun doStats(settings: Settings) {
     val affectedOriginFiles: Set<File> =
             bunchFiles.mapTo(HashSet()) { child -> File(child.parentFile, child.nameWithoutExtension) }
 
+    printResults(statsDir, affectedOriginFiles, bunchFiles, extensions, groupedFiles)
+}
+
+private fun printResults(
+    statsDir: File,
+    affectedOriginFiles: Set<File>,
+    bunchFiles: List<File>,
+    extensions: List<String>,
+    groupedFiles: Map<String, List<File>>
+) {
+    println("Directory: ${statsDir.absoluteFile}")
     println("Number of affected origin files: ${affectedOriginFiles.size}")
     println()
 

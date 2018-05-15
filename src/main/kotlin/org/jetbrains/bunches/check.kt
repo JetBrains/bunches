@@ -1,7 +1,7 @@
 @file:JvmName("BunchCheck")
 package org.jetbrains.bunches.check
 
-import org.jetbrains.bunches.file.readExtensionFromFile
+import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError
 import org.jetbrains.bunches.git.CommitInfo
@@ -45,7 +45,7 @@ fun check(args: Array<String>) {
 }
 
 fun doCheck(settings: Settings) {
-    val extensions = settings.extensions?.split('_') ?: readExtensionFromFile(settings.repoPath) ?: exitWithError()
+    val extensions = settings.extensions?.split('_') ?: readExtensionsFromFile(settings.repoPath) ?: exitWithError()
 
     val commits = readCommits(settings.repoPath, settings.sinceRef, settings.untilRef)
     var problemCommitsFound = false

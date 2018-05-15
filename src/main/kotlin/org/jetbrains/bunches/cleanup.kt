@@ -1,7 +1,7 @@
 @file:JvmName("BunchCleanup")
 package org.jetbrains.bunches.cleanup
 
-import org.jetbrains.bunches.file.readExtensionFromFile
+import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError
 import org.jetbrains.bunches.git.ChangeType
@@ -72,7 +72,7 @@ fun cleanup(settings: Settings) {
     val extensions = if (settings.extension != null) {
         setOf(settings.extension)
     } else {
-        readExtensionFromFile(settings.repoPath)?.toSet()
+        readExtensionsFromFile(settings.repoPath)?.toSet()
     }?.map { ".$it" }
 
     if (extensions == null) exitWithError()

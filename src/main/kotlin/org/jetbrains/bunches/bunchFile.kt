@@ -59,8 +59,15 @@ fun readUpdatePairsFromFile(path: String): UpdateInfo? {
     return UpdateInfo(currentBranchSuffix, rules)
 }
 
-fun readExtensionFromFile(rootPath: String): List<String>? {
-    val file = File(rootPath, ".bunch")
+fun readExtensionsFromFile(rootPath: String): List<String>? {
+    return readExtensionsFromFileImpl(File(rootPath, ".bunch"))
+}
+
+fun readExtensionsFromFile(dir: File): List<String>? {
+    return readExtensionsFromFileImpl(File(dir, ".bunch"))
+}
+
+private fun readExtensionsFromFileImpl(file: File): List<String>? {
     if (!file.exists()) {
         System.err.println("Can't get extensions list from file. File '${file.canonicalPath}' doesn't exist ")
         return null

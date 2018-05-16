@@ -74,30 +74,25 @@ private fun printResults(
     extensions: List<String>,
     groupedFiles: Map<String, List<File>>
 ) {
+    val tablePatternTitle = "%-6s|%6s|%6s|%6s"
+    val tablePatternRow = "%-6s|%6d|%6d|%6d"
+
     println("Directory: ${statsDir.absoluteFile}")
     println("Number of affected origin files: ${affectedOriginFiles.size}")
     println()
 
-    println("${"%-6s".format("Ext")}|${"%6s".format("exists")} |${"%6s".format("del")} |${"%6s".format("total")}")
+    println(tablePatternTitle.format("Ext", "exists", "del", "total"))
 
     val all = bunchFiles.size
     val allDeleted = bunchFiles.count { isDeletedBunchFile(it) }
-    print("%-6s".format("all"))
-    print("|${"%6d".format(all - allDeleted)} ")
-    print("|${"%6d".format(allDeleted)} ")
-    print("|${"%6d".format(all)}")
-    println()
+    println(tablePatternRow.format("all", all - allDeleted, allDeleted, all))
 
     for (extension in extensions) {
         val currentExtensionFiles = groupedFiles[extension] ?: listOf()
         val deleted = currentExtensionFiles.count { isDeletedBunchFile(it) }
         val total = currentExtensionFiles.size
 
-        print("%-6s".format(extension))
-        print("|${"%6d".format(total - deleted)} ")
-        print("|${"%6d".format(deleted)} ")
-        print("|${"%6d".format(total)}")
-        println()
+        println(tablePatternRow.format(extension, total - deleted, deleted, total))
     }
 }
 

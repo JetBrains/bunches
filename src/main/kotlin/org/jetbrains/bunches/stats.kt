@@ -12,7 +12,12 @@ import org.jetbrains.bunches.restore.isGradleDir
 import org.jetbrains.bunches.restore.isOutDir
 import java.io.File
 
-data class Settings(val path: String)
+enum class Kind {
+    DIR,
+    LS
+}
+
+data class Settings(val path: String, val kind: Kind)
 
 fun main(args: Array<String>) {
     stats(args)
@@ -21,21 +26,37 @@ fun main(args: Array<String>) {
 const val STATS_DESCRIPTION = "Show statistics about bunch files in repository."
 
 fun stats(args: Array<String>) {
-    if (args.size !in 1..1) {
+    if (args.size !in 1..2) {
         exitWithUsageError("""
-            Usage: <git-path>
+            Usage: [<kind: dir|ls>] <git-path>
 
             $STATS_DESCRIPTION
 
-            <git-path>  - Directory to process. Should be within .git repository as repository root will be used
-                          to spot bunches file with extensions.
+            <kind: dir|ls> - Kind of statistics. `dir` value will show information about single directory. `ls` will
+                             give a quick overview for all sub-dirs. `dir` is used by default.
+
+            <git-path>     - Directory to process. Should be within .git repository as repository root will be used
+                             to spot bunches file with extensions.
 
             Example:
             bunch stats C:/Projects/kotlin
             """.trimIndent())
     }
 
-    val settings = Settings(args[0])
+    val kind = args[0].let {
+        when (it) {
+            "dir" -> Kind.DIR
+            "ls" -> Kind.LS
+            else -> {
+                if (args.size == 2) {
+                    exitWithUsageError("Unknown kind: '$it', 'dir' or 'ls' are expected.")
+                }
+                null
+            }
+        }
+    } ?: Kind.DIR
+
+    val settings = Settings(args.getOrNull(1) ?: args[0], kind)
 
     doStats(settings)
 }
@@ -44,30 +65,89 @@ private fun File.parents(): Sequence<File> = generateSequence(this.absoluteFile)
 private fun findGitRoot(dir: File) = dir.parents().firstOrNull { File(it, ".git").exists() }
 
 fun doStats(settings: Settings) {
-    val statsDir = File(settings.path)
+    when (settings.kind) {
+        Kind.DIR -> doDirStats(settings.path)
+        Kind.LS -> doLsStats(settings.path)
+    }
+}
+
+fun doDirStats(path: String) {
+    val (statsDir, gitRoot) = fetchStatsDirs(path)
+    val extensions = readExtensionsFromFile(gitRoot) ?: exitWithError()
+
+    val bunchFiles = statsDir
+        .walkTopDown()
+        .onEnter { dir -> !(isGitDir(dir) || isOutDir(dir, gitRoot) || isGradleBuildDir(dir) || isGradleDir(dir)) }
+        .filter { child -> child.extension in extensions }
+        .toList()
+
+    val groupedFiles = bunchFiles.groupBy { it.extension }
+
+    val affectedOriginFiles: Set<File> =
+        bunchFiles.mapTo(HashSet()) { child -> File(child.parentFile, child.nameWithoutExtension) }
+
+    printDirResults(statsDir, affectedOriginFiles, bunchFiles, extensions, groupedFiles)
+}
+
+fun doLsStats(path: String) {
+    val (statsDir, gitRoot) = fetchStatsDirs(path)
+    val extensions = readExtensionsFromFile(gitRoot) ?: exitWithError()
+
+    var count = 0
+    var total = 0
+
+    statsDir
+        .walkTopDown()
+        .onEnter { dir ->
+            !shouldIgnoreDir(dir, gitRoot)
+        }
+        .onLeave { dir ->
+            val lsName = when {
+                dir.parentFile == statsDir -> {
+                    dir.name
+                }
+                dir == statsDir -> {
+                    "<root>"
+                }
+                else -> null
+            }
+
+            if (lsName != null) {
+                if (shouldIgnoreDir(dir, gitRoot)) {
+                    println("%6s %s".format("ignore", lsName))
+                } else {
+                    println("%6d %s".format(count, lsName))
+                }
+                count = 0
+            }
+        }
+        .onEach { child ->
+            if (child.extension in extensions) {
+                count++
+                total++
+            }
+        }.forEach {  }
+
+    println()
+    println("Total: $total")
+}
+
+private fun shouldIgnoreDir(dir: File, gitRoot: File) =
+    isGitDir(dir) || isOutDir(dir, gitRoot) || isGradleBuildDir(dir) || isGradleDir(dir)
+
+private data class StatsDirs(val statsDir: File, val gitDir: File)
+private fun fetchStatsDirs(path: String): StatsDirs {
+    val statsDir = File(path)
     when {
         !statsDir.exists() -> exitWithUsageError("$statsDir directory doesn't exist")
         !statsDir.isDirectory -> exitWithUsageError("$statsDir is not directory")
     }
 
     val gitRoot = findGitRoot(statsDir) ?: exitWithUsageError("Couldn't find git root directory")
-    val extensions = readExtensionsFromFile(gitRoot) ?: exitWithError()
-
-    val bunchFiles = statsDir
-            .walkTopDown()
-            .onEnter { dir -> !(isGitDir(dir) || isOutDir(dir, gitRoot) || isGradleBuildDir(dir) || isGradleDir(dir)) }
-            .filter { child -> child.extension in extensions }
-            .toList()
-
-    val groupedFiles = bunchFiles.groupBy { it.extension }
-
-    val affectedOriginFiles: Set<File> =
-            bunchFiles.mapTo(HashSet()) { child -> File(child.parentFile, child.nameWithoutExtension) }
-
-    printResults(statsDir, affectedOriginFiles, bunchFiles, extensions, groupedFiles)
+    return StatsDirs(statsDir, gitRoot)
 }
 
-private fun printResults(
+private fun printDirResults(
     statsDir: File,
     affectedOriginFiles: Set<File>,
     bunchFiles: List<File>,

@@ -2,7 +2,7 @@
 
 ## Bunches Tool Set
 
-Set of tools for storing similar git-branches in single branch by moving files that have changes to 
+Set of tools for storing similar git-branches in a single branch by moving files that have changes to 
 *bunch-files*, files with additional special extension.
 
 ```
@@ -12,15 +12,19 @@ SomeAction.java
 SomeAction.java.181 <-- Bunch file for Idea 2018.1
 ```
 
-Such fake branches have several advantages for plugin development over classic approach when own branch is created for each IDEA version:
+Such fake branches have several advantages for plugin development over classic approach when each IDEA version is stored in a separate branch:
 * Files for each version are available locally. "Compare Files" action in IDE can be used to see the difference in files.
 * Each commit can have own changes for different IDEA-versions. 
 * Conflicting problems can be spotted and fixed before commit.
 * No tedious git branch administration.
 
+The main disadvantages are:
+* Bunch files should be removed before building artifacts if build tool tends to pack them into binaries.
+* Bunch files should be processed during commit phase even if there are no conflicts from classic git merge perspective (different parts of file are changed).
+
 ```
 This approach works well when number of bunch-files is reasonable small or they never change. 
-The best practice it to have bunch files only for solving API compatibility issues, and maintain 
+The best practice is to have bunch files only for solving API compatibility issues, and maintain 
 same source for all supported IDEA-versions in other files.
 ```
 

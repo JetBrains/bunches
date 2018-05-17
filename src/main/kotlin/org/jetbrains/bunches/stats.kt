@@ -99,25 +99,20 @@ fun doLsStats(path: String) {
     statsDir
         .walkTopDown()
         .onEnter { dir ->
-            !shouldIgnoreDir(dir, gitRoot)
+            val ignoreDir = shouldIgnoreDir(dir, gitRoot)
+            if (ignoreDir) {
+                val lsName = printLSDirName(dir, statsDir)
+                if (lsName != null) {
+                    println("%6s %s".format("ignore", lsName))
+                    count = 0
+                }
+            }
+            !ignoreDir
         }
         .onLeave { dir ->
-            val lsName = when {
-                dir.parentFile == statsDir -> {
-                    dir.name
-                }
-                dir == statsDir -> {
-                    "<root>"
-                }
-                else -> null
-            }
-
+            val lsName = printLSDirName(dir, statsDir)
             if (lsName != null) {
-                if (shouldIgnoreDir(dir, gitRoot)) {
-                    println("%6s %s".format("ignore", lsName))
-                } else {
-                    println("%6d %s".format(count, lsName))
-                }
+                println("%6d %s".format(count, lsName))
                 count = 0
             }
         }
@@ -132,12 +127,23 @@ fun doLsStats(path: String) {
     println("Total: $total")
 }
 
+private fun printLSDirName(dir: File, statsDir: File) =
+    when {
+        dir.parentFile == statsDir -> {
+            dir.name
+        }
+        dir == statsDir -> {
+            "<root>"
+        }
+        else -> null
+    }
+
 private fun shouldIgnoreDir(dir: File, gitRoot: File) =
     isGitDir(dir) || isOutDir(dir, gitRoot) || isGradleBuildDir(dir) || isGradleDir(dir)
 
 private data class StatsDirs(val statsDir: File, val gitDir: File)
 private fun fetchStatsDirs(path: String): StatsDirs {
-    val statsDir = File(path)
+    val statsDir = File(path).absoluteFile
     when {
         !statsDir.exists() -> exitWithUsageError("$statsDir directory doesn't exist")
         !statsDir.isDirectory -> exitWithUsageError("$statsDir is not directory")

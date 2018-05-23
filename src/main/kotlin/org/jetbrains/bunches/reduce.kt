@@ -7,7 +7,8 @@ import org.jetbrains.bunches.general.exitWithUsageError
 import org.jetbrains.bunches.git.ChangeType
 import org.jetbrains.bunches.git.FileChange
 import org.jetbrains.bunches.git.commitChanges
-import org.jetbrains.bunches.restore.*
+import org.jetbrains.bunches.git.shouldIgnoreDir
+import org.jetbrains.bunches.restore.toBunchFile
 import java.io.File
 
 enum class ReduceAction {
@@ -90,7 +91,7 @@ fun doReduce(settings: Settings) {
 
     val filesWithDonorExtensions = root
             .walkTopDown()
-            .onEnter { dir -> !(isGitDir(dir) || isOutDir(dir, root) || isGradleBuildDir(dir) || isGradleDir(dir)) }
+            .onEnter { dir -> !shouldIgnoreDir(dir) }
             .filter { child -> child.extension in extensions }
             .toList()
 

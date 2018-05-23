@@ -6,10 +6,7 @@ import org.jetbrains.bunches.check.isDeletedBunchFile
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError
-import org.jetbrains.bunches.restore.isGitDir
-import org.jetbrains.bunches.restore.isGradleBuildDir
-import org.jetbrains.bunches.restore.isGradleDir
-import org.jetbrains.bunches.restore.isOutDir
+import org.jetbrains.bunches.git.shouldIgnoreDir
 import java.io.File
 
 enum class Kind {
@@ -77,7 +74,7 @@ fun doDirStats(path: String) {
 
     val bunchFiles = statsDir
         .walkTopDown()
-        .onEnter { dir -> !(isGitDir(dir) || isOutDir(dir, gitRoot) || isGradleBuildDir(dir) || isGradleDir(dir)) }
+        .onEnter { dir -> !shouldIgnoreDir(dir) }
         .filter { child -> child.extension in extensions }
         .toList()
 
@@ -99,7 +96,7 @@ fun doLsStats(path: String) {
     statsDir
         .walkTopDown()
         .onEnter { dir ->
-            val ignoreDir = shouldIgnoreDir(dir, gitRoot)
+            val ignoreDir = shouldIgnoreDir(dir)
             if (ignoreDir) {
                 val lsName = printLSDirName(dir, statsDir)
                 if (lsName != null) {
@@ -137,9 +134,6 @@ private fun printLSDirName(dir: File, statsDir: File) =
         }
         else -> null
     }
-
-private fun shouldIgnoreDir(dir: File, gitRoot: File) =
-    isGitDir(dir) || isOutDir(dir, gitRoot) || isGradleBuildDir(dir) || isGradleDir(dir)
 
 private data class StatsDirs(val statsDir: File, val gitDir: File)
 private fun fetchStatsDirs(path: String): StatsDirs {

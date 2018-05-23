@@ -4,11 +4,7 @@ package org.jetbrains.bunches.cleanup
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError
-import org.jetbrains.bunches.git.ChangeType
-import org.jetbrains.bunches.git.FileChange
-import org.jetbrains.bunches.git.commitChanges
-import org.jetbrains.bunches.restore.isGitDir
-import org.jetbrains.bunches.restore.isGradleDir
+import org.jetbrains.bunches.git.*
 import java.io.File
 
 const val EXT_PATTERN = "{ext}"

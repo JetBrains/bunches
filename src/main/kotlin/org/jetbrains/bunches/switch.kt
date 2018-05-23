@@ -10,6 +10,7 @@ import org.jetbrains.bunches.general.exitWithUsageError
 import org.jetbrains.bunches.git.ChangeType
 import org.jetbrains.bunches.git.FileChange
 import org.jetbrains.bunches.git.commitChanges
+import org.jetbrains.bunches.git.shouldIgnoreDir
 import java.io.File
 
 const val RESTORE_COMMIT_TITLE = "~~~~ switch {target} ~~~~"
@@ -89,7 +90,7 @@ private fun doSwitch(suffixes: List<String>, settings: Settings) {
 
     val filesWithDonorExtensions = root
             .walkTopDown()
-            .onEnter { dir -> !(isGitDir(dir) || isOutDir(dir, root) || isGradleBuildDir(dir) || isGradleDir(dir)) }
+            .onEnter { dir -> !shouldIgnoreDir(dir) }
             .filter { child -> child.extension in donorExtensionsPrioritized }
             .toList()
 
@@ -190,20 +191,4 @@ fun getRuleSuffixes(settings: Settings): List<String> {
 
         else -> suffixes
     }
-}
-
-fun isGradleDir(dir: File) = dir.name == ".gradle"
-fun isGitDir(dir: File) = dir.name == ".git"
-
-fun isOutDir(dir: File, baseDir: File): Boolean {
-    if (dir.name != "out") return false
-    return dir.parentFile == baseDir
-}
-
-fun isGradleBuildDir(dir: File): Boolean {
-    if (dir.name != "build") return false
-    if (File(dir.parentFile, "build.gradle.kts").exists()) return true
-    if (File(dir.parentFile, "build.gradle").exists()) return true
-
-    return false
 }

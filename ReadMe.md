@@ -30,3 +30,44 @@ same source for all supported IDEA-versions in other files.
 
 This tool set is used in [Kotlin](https://github.com/JetBrains/kotlin) project.  
 
+## Install
+
+The latest release can be obtained from:
+
+https://github.com/JetBrains/bunches/releases
+
+macOS users can install it via brew:
+
+```
+brew tap jetbrains/utils
+brew install bunches
+```
+
+## Operations
+
+* **switch** - restores state of files for the particular branch. This command is used during the build, and should be used if development with non-based platform is needed.
+* **cp** - cherry-picks commit to master branch with auto-creating bunch files with given suffix for all affected files.
+* **cleanup** - removes all bunch files from the repository directory. This command is executed on buildserver to avoid appearing bunch files in result binaries. `--ext=<suffix>` option can be passed to clean bunch files with the specific extension.
+* **check** - checks the range of commits for forgotten bunch files.
+* **reduce** - locates bunch files that are equal to base files (an equality check ignores whitespaces).
+
+## .bunch file format
+
+```
+173 // Base branch
+// Switch rules
+172
+as31
+as32_181
+181
+182_181
+```
+
+Each line from switch rules section describes how to switch to the branch mentioned at the beginning of the line.
+For example for Android Studio 3.2, rule `as32_181_173` will be applied (base `173` branch is added implicitly).
+
+Switch tool will do following steps when it gets `as32_181_173` as input for each base file in repository:
+
+* If `as32` bunch-file is present, replace base file with it and continue to other file;
+* If `181` bunch file is present, replace base file with it and continue to other file;
+* Leave base version of the file (file from `173` branch) and continue to other file;

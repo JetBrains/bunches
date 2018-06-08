@@ -1,4 +1,11 @@
-## 0.9.0
+## 0.9.1 (Apr 23, 2018)
+
+- Ignore all `out` directories in `reduce`, `stats`, and `switch` commands
+- Support `ls` mode in `stats` command to see how bunch files are spread among subdirectories
+- Allow to execute `stats` command for repository subdirectories 
+- Some files were not shown as redundant in `reduce` command
+
+## 0.9.0 (Apr 10, 2018)
 
 - Experimental git worktree feature support
 - Set correct index file when working tree repository is used

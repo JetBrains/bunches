@@ -8,6 +8,7 @@ import org.jetbrains.bunches.check.CHECK_DESCRIPTION
 import org.jetbrains.bunches.check.check
 import org.jetbrains.bunches.cleanup.CLEANUP_DESCRIPTION
 import org.jetbrains.bunches.cleanup.cleanup
+import org.jetbrains.bunches.commithook.checkCommitHook
 import org.jetbrains.bunches.cp.CHERRY_PICK_DESCRIPTION
 import org.jetbrains.bunches.cp.cherryPick
 import org.jetbrains.bunches.reduce.REDUCE_DESCRIPTION
@@ -58,8 +59,9 @@ fun main(args: Array<String>) {
         "check" -> check(commandArgs)
         "reduce" -> reduce(commandArgs)
         "stats" -> stats(commandArgs)
-
         "--version" -> printVersion()
+
+        "commit-check-hook" -> checkCommitHook(commandArgs)
 
         else -> {
             exitWithUsageError("Unknown command: $command")

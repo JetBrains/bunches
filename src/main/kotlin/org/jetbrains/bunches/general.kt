@@ -3,6 +3,7 @@
 
 package org.jetbrains.bunches.general
 
+import org.jetbrains.bunches.ManifestReader
 import org.jetbrains.bunches.check.CHECK_DESCRIPTION
 import org.jetbrains.bunches.check.check
 import org.jetbrains.bunches.cleanup.CLEANUP_DESCRIPTION
@@ -32,7 +33,7 @@ fun exitWithError(message: String? = null): Nothing {
 fun main(args: Array<String>) {
     if (args.isEmpty()) {
         exitWithUsageError("""
-            Usage: switch|cp|cleanup|check|reduce|stats <args>
+            Usage: switch|cp|cleanup|check|reduce|stats|--version <args>
 
             switch  - $SWITCH_DESCRIPTION
             cp      - $CHERRY_PICK_DESCRIPTION
@@ -57,8 +58,15 @@ fun main(args: Array<String>) {
         "check" -> check(commandArgs)
         "reduce" -> reduce(commandArgs)
         "stats" -> stats(commandArgs)
+
+        "--version" -> printVersion()
+
         else -> {
             exitWithUsageError("Unknown command: $command")
         }
     }
+}
+
+private fun printVersion() {
+    println(ManifestReader.readAttribute("Bundle-Version") ?: "unknown")
 }

@@ -49,6 +49,12 @@ allprojects {
     }
 }
 
+jar {
+    manifest {
+        attributes("Bundle-Version": version)
+    }
+}
+
 applyKotlin()
 
 dependencies {

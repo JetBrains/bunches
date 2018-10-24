@@ -1,8 +1,5 @@
-apply plugin: 'application'
-mainClassName = "org.jetbrains.bunches.general.Bunch"
-
 buildscript {
-    ext.kotlin_version = '1.2.41'
+    ext.kotlin_version = '1.2.71'
     ext.kotlin_target = '1.8'
 
 
@@ -14,18 +11,16 @@ buildscript {
     }
 }
 
-distZip {
-    filesMatching("**/bin/*") { mode = 0b111101101 }
-    filesMatching("**/bin/*.bat") { mode = 0b110100100 }
-}
 
-applicationDistribution.from("src/licenses") {
-    into "licenses"
-}
+subprojects {
+    group = 'org.jetbrains.tooling'
+    version = '0.9.1'
 
-allprojects {
-    group 'nk'
-    version '0.9.1'
+    repositories {
+        mavenCentral()
+    }
+    apply plugin: 'maven'
+
 
     ext.applyKotlin = {
         apply plugin: 'kotlin'
@@ -47,17 +42,6 @@ allprojects {
             kotlinOptions.jvmTarget = kotlin_target
         }
     }
-}
 
-jar {
-    manifest {
-        attributes("Bundle-Version": version)
-    }
-}
-
-applyKotlin()
-
-dependencies {
-    compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.11.0.201803080745-r'
-    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.2'
+    applyKotlin()
 }

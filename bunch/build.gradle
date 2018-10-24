@@ -1,0 +1,23 @@
+apply plugin: 'application'
+mainClassName = "org.jetbrains.bunches.general.Bunch"
+
+dependencies {
+    compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.11.0.201803080745-r'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.2'
+}
+ 
+distZip {
+    filesMatching("**/bin/*") { mode = 0b111101101 }
+    filesMatching("**/bin/*.bat") { mode = 0b110100100 }
+}
+
+applicationDistribution.from("src/licenses") {
+    into "licenses"
+}
+
+jar {
+    manifest {
+        attributes("Bundle-Version": version)
+    }
+}
+

@@ -33,6 +33,11 @@ fun main(args: Array<String>) {
 private const val CLEAN_UP = "--cleanup"
 
 const val SWITCH_DESCRIPTION = "Restores state of files for the particular branch by replacing base files with bunch counterparts."
+const val SWITCH_COMMIT_TITLE = """<commit-title>    - Title for the switch commit. "$RESTORE_COMMIT_TITLE" is used by default. {target} pattern
+                                in message will be replaced with the target branch suffix."""
+const val SWITCH_BRANCHES_RULE = """<branches-rule>   - Set of file suffixes separated with `_` showing what files should be affected and priority
+                                of application. If only target branch is given file <git-path>/.bunch will be checked for
+                                pattern."""
 
 fun restore(args: Array<String>) {
     if (args.size != 4 && args.size != 3 && args.size != 2) {
@@ -43,16 +48,13 @@ fun restore(args: Array<String>) {
 
             <git-path>        - Directory with repository (parent directory for .git).
 
-            <branches-rule>   - Set of file suffixes separated with `_` showing what files should be affected and priority
-                                of application. If only target branch is given file <git-path>/.bunch will be checked for
-                                pattern.
+            $SWITCH_BRANCHES_RULE
 
             $STEP_            - Do switch step by step with intermediate commits after applying each step
 
             $CLEAN_UP         - Remove bunch files after branch restore (executes 'cleanup' command with default arguments).
 
-            <commit-title>    - Title for the switch commit. "$RESTORE_COMMIT_TITLE" is used by default. {target} pattern
-                                in message will be replaced with the target branch suffix.
+            $SWITCH_COMMIT_TITLE
 
             Example:
             bunch switch C:/Projects/kotlin as32

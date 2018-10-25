@@ -21,6 +21,8 @@ fun main(args: Array<String>) {
 }
 
 const val STATS_DESCRIPTION = "Show statistics about bunch files in repository."
+const val STATS_DIR = "show information about single directory"
+const val STATS_LS = "give a quick overview for all sub-dirs"
 
 fun stats(args: Array<String>) {
     if (args.size !in 1..2) {
@@ -29,8 +31,8 @@ fun stats(args: Array<String>) {
 
             $STATS_DESCRIPTION
 
-            <kind: dir|ls> - Kind of statistics. `dir` value will show information about single directory. `ls` will
-                             give a quick overview for all sub-dirs. `dir` is used by default.
+            <kind: dir|ls> - Kind of statistics. `dir` value will $STATS_DIR. `ls` will
+                             $STATS_LS. `dir` is used by default.
 
             <git-path>     - Directory to process. Should be within .git repository as repository root will be used
                              to spot bunches file with extensions.

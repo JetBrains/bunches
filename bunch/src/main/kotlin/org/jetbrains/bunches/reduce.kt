@@ -25,6 +25,11 @@ fun main(args: Array<String>) {
 
 const val REDUCE_DESCRIPTION = "Check repository for unneeded files with the same content."
 const val DEFAULT_REDUCE_COMMIT_TITLE = "~~~~ reduce ~~~~"
+const val REDUCE_ACTION = """<action>         - Action that should be applied to redundant files. "commit" is used by default.
+                                 print - print the list in console
+                                 delete - only delete files
+                                 commit - delete files and commit them"""
+const val REDUCE_COMMIT_MESSAGE = """<commit message> - Commit message for "commit" action. "~~~~ reduce ~~~~" is used by default."""
 
 fun reduce(args: Array<String>) {
     if (args.size !in 1..3) {
@@ -34,11 +39,8 @@ fun reduce(args: Array<String>) {
             $REDUCE_DESCRIPTION
 
             <git-path>       - Directory with repository (parent directory for .git)
-            <action>         - Action that should be applied to redundant files. "commit" is used by default.
-                                 print - print the list in console
-                                 delete - only delete files
-                                 commit - delete files and commit them
-            <commit message> - Commit message for "commit" action. "~~~~ reduce ~~~~" is used by default.
+            $REDUCE_ACTION
+            $REDUCE_COMMIT_MESSAGE
 
             Example:
             bunch reduce C:/Projects/kotlin

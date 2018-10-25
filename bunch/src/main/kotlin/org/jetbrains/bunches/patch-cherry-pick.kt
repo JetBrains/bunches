@@ -20,6 +20,10 @@ fun main(args: Array<String>) {
 
 const val CHERRY_PICK_DESCRIPTION = "cherry-picks commit to the current branch with auto-creating bunch files with given suffix."
 
+const val CP_SINCE = "since-ref"
+const val CP_UNTIL = "until-ref"
+const val CP_SX = "suffix"
+
 fun cherryPick(args: Array<String>) {
     if (args.size != 4) {
         exitWithUsageError("""
@@ -28,9 +32,9 @@ fun cherryPick(args: Array<String>) {
             $CHERRY_PICK_DESCRIPTION
 
             <git-path>  - Directory with repository (parent directory for .git folder).
-            <since-ref> - Reference to most recent commit that should be ported.
-            <until-ref> - Parent of the last commit that should be ported (hash of "==== switch 182 ====" for instance).
-            <suffix>    - Suffix for ported files.
+            <$CP_SINCE> - Reference to most recent commit that should be ported.
+            <$CP_UNTIL> - Parent of the last commit that should be ported (hash of "==== switch 182 ====" for instance).
+            <$CP_SX>    - Suffix for ported files.
 
             Example:
             bunch cp C:/Projects/kotlin my-feature-branch c1125219e44aed60b8ba033ddae5b8f5c748052e 182

@@ -34,6 +34,10 @@ private const val CLEAN_UP = "--cleanup"
 
 const val SWITCH_DESCRIPTION = "Restores state of files for the particular branch by replacing base files with bunch counterparts."
 
+const val SW_COMMIT_T = "commit-title"
+
+const val SW_BRANCHES_ = "branches-rule"
+
 fun restore(args: Array<String>) {
     if (args.size != 4 && args.size != 3 && args.size != 2) {
         exitWithUsageError("""
@@ -43,7 +47,7 @@ fun restore(args: Array<String>) {
 
             <git-path>        - Directory with repository (parent directory for .git).
 
-            <branches-rule>   - Set of file suffixes separated with `_` showing what files should be affected and priority
+            <$SW_BRANCHES_>   - Set of file suffixes separated with `_` showing what files should be affected and priority
                                 of application. If only target branch is given file <git-path>/.bunch will be checked for
                                 pattern.
 
@@ -51,7 +55,7 @@ fun restore(args: Array<String>) {
 
             $CLEAN_UP         - Remove bunch files after branch restore (executes 'cleanup' command with default arguments).
 
-            <commit-title>    - Title for the switch commit. "$RESTORE_COMMIT_TITLE" is used by default. {target} pattern
+            <$SW_COMMIT_T>    - Title for the switch commit. "$RESTORE_COMMIT_TITLE" is used by default. {target} pattern
                                 in message will be replaced with the target branch suffix.
 
             Example:

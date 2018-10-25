@@ -18,16 +18,19 @@ import org.jetbrains.bunches.stats.STATS_DESCRIPTION
 import org.jetbrains.bunches.stats.stats
 import kotlin.system.exitProcess
 
-fun exitWithUsageError(message: String): Nothing {
-    System.err.println(message)
-    exitProcess(1)
+var exitHook: (Pair<String?, Int>) -> (Nothing) = {
+    if (it.first != null) {
+        System.err.println(it.first)
+    }
+    exitProcess(it.second)
 }
 
-fun exitWithError(message: String? = null): Nothing {
-    if (message != null) {
-        System.err.println(message)
-    }
-    exitProcess(2)
+fun exitWithUsageError(message: String): Nothing {
+    with(Pair(message, 1), exitHook)
+}
+
+fun exitWithError(message: String? = null): Nothing  {
+    with(Pair(message, 2), exitHook)
 }
 
 fun main(args: Array<String>) {

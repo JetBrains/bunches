@@ -16,6 +16,9 @@ fun main(args: Array<String>) {
 
 const val CHECK_DESCRIPTION = "Check if commits have forgotten bunch files according to the HEAD of the given directory."
 
+const val CH_SINCE = "since-ref"
+const val CH_UNTIL = "until-ref"
+
 fun check(args: Array<String>) {
     if (args.size !in 3..4) {
         exitWithUsageError("""
@@ -24,8 +27,8 @@ fun check(args: Array<String>) {
             $CHECK_DESCRIPTION
 
             <git-path>   - Directory with repository (parent directory for .git).
-            <since-ref>  - Reference to the most recent commit that should be checked.
-            <until-ref>  - Parent of the last commit that should be checked.
+            <$CH_SINCE>  - Reference to the most recent commit that should be checked.
+            <$CH_UNTIL>  - Parent of the last commit that should be checked.
             <extensions> - Set of extensions to check with '_' separator. '.bunch' file will be used if
                            the option is missing.
 

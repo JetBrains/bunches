@@ -4,6 +4,7 @@
 package org.jetbrains.bunches.general
 
 import org.jetbrains.bunches.ManifestReader
+import org.jetbrains.bunches.apply.apply
 import org.jetbrains.bunches.check.CHECK_DESCRIPTION
 import org.jetbrains.bunches.check.check
 import org.jetbrains.bunches.cleanup.CLEANUP_DESCRIPTION
@@ -61,6 +62,7 @@ fun main(args: Array<String>) {
         "check" -> check(commandArgs)
         "reduce" -> reduce(commandArgs)
         "stats" -> stats(commandArgs)
+        "apply" -> apply(commandArgs)
 
         "--version" -> printVersion()
 

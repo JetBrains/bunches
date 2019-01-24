@@ -3,3 +3,5 @@ patches
 .idea/modules.xml
 .idea/misc.xml
 **.iml
+.gradle
+build/

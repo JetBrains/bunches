@@ -2,5 +2,5 @@ rootProject.name = 'bunch-tool'
 
 include 'bunch'
 include 'bunch-gradle-plugin'
-
+include 'idea-plugin'
 

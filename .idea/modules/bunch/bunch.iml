@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id=":bunch" external.linked.project.path="$MODULE_DIR$/../../../bunch" external.root.project.path="$MODULE_DIR$/../../.." external.system.id="GRADLE" external.system.module.group="org.jetbrains.tooling" external.system.module.version="0.9.1" type="JAVA_MODULE" version="4">
+  <component name="ExternalSystem" linkedProjectPath="$MODULE_DIR$/../../.." rootProjectPath="$MODULE_DIR$/../../.." />
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../../bunch">
+      <excludeFolder url="file://$MODULE_DIR$/../../../bunch/.gradle" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../bunch/build" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../bunch/out" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

@@ -8,6 +8,8 @@
       <module name="bunch_test" target="1.8" />
       <module name="idea-plugin_main" target="1.8" />
       <module name="idea-plugin_test" target="1.8" />
+      <module name="org.jetbrains.tooling-bunch_main" target="1.8" />
+      <module name="org.jetbrains.tooling-bunch_test" target="1.8" />
       <module name="patchsets_main" target="1.8" />
       <module name="patchsets_test" target="1.8" />
     </bytecodeTargetLevel>

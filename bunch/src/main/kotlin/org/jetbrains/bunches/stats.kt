@@ -76,7 +76,7 @@ fun doDirStats(path: String) {
 
     val bunchFiles = statsDir
         .walkTopDown()
-        .onEnter { dir -> !shouldIgnoreDir(dir) }
+        .onEnter { dir -> !shouldIgnoreDir(dir, gitRoot) }
         .filter { child -> child.extension in extensions }
         .toList()
 
@@ -98,7 +98,7 @@ fun doLsStats(path: String) {
     statsDir
         .walkTopDown()
         .onEnter { dir ->
-            val ignoreDir = shouldIgnoreDir(dir)
+            val ignoreDir = shouldIgnoreDir(dir, gitRoot)
             if (ignoreDir) {
                 val lsName = printLSDirName(dir, statsDir)
                 if (lsName != null) {

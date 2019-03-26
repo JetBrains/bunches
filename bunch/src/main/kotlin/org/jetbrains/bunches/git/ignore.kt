@@ -16,4 +16,10 @@ private fun isGradleBuildDir(dir: File): Boolean {
     return false
 }
 
-fun shouldIgnoreDir(dir: File) = isGitDir(dir) || isOutDir(dir) || isGradleBuildDir(dir) || isGradleDir(dir)
+fun isGitRoot(dir: File) = File(dir, ".git").isDirectory
+
+fun isNestedGitRoot(dir: File, baseGitRoot: File) =
+        isGitRoot(dir) && dir != baseGitRoot
+
+fun shouldIgnoreDir(dir: File, baseGitRoot: File) =
+        isGitDir(dir) || isOutDir(dir) || isGradleBuildDir(dir) || isGradleDir(dir) || isNestedGitRoot(dir, baseGitRoot)

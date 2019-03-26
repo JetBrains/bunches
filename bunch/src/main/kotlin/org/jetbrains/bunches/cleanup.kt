@@ -74,9 +74,14 @@ fun cleanup(settings: Settings) {
     if (extensions == null) exitWithError()
 
     val root = File(settings.repoPath)
+
+    if (!isGitRoot(root)) {
+        exitWithError("Repository directory with branch is expected")
+    }
+
     val filesWithExtensions = root
             .walkTopDown()
-            .onEnter { dir -> !(isGitDir(dir) || isGradleDir(dir)) }
+            .onEnter { dir -> !(isGitDir(dir) || isGradleDir(dir) || isNestedGitRoot(dir, root)) }
             .filter { child -> extensions.any { child.name.endsWith(it) } }
             .toList()
 

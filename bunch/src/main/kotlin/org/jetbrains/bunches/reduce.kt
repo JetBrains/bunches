@@ -7,6 +7,7 @@ import org.jetbrains.bunches.general.exitWithUsageError
 import org.jetbrains.bunches.git.ChangeType
 import org.jetbrains.bunches.git.FileChange
 import org.jetbrains.bunches.git.commitChanges
+import org.jetbrains.bunches.git.isGitRoot
 import org.jetbrains.bunches.git.shouldIgnoreDir
 import org.jetbrains.bunches.restore.toBunchFile
 import java.io.File
@@ -80,7 +81,7 @@ private data class UpdatePair(val from: String, val to: String)
 
 fun doReduce(settings: Settings) {
     val root = File(settings.repoPath)
-    if (!root.exists() || !root.isDirectory) {
+    if (!isGitRoot(root)) {
         exitWithError("Repository directory with branch is expected")
     }
 
@@ -93,7 +94,7 @@ fun doReduce(settings: Settings) {
 
     val filesWithDonorExtensions = root
             .walkTopDown()
-            .onEnter { dir -> !shouldIgnoreDir(dir) }
+            .onEnter { dir -> !shouldIgnoreDir(dir, root) }
             .filter { child -> child.extension in extensions }
             .toList()
 

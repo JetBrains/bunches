@@ -10,6 +10,7 @@ import org.jetbrains.bunches.general.exitWithUsageError
 import org.jetbrains.bunches.git.ChangeType
 import org.jetbrains.bunches.git.FileChange
 import org.jetbrains.bunches.git.commitChanges
+import org.jetbrains.bunches.git.isGitRoot
 import org.jetbrains.bunches.git.shouldIgnoreDir
 import java.io.File
 
@@ -131,13 +132,13 @@ private fun doStepByStepSwitch(suffixes: List<String>, settings: Settings) {
 
     val root = File(settings.repoPath)
 
-    if (!root.exists() || !root.isDirectory) {
+    if (!isGitRoot(root)) {
         exitWithError("Repository directory with branch is expected")
     }
 
     val filesWithDonorExtensions = root
             .walkTopDown()
-            .onEnter { dir -> !shouldIgnoreDir(dir) }
+            .onEnter { dir -> !shouldIgnoreDir(dir, root) }
             .filter { child -> child.extension in donorExtensionsInStepByStepOrder }
             .toList()
 
@@ -212,7 +213,7 @@ private fun doStepByStepSwitch(suffixes: List<String>, settings: Settings) {
             }
         }
 
-        if (!branchChanges.isEmpty()) {
+        if (branchChanges.isNotEmpty()) {
             commitChanges(
                     settings.repoPath,
                     branchChanges,
@@ -228,7 +229,7 @@ private fun doSwitch(suffixes: List<String>, settings: Settings) {
 
     val root = File(settings.repoPath)
 
-    if (!root.exists() || !root.isDirectory) {
+    if (!isGitRoot(root)) {
         exitWithError("Repository directory with branch is expected")
     }
 
@@ -236,7 +237,7 @@ private fun doSwitch(suffixes: List<String>, settings: Settings) {
 
     val filesWithDonorExtensions = root
             .walkTopDown()
-            .onEnter { dir -> !shouldIgnoreDir(dir) }
+            .onEnter { dir -> !shouldIgnoreDir(dir, root) }
             .filter { child -> child.extension in donorExtensionsPrioritized }
             .toList()
 

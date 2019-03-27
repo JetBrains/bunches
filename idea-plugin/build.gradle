@@ -27,8 +27,3 @@ intellij {
     version '2018.3.5'
     pluginName = 'bunch-tool-idea-plugin'
 }
-patchPluginXml {
-    changeNotes """
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>"""
-}

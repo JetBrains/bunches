@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="CompilerConfiguration">
-    <bytecodeTargetLevel>
-      <module name="bunch-gradle-plugin_main" target="1.8" />
-      <module name="bunch-gradle-plugin_test" target="1.8" />
-      <module name="bunch_main" target="1.8" />
-      <module name="bunch_test" target="1.8" />
-      <module name="idea-plugin_main" target="1.8" />
-      <module name="idea-plugin_test" target="1.8" />
-      <module name="patchsets_main" target="1.8" />
-      <module name="patchsets_test" target="1.8" />
-    </bytecodeTargetLevel>
-  </component>
+    <component name="CompilerConfiguration">
+        <bytecodeTargetLevel>
+            <module name="bunch-gradle-plugin_main" target="1.8" />
+            <module name="bunch-gradle-plugin_test" target="1.8" />
+            <module name="bunch_main" target="1.8" />
+            <module name="bunch_test" target="1.8" />
+            <module name="idea-plugin_main" target="1.8" />
+            <module name="idea-plugin_test" target="1.8" />
+            <module name="org.jetbrains.tooling-bunch_main" target="1.8" />
+            <module name="org.jetbrains.tooling-bunch_test" target="1.8" />
+            <module name="patchsets_main" target="1.8" />
+            <module name="patchsets_test" target="1.8" />
+        </bytecodeTargetLevel>
+    </component>
 </project>

@@ -2,11 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="45f5841f-3a45-4cf7-8def-b2fd91910cfa" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestDialog.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/BunchCheckinHandler.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/userDataUtil.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/bunch-gradle-plugin/bunch-gradle-plugin.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/bunch-gradle-plugin/bunch-gradle-plugin.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/bunch-gradle-plugin/bunch-gradle-plugin_test.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/bunch-gradle-plugin/bunch-gradle-plugin_test.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/bunch-tool.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/bunch-tool.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/bunch/bunch.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/bunch/bunch.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/bunch/bunch_test.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/bunch/bunch_test.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/idea-plugin.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/idea-plugin.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/idea-plugin/idea-plugin_test.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/idea-plugin/idea-plugin_test.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestAction.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestDialog.form" beforeDir="false" afterPath="$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestDialog.form" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestDialog.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/idea-plugin/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/idea-plugin/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/idea-plugin/src/main/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/idea-plugin/src/main/resources/META-INF/plugin.xml" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -88,41 +96,45 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestAction.kt">
+        <entry file="file://$PROJECT_DIR$/idea-plugin/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="11" column="32" selection-start-line="11" selection-start-column="32" selection-end-line="11" selection-end-column="32" />
-              <folding>
-                <element signature="e#42#188#0" expanded="true" />
-              </folding>
+            <state>
+              <caret column="9" lean-forward="true" selection-start-column="9" selection-end-column="9" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/resources/META-INF/plugin.xml">
+        <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/BunchCheckinHandler.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="408">
-              <caret line="24" column="44" selection-start-line="24" selection-start-column="44" selection-end-line="24" selection-end-column="44" />
+            <state relative-caret-position="-125">
+              <caret line="32" column="41" lean-forward="true" selection-start-line="32" selection-start-column="41" selection-end-line="32" selection-end-column="41" />
+              <folding>
+                <element signature="e#205#1128#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestDialog.kt">
+        <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/resources/META-INF/plugin.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="221">
-              <caret line="18" selection-start-line="18" selection-end-line="18" />
-              <folding>
-                <element signature="e#42#86#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="170">
+              <caret line="10" column="113" selection-start-line="10" selection-start-column="113" selection-end-line="10" selection-end-column="113" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestDialog.form">
-          <provider selected="true" editor-type-id="ui-designer" />
+        <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/userDataUtil.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="408">
+              <caret line="24" column="64" selection-start-line="24" selection-start-column="64" selection-end-line="24" selection-end-column="64" />
+              <folding>
+                <element signature="e#644#795#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
         </entry>
       </file>
     </leaf>
@@ -130,25 +142,31 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Kotlin File" />
         <option value="Action" />
+        <option value="Kotlin File" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="UPDATE_TYPE" value="REBASE" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/bunch/src/main/kotlin/org/jetbrains/bunches/ManifestReader.kt" />
         <option value="$PROJECT_DIR$/bunch-gradle-plugin/src/main/kotlin/BunchGradlePlugin.kt" />
-        <option value="$PROJECT_DIR$/idea-plugin/build.gradle" />
         <option value="$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestDialog.java" />
         <option value="$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestDialog.form" />
         <option value="$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestAction.kt" />
-        <option value="$PROJECT_DIR$/idea-plugin/src/main/resources/META-INF/plugin.xml" />
         <option value="$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestDialog.kt" />
+        <option value="$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/userDataUtil.kt" />
+        <option value="$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/BunchCheckinHandler.kt" />
+        <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/idea-plugin/build.gradle" />
+        <option value="$PROJECT_DIR$/.idea/compiler.xml" />
+        <option value="$PROJECT_DIR$/idea-plugin/src/main/resources/META-INF/plugin.xml" />
       </list>
     </option>
   </component>
@@ -159,8 +177,7 @@
     </treeState>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="168" />
-    <option name="y" value="-18" />
+    <option name="x" value="953" />
     <option name="width" value="974" />
     <option name="height" value="1047" />
   </component>
@@ -169,44 +186,43 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
             <path>
               <item name="bunch-tool" type="b2602c69:ProjectViewProjectNode" />
-              <item name="bunches" type="462c0819:PsiDirectoryNode" />
+              <item name="bunches" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
             <path>
               <item name="bunch-tool" type="b2602c69:ProjectViewProjectNode" />
-              <item name="bunches" type="462c0819:PsiDirectoryNode" />
-              <item name="idea-plugin" type="462c0819:PsiDirectoryNode" />
+              <item name="bunches" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="idea-plugin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
             <path>
               <item name="bunch-tool" type="b2602c69:ProjectViewProjectNode" />
-              <item name="bunches" type="462c0819:PsiDirectoryNode" />
-              <item name="idea-plugin" type="462c0819:PsiDirectoryNode" />
+              <item name="bunches" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="idea-plugin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="bunch-tool" type="b2602c69:ProjectViewProjectNode" />
-              <item name="bunches" type="462c0819:PsiDirectoryNode" />
-              <item name="idea-plugin" type="462c0819:PsiDirectoryNode" />
+              <item name="bunches" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="idea-plugin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="bunch-tool" type="b2602c69:ProjectViewProjectNode" />
-              <item name="bunches" type="462c0819:PsiDirectoryNode" />
-              <item name="idea-plugin" type="462c0819:PsiDirectoryNode" />
+              <item name="bunches" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="idea-plugin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="kotlin" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="bunch-tool" type="b2602c69:ProjectViewProjectNode" />
-              <item name="bunches" type="462c0819:PsiDirectoryNode" />
-              <item name="idea-plugin" type="462c0819:PsiDirectoryNode" />
+              <item name="bunches" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="idea-plugin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="kotlin" type="462c0819:PsiDirectoryNode" />
@@ -214,16 +230,16 @@
             </path>
             <path>
               <item name="bunch-tool" type="b2602c69:ProjectViewProjectNode" />
-              <item name="bunches" type="462c0819:PsiDirectoryNode" />
-              <item name="idea-plugin" type="462c0819:PsiDirectoryNode" />
+              <item name="bunches" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="idea-plugin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="resources" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="bunch-tool" type="b2602c69:ProjectViewProjectNode" />
-              <item name="bunches" type="462c0819:PsiDirectoryNode" />
-              <item name="idea-plugin" type="462c0819:PsiDirectoryNode" />
+              <item name="bunches" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="idea-plugin" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="resources" type="462c0819:PsiDirectoryNode" />
@@ -234,6 +250,7 @@
         </subPane>
       </pane>
       <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -242,7 +259,7 @@
     <property name="UI_DESIGNER_EDITOR_MODE.UIDesignerToolWindowManager.WIDTH" value="615" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1552848645827" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1553709783700" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/idea-plugin/build.gradle" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.0" />
@@ -379,16 +396,19 @@
       <workItem from="1552832899411" duration="62000" />
       <workItem from="1552833145712" duration="5399000" />
       <workItem from="1552846415969" duration="2398000" />
+      <workItem from="1553708681249" duration="1117000" />
+      <workItem from="1553709827020" duration="600000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="9948000" />
+    <option name="totallyTimeSpent" value="12561000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20415778" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.4360341" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -397,7 +417,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49946696" visible="true" weight="0.32936078" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49946696" weight="0.32936078" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -416,7 +436,7 @@
       <window_info anchor="right" id="Maven" order="3" weight="0.32995737" />
       <window_info anchor="right" id="Palette" order="4" />
       <window_info anchor="right" id="Capture Analysis" order="5" />
-      <window_info anchor="right" id="Gradle" order="6" visible="true" weight="0.20255864" />
+      <window_info anchor="right" id="Gradle" order="6" weight="0.4157549" />
       <window_info anchor="right" id="Database" order="7" />
       <window_info anchor="right" id="Palette&#9;" order="8" />
       <window_info anchor="right" id="Theme Preview" order="9" />
@@ -424,6 +444,46 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="antWorkspaceConfiguration">
     <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
@@ -492,13 +552,6 @@
     <entry file="file://$PROJECT_DIR$/bunch/build.gradle">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/idea-plugin/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="367">
-          <caret line="27" column="41" lean-forward="true" selection-start-line="27" selection-start-column="41" selection-end-line="27" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestAction.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="187">
@@ -509,20 +562,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/a.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/resources/META-INF/plugin.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="408">
-          <caret line="24" column="44" selection-start-line="24" selection-start-column="44" selection-end-line="24" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/a.java" />
     <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/TestDialog.form">
       <provider selected="true" editor-type-id="ui-designer" />
     </entry>
@@ -547,6 +587,50 @@
           <folding>
             <element signature="e#42#86#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idea-plugin/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="9" lean-forward="true" selection-start-column="9" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/userDataUtil.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="408">
+          <caret line="24" column="64" selection-start-line="24" selection-start-column="64" selection-end-line="24" selection-end-column="64" />
+          <folding>
+            <element signature="e#644#795#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/compiler.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="7" column="53" lean-forward="true" selection-start-line="7" selection-start-column="53" selection-end-line="7" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/kotlin/org/jetbrains/bunches/ideaPlugin/BunchCheckinHandler.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-125">
+          <caret line="32" column="41" lean-forward="true" selection-start-line="32" selection-start-column="41" selection-end-line="32" selection-end-column="41" />
+          <folding>
+            <element signature="e#205#1128#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/idea-plugin/src/main/resources/META-INF/plugin.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="10" column="113" selection-start-line="10" selection-start-column="113" selection-end-line="10" selection-end-column="113" />
         </state>
       </provider>
     </entry>

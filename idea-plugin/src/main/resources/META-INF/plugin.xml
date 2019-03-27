@@ -10,7 +10,6 @@
     <extensions defaultExtensionNs="com.intellij">
         <checkinHandlerFactory implementation="org.jetbrains.bunches.ideaPlugin.BunchFileCheckInHandlerFactory"/>
     </extensions>
-
     <actions>
         <action id="Test" class="org.jetbrains.bunches.ideaPlugin.TestAction" text="Test">
             <add-to-group group-id="FileMenu"/>

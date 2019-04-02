@@ -4,6 +4,7 @@ patches
 .idea/misc.xml
 .idea/**/workspace.xml
 .idea/**/uiDesigner.xml
+.idea/compiler.xml
 **.iml
 .gradle
 build/

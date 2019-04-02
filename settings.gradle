@@ -1,6 +1,6 @@
-rootProject.name = 'bunch-tool'
+rootProject.name = 'bunches'
 
-include 'bunch'
+include 'bunch-cli'
 include 'bunch-gradle-plugin'
 include 'idea-plugin'
 include 'bunch-git-hook'

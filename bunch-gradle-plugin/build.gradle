@@ -1,4 +1,4 @@
 dependencies {
-    compile project(':bunch')
+    compile project(':bunch-cli')
     compile gradleApi()
 }

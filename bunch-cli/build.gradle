@@ -24,3 +24,13 @@ jar {
         attributes("Bundle-Version": version)
     }
 }
+
+bintray {
+    pkg {
+        repo = 'maven'
+        userOrg = 'jetbrains'
+        name = 'bunch-cli'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/JetBrains/bunches'
+    }
+}

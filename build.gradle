@@ -2,12 +2,13 @@ buildscript {
     ext.kotlin_version = '1.2.71'
     ext.kotlin_target = '1.8'
 
-
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.+'
     }
 }
 
@@ -18,8 +19,14 @@ subprojects {
     repositories {
         mavenCentral()
     }
-    apply plugin: 'maven'
 
+    apply plugin: 'maven'
+    apply plugin: 'com.jfrog.bintray'
+
+    bintray {
+        user = 'goodwinnk'
+        key = '8c20aaa89a285bc1f95db8e78f12f4cd974c47f0'
+    }
 
     ext.applyKotlin = {
         apply plugin: 'kotlin'

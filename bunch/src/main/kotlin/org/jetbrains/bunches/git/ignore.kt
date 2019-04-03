@@ -16,7 +16,10 @@ private fun isGradleBuildDir(dir: File): Boolean {
     return false
 }
 
-fun isGitRoot(dir: File) = File(dir, ".git").isDirectory
+// Git root directory contains ".git" sub-directory.
+// Git worktree directory contains ".git" file.
+// Both cases are covered by this function.
+fun isGitRoot(dir: File) = File(dir, ".git").exists()
 
 fun isNestedGitRoot(dir: File, baseGitRoot: File) =
         isGitRoot(dir) && dir != baseGitRoot

@@ -13,8 +13,14 @@
     </extensions>
 
     <actions>
-        <action id="Test" class="org.jetbrains.bunches.ideaPlugin.TestAction" text="Test">
-            <add-to-group group-id="FileMenu"/>
-        </action>
+        <group id="org.jetbrains.bunches.ideaPlugin.BunchToolMenuGroup"
+               class="org.jetbrains.bunches.ideaPlugin.BunchToolMenuGroup"
+               text="Bunch tool" popup="true">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <action id="org.jetbrains.bunches.ideaPlugin.SwitchAction"
+                    class="org.jetbrains.bunches.ideaPlugin.SwitchAction"
+                    text="Switch">
+            </action>
+        </group>
     </actions>
 </idea-plugin>

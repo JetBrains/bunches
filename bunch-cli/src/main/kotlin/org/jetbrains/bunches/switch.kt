@@ -118,11 +118,11 @@ fun restore(args: Array<String>) {
 
     if (settings.doCleanup) {
         cleanup(org.jetbrains.bunches.cleanup.Settings(
-                settings.repoPath, extension = null, commitTitle = RESTORE_CLEANUP_COMMIT_TITLE, isNoCommit = false))
+            settings.repoPath, extension = null, commitTitle = RESTORE_CLEANUP_COMMIT_TITLE, isNoCommit = false))
     }
 }
 
-private fun doStepByStepSwitch(suffixes: List<String>, settings: Settings) {
+fun doStepByStepSwitch(suffixes: List<String>, settings: Settings) {
     val originBranchExtension = suffixes.first()
     val donorExtensionsInStepByStepOrder = suffixes.subList(1, suffixes.size).toSet()
 
@@ -219,7 +219,7 @@ private fun doStepByStepSwitch(suffixes: List<String>, settings: Settings) {
     }
 }
 
-private fun doSwitch(suffixes: List<String>, settings: Settings) {
+fun doSwitch(suffixes: List<String>, settings: Settings) {
     val originBranchExtension = suffixes.first()
     val donorExtensionsPrioritized = suffixes.subList(1, suffixes.size).reversed().toSet()
 

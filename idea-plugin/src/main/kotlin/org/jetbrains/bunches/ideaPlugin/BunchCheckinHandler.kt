@@ -56,10 +56,10 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
         override fun beforeCheckin(
                 executor: CommitExecutor?,
                 additionalDataConsumer: PairConsumer<Any, Any>?
-        ): CheckinHandler.ReturnResult {
-            if (!project.bunchFileCheckEnabled) return CheckinHandler.ReturnResult.COMMIT
+        ): ReturnResult {
+            if (!project.bunchFileCheckEnabled) return ReturnResult.COMMIT
 
-            val extensions = BunchFileUtils.bunchExtension(project)?.toSet() ?: return CheckinHandler.ReturnResult.COMMIT
+            val extensions = BunchFileUtils.bunchExtension(project)?.toSet() ?: return ReturnResult.COMMIT
 
             val forgottenFiles = HashSet<File>()
             val commitFiles = checkInProjectPanel.files.filter { it.isFile }.toSet()
@@ -76,7 +76,7 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
                 }
             }
 
-            if (forgottenFiles.isEmpty()) return CheckinHandler.ReturnResult.COMMIT
+            if (forgottenFiles.isEmpty()) return ReturnResult.COMMIT
 
             val projectBaseFile = File(project.basePath)
             var filePaths = forgottenFiles.map { it.relativeTo(projectBaseFile).path }.sorted()
@@ -90,12 +90,12 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
                     "Forgotten Bunch Files", "Review", "Commit", CommonBundle.getCancelButtonText(), Messages.getWarningIcon()
             )) {
                 YES -> {
-                    return CheckinHandler.ReturnResult.CLOSE_WINDOW
+                    return ReturnResult.CLOSE_WINDOW
                 }
-                NO -> return CheckinHandler.ReturnResult.COMMIT
+                NO -> return ReturnResult.COMMIT
             }
 
-            return CheckinHandler.ReturnResult.CANCEL
+            return ReturnResult.CANCEL
         }
     }
 }
@@ -111,7 +111,7 @@ object BunchFileUtils {
         val file = File(bunchFile.path)
         if (!file.exists()) return null
 
-        val lines = file.readLines().map { it.trim() }.filter { !it.isEmpty() }
+        val lines = file.readLines().map { it.trim() }.filter { it.isNotEmpty() }
         if (lines.size <= 1) return null
 
         return lines.drop(1).map { it.split('_').first() }

@@ -7,11 +7,7 @@ import org.jetbrains.bunches.cleanup.cleanup
 import org.jetbrains.bunches.file.readRuleFromFile
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError
-import org.jetbrains.bunches.git.ChangeType
-import org.jetbrains.bunches.git.FileChange
-import org.jetbrains.bunches.git.commitChanges
-import org.jetbrains.bunches.git.isGitRoot
-import org.jetbrains.bunches.git.shouldIgnoreDir
+import org.jetbrains.bunches.git.*
 import java.io.File
 
 const val RESTORE_COMMIT_TITLE = "~~~~ switch {target} ~~~~"
@@ -126,7 +122,7 @@ fun restore(args: Array<String>) {
     }
 }
 
-private fun doStepByStepSwitch(suffixes: List<String>, settings: Settings) {
+fun doStepByStepSwitch(suffixes: List<String>, settings: Settings) {
     val originBranchExtension = suffixes.first()
     val donorExtensionsInStepByStepOrder = suffixes.subList(1, suffixes.size).toSet()
 
@@ -223,7 +219,7 @@ private fun doStepByStepSwitch(suffixes: List<String>, settings: Settings) {
     }
 }
 
-private fun doSwitch(suffixes: List<String>, settings: Settings) {
+fun doSwitch(suffixes: List<String>, settings: Settings) {
     val originBranchExtension = suffixes.first()
     val donorExtensionsPrioritized = suffixes.subList(1, suffixes.size).reversed().toSet()
 

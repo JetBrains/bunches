@@ -15,12 +15,10 @@ class SwitchDialog(project: Project, bunches: List<String>?) : DialogWrapper(pro
     init {
         init()
         title = "Switch Bunches"
-        when {
-            bunches != null -> bunches.forEach { comboSwitch!!.addItem(it) }
-            else -> {
-                comboSwitch!!.addItem("Nothing to show")
-                comboSwitch!!.isEnabled = false
-            }
+        if (bunches != null && bunches.isNotEmpty()) bunches.forEach { comboSwitch!!.addItem(it) }
+        else {
+            comboSwitch!!.addItem("Nothing to show")
+            comboSwitch!!.isEnabled = false
         }
         textFieldCommitMessage!!.text = RESTORE_COMMIT_TITLE
 

@@ -12,6 +12,12 @@ buildscript {
     }
 }
 
+task wait() {
+    doLast {
+        sleep(20 * 1000)
+    }
+}
+
 subprojects {
     group = 'org.jetbrains.tooling'
     version = '0.9.1'

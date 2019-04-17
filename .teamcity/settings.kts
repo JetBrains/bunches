@@ -83,6 +83,11 @@ object Main : BuildType({
         }
 
         gradle {
+            name = "Wait"
+            tasks = "wait"
+        }
+
+        gradle {
             name = "Build Idea Plugin"
             tasks = ":idea-plugin:build"
         }

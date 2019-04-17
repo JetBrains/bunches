@@ -32,7 +32,10 @@ project {
 
     vcsRoot(BunchTool)
 
-    buildType(Main)
+    buildTypes.addAll(listOf(
+            Composite,
+            Main
+    ))
 
     cleanup {
         preventDependencyCleanup = false

@@ -1,8 +1,7 @@
-import jetbrains.buildServer.configs.kotlin.v2018_2.BuildType
+import jetbrains.buildServer.configs.kotlin.v2018_2.*
 import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.gradle
-import jetbrains.buildServer.configs.kotlin.v2018_2.project
+import jetbrains.buildServer.configs.kotlin.v2018_2.ui.create
 import jetbrains.buildServer.configs.kotlin.v2018_2.vcs.GitVcsRoot
-import jetbrains.buildServer.configs.kotlin.v2018_2.version
 
 /*
 The settings script is an entry point for defining a TeamCity
@@ -39,6 +38,28 @@ project {
         preventDependencyCleanup = false
     }
 }
+
+object Composite : BuildType({
+    id("Composite")
+    name = "Composite"
+
+    type = BuildTypeSettings.Type.COMPOSITE
+
+    vcs {
+        showDependenciesChanges = true
+    }
+
+    dependencies {
+        dependency(RelativeId("Main")) {
+            snapshot {
+            }
+
+            artifacts {
+                artifactRules = "*.zip"
+            }
+        }
+    }
+})
 
 object Main : BuildType({
     name = "Main"

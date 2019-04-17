@@ -1,6 +1,4 @@
-import jetbrains.buildServer.configs.kotlin.v2018_2.ui.create
 import jetbrains.buildServer.configs.kotlin.v2018_2.BuildType
-import jetbrains.buildServer.configs.kotlin.v2018_2.DslContext
 import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.v2018_2.project
 import jetbrains.buildServer.configs.kotlin.v2018_2.vcs.GitVcsRoot
@@ -60,6 +58,7 @@ object Main : BuildType({
 
     artifactRules = """
         bunch-cli/build/distributions/*.zip
+        idea-plugin/build/distributions/*.zip
     """.trimIndent()
 })
 

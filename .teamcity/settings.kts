@@ -70,8 +70,23 @@ object Main : BuildType({
 
     steps {
         gradle {
+            name = "Clean"
+            tasks = "clean"
+        }
+
+        gradle {
+            name = "Build Cli"
+            tasks = ":bunch-cli:build"
+        }
+
+        gradle {
+            name = "Build Idea Plugin"
+            tasks = ":idea-plugin:build"
+        }
+
+        gradle {
             name = "Build All"
-            tasks = "clean build"
+            tasks = "build"
             buildFile = ""
             gradleWrapperPath = ""
         }

@@ -1,31 +1,4 @@
-buildscript {
-    ext.kotlin_version = '1.3.11'
-
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-
-version 'unspecified'
-
-apply plugin: 'kotlin'
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.11.0.201803080745-r'
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.2'
-}
-
-compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
-}
-compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
 }

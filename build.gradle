@@ -14,7 +14,7 @@ buildscript {
 
 task wait() {
     doLast {
-        sleep(20 * 1000)
+        sleep(50 * 1000)
     }
 }
 

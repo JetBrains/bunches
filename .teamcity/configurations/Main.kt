@@ -29,8 +29,8 @@ object Main : BuildType({
         }
 
         publishArtifacts(
-                stepName = "Publish Cli",
-                artifactPath = bunchCLIArtifactRule
+                "Publish Cli",
+                bunchCLIArtifactRule
         )
 
         gradle {

@@ -16,6 +16,5 @@ fun BuildSteps.publishArtifacts(stepName: String, vararg artifactPath: String) {
             """.trimIndent()
         }
         antArguments = "-v"
-        jdkHome = "%projectJDK%"
     }
 }

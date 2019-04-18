@@ -108,5 +108,5 @@ object Main : BuildType({
 
 object BunchTool : GitVcsRoot({
     name = "Bunch Tool"
-    url = "https://github.com/JetBrains/bunches.git"
+    url = "file:///C:/Projects/bunches"
 })

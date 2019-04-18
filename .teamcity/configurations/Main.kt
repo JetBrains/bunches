@@ -2,7 +2,9 @@ package configurations
 
 import configurations.steps.publishArtifacts
 import jetbrains.buildServer.configs.kotlin.v2018_2.BuildType
+import jetbrains.buildServer.configs.kotlin.v2018_2.buildFeatures.perfmon
 import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.gradle
+import jetbrains.buildServer.configs.kotlin.v2018_2.ui.add
 import vcsRoots.BunchToolVcsRoot
 
 object Main : BuildType({
@@ -46,6 +48,13 @@ object Main : BuildType({
             tasks = "build"
             buildFile = ""
             gradleWrapperPath = ""
+        }
+    }
+
+    features {
+        add {
+            perfmon {
+            }
         }
     }
 

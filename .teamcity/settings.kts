@@ -1,7 +1,10 @@
+import configurations.Composite
+import configurations.Main
 import jetbrains.buildServer.configs.kotlin.v2018_2.*
 import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.v2018_2.ui.create
 import jetbrains.buildServer.configs.kotlin.v2018_2.vcs.GitVcsRoot
+import vcsRoots.BunchToolVcsRoot
 
 /*
 The settings script is an entry point for defining a TeamCity
@@ -30,7 +33,7 @@ version = "2018.2"
 project {
     description = "Bunch Tool"
 
-    vcsRoot(BunchTool)
+    vcsRoot(BunchToolVcsRoot)
 
     buildTypes.addAll(listOf(
             Composite,
@@ -41,72 +44,3 @@ project {
         preventDependencyCleanup = false
     }
 }
-
-object Composite : BuildType({
-    id("Composite")
-    name = "Composite"
-
-    type = BuildTypeSettings.Type.COMPOSITE
-
-    vcs {
-        showDependenciesChanges = true
-    }
-
-    dependencies {
-        dependency(RelativeId("Main")) {
-            snapshot {
-            }
-
-            artifacts {
-                artifactRules = "*.zip"
-            }
-        }
-    }
-})
-
-object Main : BuildType({
-    name = "Main"
-
-    vcs {
-        root(BunchTool)
-    }
-
-    steps {
-        gradle {
-            name = "Clean"
-            tasks = "clean"
-        }
-
-        gradle {
-            name = "Build Cli"
-            tasks = ":bunch-cli:build"
-        }
-
-        gradle {
-            name = "Wait"
-            tasks = "wait"
-        }
-
-        gradle {
-            name = "Build Idea Plugin"
-            tasks = ":idea-plugin:build"
-        }
-
-        gradle {
-            name = "Build All"
-            tasks = "build"
-            buildFile = ""
-            gradleWrapperPath = ""
-        }
-    }
-
-    artifactRules = """
-        bunch-cli/build/distributions/*.zip
-        idea-plugin/build/distributions/*.zip
-    """.trimIndent()
-})
-
-object BunchTool : GitVcsRoot({
-    name = "Bunch Tool"
-    url = "file:///C:/Projects/bunches"
-})

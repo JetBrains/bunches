@@ -6,21 +6,21 @@ import org.jetbrains.bunches.restore.RESTORE_COMMIT_TITLE
 import javax.swing.*
 
 class SwitchDialog(project: Project, bunches: List<String>?) : DialogWrapper(project, false) {
-    private var contentPane: JPanel? = null
-    private var comboSwitch: JComboBox<String>? = null
-    private var checkStepByStep: JCheckBox? = null
-    private var checkCleanup: JCheckBox? = null
-    private var textFieldCommitMessage: JTextField? = null
+    private lateinit var contentPane: JPanel
+    private lateinit var comboSwitch: JComboBox<String>
+    private lateinit var checkStepByStep: JCheckBox
+    private lateinit var checkCleanup: JCheckBox
+    private lateinit var textFieldCommitMessage: JTextField
 
     init {
         init()
         title = "Switch Bunches"
-        if (bunches != null && bunches.isNotEmpty()) bunches.forEach { comboSwitch!!.addItem(it) }
+        if (bunches != null && bunches.isNotEmpty()) bunches.forEach { comboSwitch.addItem(it) }
         else {
-            comboSwitch!!.addItem("Nothing to show")
-            comboSwitch!!.isEnabled = false
+            comboSwitch.addItem("Nothing to show")
+            comboSwitch.isEnabled = false
         }
-        textFieldCommitMessage!!.text = RESTORE_COMMIT_TITLE
+        textFieldCommitMessage.text = RESTORE_COMMIT_TITLE
 
     }
 
@@ -34,10 +34,10 @@ class SwitchDialog(project: Project, bunches: List<String>?) : DialogWrapper(pro
 
     fun getParameters(): SwitchParameters {
         return SwitchParameters(
-                comboSwitch?.selectedItem as? String,
-                checkStepByStep?.isSelected,
-                checkCleanup?.isSelected,
-                textFieldCommitMessage?.text
+                comboSwitch.selectedItem as String,
+                checkStepByStep.isSelected,
+                checkCleanup.isSelected,
+                textFieldCommitMessage.text
         )
     }
 }

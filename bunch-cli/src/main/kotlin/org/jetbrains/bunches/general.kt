@@ -3,6 +3,8 @@
 
 package org.jetbrains.bunches.general
 
+import org.jetbrains.bunches.BunchException
+import org.jetbrains.bunches.BunchParametersException
 import org.jetbrains.bunches.ManifestReader
 import org.jetbrains.bunches.check.CHECK_DESCRIPTION
 import org.jetbrains.bunches.check.check
@@ -29,7 +31,7 @@ fun exitWithUsageError(message: String): Nothing {
     with(Pair(message, 1), exitHook)
 }
 
-fun exitWithError(message: String? = null): Nothing  {
+fun exitWithError(message: String? = null): Nothing {
     with(Pair(message, 2), exitHook)
 }
 
@@ -52,21 +54,24 @@ fun main(args: Array<String>) {
 
     val command = args[0]
     val commandArgs = args.toList().drop(1).toTypedArray()
+    try {
+        when (command) {
+            "cp" -> cherryPick(commandArgs)
+            "restore" -> restore(commandArgs)
+            "switch" -> restore(commandArgs)
+            "cleanup" -> cleanup(commandArgs)
+            "check" -> check(commandArgs)
+            "reduce" -> reduce(commandArgs)
+            "stats" -> stats(commandArgs)
 
-    when (command) {
-        "cp" -> cherryPick(commandArgs)
-        "restore" -> restore(commandArgs)
-        "switch" -> restore(commandArgs)
-        "cleanup" -> cleanup(commandArgs)
-        "check" -> check(commandArgs)
-        "reduce" -> reduce(commandArgs)
-        "stats" -> stats(commandArgs)
+            "--version" -> printVersion()
 
-        "--version" -> printVersion()
-
-        else -> {
-            exitWithUsageError("Unknown command: $command")
+            else -> throw BunchParametersException("Unknown command: $command")
         }
+    } catch (e: BunchException) {
+        exitWithError(e.message)
+    } catch (e: BunchParametersException) {
+        exitWithUsageError(e.message ?: "")
     }
 }
 

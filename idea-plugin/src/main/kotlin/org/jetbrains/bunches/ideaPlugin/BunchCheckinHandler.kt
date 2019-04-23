@@ -16,6 +16,7 @@ import com.intellij.openapi.vcs.ui.RefreshableOnComponent
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.NonFocusableCheckBox
 import com.intellij.util.PairConsumer
+import org.jetbrains.bunches.ideaPlugin.exceptions.*
 import java.awt.GridLayout
 import java.io.File
 import javax.swing.JComponent
@@ -32,7 +33,7 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
         private val project get() = checkInProjectPanel.project
 
         override fun getBeforeCheckinConfigurationPanel(): RefreshableOnComponent? {
-            BunchFileUtils.bunchFile(project) ?: return null
+            BunchFileUtils.bunchFile(project)
 
             val bunchFilesCheckBox = NonFocusableCheckBox(replaceMnemonicAmpersand("Check &bunch files"))
             return object : RefreshableOnComponent {
@@ -56,11 +57,16 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
         override fun beforeCheckin(
                 executor: CommitExecutor?,
                 additionalDataConsumer: PairConsumer<Any, Any>?
-        ): CheckinHandler.ReturnResult {
-            if (!project.bunchFileCheckEnabled) return CheckinHandler.ReturnResult.COMMIT
+        ): ReturnResult {
+            if (!project.bunchFileCheckEnabled) return ReturnResult.COMMIT
 
-            val extensions = BunchFileUtils.bunchExtension(project)?.toSet() ?: return CheckinHandler.ReturnResult.COMMIT
+            lateinit var extensions: Set<String>
 
+            try {
+                extensions = BunchFileUtils.bunchExtension(project).toSet()
+            } catch (e: BunchPluginException) {
+                return ReturnResult.COMMIT
+            }
             val forgottenFiles = HashSet<File>()
             val commitFiles = checkInProjectPanel.files.filter { it.isFile }.toSet()
             for (file in commitFiles) {
@@ -76,7 +82,7 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
                 }
             }
 
-            if (forgottenFiles.isEmpty()) return CheckinHandler.ReturnResult.COMMIT
+            if (forgottenFiles.isEmpty()) return ReturnResult.COMMIT
 
             val projectBaseFile = File(project.basePath)
             var filePaths = forgottenFiles.map { it.relativeTo(projectBaseFile).path }.sorted()
@@ -90,29 +96,29 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
                     "Forgotten Bunch Files", "Review", "Commit", CommonBundle.getCancelButtonText(), Messages.getWarningIcon()
             )) {
                 YES -> {
-                    return CheckinHandler.ReturnResult.CLOSE_WINDOW
+                    return ReturnResult.CLOSE_WINDOW
                 }
-                NO -> return CheckinHandler.ReturnResult.COMMIT
+                NO -> return ReturnResult.COMMIT
             }
 
-            return CheckinHandler.ReturnResult.CANCEL
+            return ReturnResult.CANCEL
         }
     }
 }
 
 object BunchFileUtils {
-    fun bunchFile(project: Project): VirtualFile? {
-        @Suppress("DEPRECATION") val baseDir = project.baseDir ?: return null
-        return baseDir.findChild(".bunch")
+    fun bunchFile(project: Project): VirtualFile {
+        @Suppress("DEPRECATION") val baseDir = project.baseDir ?: throw BaseDirNotFoundPluginException()
+        return baseDir.findChild(".bunch") ?: throw BunchFileNotFoundPluginException()
     }
 
-    fun bunchExtension(project: Project): List<String>? {
-        val bunchFile: VirtualFile = bunchFile(project) ?: return null
+    fun bunchExtension(project: Project): List<String> {
+        val bunchFile: VirtualFile = bunchFile(project)
         val file = File(bunchFile.path)
-        if (!file.exists()) return null
+        if (!file.exists()) throw BunchFileDoesNotExistsPluginException()
 
-        val lines = file.readLines().map { it.trim() }.filter { !it.isEmpty() }
-        if (lines.size <= 1) return null
+        val lines = file.readLines().map { it.trim() }.filter { it.isNotEmpty() }
+        if (lines.size <= 1) throw BunchFileFormatPluginException()
 
         return lines.drop(1).map { it.split('_').first() }
     }

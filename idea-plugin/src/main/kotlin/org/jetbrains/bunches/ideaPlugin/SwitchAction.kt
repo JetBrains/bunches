@@ -26,12 +26,12 @@ class SwitchAction : AnAction() {
                     return
                 }
                 val settings = Settings(basePath,
-                        switchSettings.branch ?: return,
-                        switchSettings.commitMessage ?: return,
+                        switchSettings.branch,
+                        switchSettings.commitMessage,
                         true,
-                        switchSettings.doCleanup ?: return)
+                        switchSettings.doCleanup)
 
-                if (switchSettings.stepByStep == true) {
+                if (switchSettings.stepByStep) {
                     doStepByStepSwitch(suffixes, settings)
                 } else {
                     doSwitch(suffixes, settings)

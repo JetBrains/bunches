@@ -28,7 +28,7 @@ fun exitWithError(message: String? = null): Nothing {
     throw BunchException(message)
 }
 
-fun printExceptionToSystemError(errorCode: Int, args: Array<String>, e: Exception): Nothing {
+fun printExceptionToSystemError(errorCode: Int, args: Array<String>, e: Throwable): Nothing {
     if (args.contains("--verbose")) {
         System.err.println(e)
         e.printStackTrace()
@@ -45,6 +45,8 @@ fun main(args: Array<String>) {
         printExceptionToSystemError(1, args, e)
     } catch (e: BunchException) {
         printExceptionToSystemError(2, args, e)
+    } catch (e: Throwable) {
+        printExceptionToSystemError(3, args, e)
     }
 }
 

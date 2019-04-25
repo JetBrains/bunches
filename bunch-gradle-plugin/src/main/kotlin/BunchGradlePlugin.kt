@@ -4,7 +4,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.util.GradleVersion
-import org.jetbrains.bunches.BunchException
 import org.jetbrains.bunches.general.doMain
 
 class BunchGradlePlugin : Plugin<Project> {
@@ -14,7 +13,7 @@ class BunchGradlePlugin : Plugin<Project> {
         val tasks = getTasks(ProjectPropertyProvider(project)) { x ->
             try {
                 doMain(x)
-            } catch (e: BunchException) {
+            } catch (e: Throwable) {
                 throw GradleException("Bunch file exit with error", e)
             }
         }

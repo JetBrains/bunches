@@ -28,8 +28,13 @@ fun exitWithError(message: String? = null): Nothing {
     throw BunchException(message)
 }
 
-fun printExceptionToSystemError(errorCode: Int, e: Exception): Nothing {
-    System.err.println(e.message ?: "Exit with error")
+fun printExceptionToSystemError(errorCode: Int, args: Array<String>, e: Exception): Nothing {
+    if (args.contains("--verbose")) {
+        System.err.println(e)
+        e.printStackTrace()
+    } else {
+        System.err.println(e.message ?: "Exit with error")
+    }
     exitProcess(errorCode)
 }
 
@@ -37,9 +42,9 @@ fun main(args: Array<String>) {
     try {
         doMain(args)
     } catch (e: BunchParametersException) {
-        printExceptionToSystemError(1, e)
+        printExceptionToSystemError(1, args, e)
     } catch (e: BunchException) {
-        printExceptionToSystemError(2, e)
+        printExceptionToSystemError(2, args, e)
     }
 }
 

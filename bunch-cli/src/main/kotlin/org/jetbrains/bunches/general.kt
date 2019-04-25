@@ -20,22 +20,30 @@ import org.jetbrains.bunches.stats.STATS_DESCRIPTION
 import org.jetbrains.bunches.stats.stats
 import kotlin.system.exitProcess
 
-var exitHook: (Pair<String?, Int>) -> (Nothing) = {
-    if (it.first != null) {
-        System.err.println(it.first)
-    }
-    exitProcess(it.second)
-}
-
 fun exitWithUsageError(message: String): Nothing {
-    with(Pair(message, 1), exitHook)
+    throw BunchParametersException(message)
 }
 
 fun exitWithError(message: String? = null): Nothing {
-    with(Pair(message, 2), exitHook)
+    throw BunchException(message)
+}
+
+fun printExceptionToSystemError(errorCode: Int, e: Exception): Nothing {
+    System.err.println(e.message ?: "Exit with error")
+    exitProcess(errorCode)
 }
 
 fun main(args: Array<String>) {
+    try {
+        doMain(args)
+    } catch (e: BunchParametersException) {
+        printExceptionToSystemError(1, e)
+    } catch (e: BunchException) {
+        printExceptionToSystemError(2, e)
+    }
+}
+
+fun doMain(args: Array<String>) {
     if (args.isEmpty()) {
         exitWithUsageError("""
             Usage: switch|cp|cleanup|check|reduce|stats|--version <args>
@@ -54,24 +62,18 @@ fun main(args: Array<String>) {
 
     val command = args[0]
     val commandArgs = args.toList().drop(1).toTypedArray()
-    try {
-        when (command) {
-            "cp" -> cherryPick(commandArgs)
-            "restore" -> restore(commandArgs)
-            "switch" -> restore(commandArgs)
-            "cleanup" -> cleanup(commandArgs)
-            "check" -> check(commandArgs)
-            "reduce" -> reduce(commandArgs)
-            "stats" -> stats(commandArgs)
+    when (command) {
+        "cp" -> cherryPick(commandArgs)
+        "restore" -> restore(commandArgs)
+        "switch" -> restore(commandArgs)
+        "cleanup" -> cleanup(commandArgs)
+        "check" -> check(commandArgs)
+        "reduce" -> reduce(commandArgs)
+        "stats" -> stats(commandArgs)
 
-            "--version" -> printVersion()
+        "--version" -> printVersion()
 
-            else -> throw BunchParametersException("Unknown command: $command")
-        }
-    } catch (e: BunchException) {
-        exitWithError(e.message)
-    } catch (e: BunchParametersException) {
-        exitWithUsageError(e.message ?: "")
+        else -> throw BunchParametersException("Unknown command: $command")
     }
 }
 

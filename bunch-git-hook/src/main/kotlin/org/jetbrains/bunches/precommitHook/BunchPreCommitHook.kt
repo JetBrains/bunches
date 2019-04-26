@@ -34,10 +34,8 @@ fun main(args: Array<String>) {
     for (file in commitFiles) {
         if (file.extension in extensions) continue
 
-        val parent = file.parent ?: continue
-        val name = file.name
-        for (extension in extensions) {
-            val bunchFile = File(parent, "$name.$extension")
+                for (extension in extensions) {
+            val bunchFile = File(file.absolutePath + ".$extension")
             if (bunchFile !in commitFiles && bunchFile.exists()) {
                 forgottenFiles.add(bunchFile)
             }

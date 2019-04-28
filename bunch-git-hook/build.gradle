@@ -1,4 +1,0 @@
-dependencies {
-    compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.11.0.201803080745-r'
-    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.2'
-}

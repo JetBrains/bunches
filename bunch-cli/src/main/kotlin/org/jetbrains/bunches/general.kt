@@ -12,6 +12,8 @@ import org.jetbrains.bunches.cleanup.CLEANUP_DESCRIPTION
 import org.jetbrains.bunches.cleanup.cleanup
 import org.jetbrains.bunches.cp.CHERRY_PICK_DESCRIPTION
 import org.jetbrains.bunches.cp.cherryPick
+import org.jetbrains.bunches.precommit.installHook
+import org.jetbrains.bunches.precommit.precommitHook
 import org.jetbrains.bunches.reduce.REDUCE_DESCRIPTION
 import org.jetbrains.bunches.reduce.reduce
 import org.jetbrains.bunches.restore.SWITCH_DESCRIPTION
@@ -77,6 +79,8 @@ fun doMain(args: Array<String>) {
         "check" -> check(commandArgs)
         "reduce" -> reduce(commandArgs)
         "stats" -> stats(commandArgs)
+        "installHook" -> installHook(commandArgs)
+        "precommit" -> precommitHook()
 
         "--version" -> printVersion()
 

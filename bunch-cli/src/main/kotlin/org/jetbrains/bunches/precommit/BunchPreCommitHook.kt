@@ -12,12 +12,7 @@ fun getBunchExtensions(dotBunchFile: File): Set<String>? {
     return lines.drop(1).map { it.split('_').first() }.toSet()
 }
 
-fun main(args: Array<String>) {
-    if (args.isNotEmpty()) {
-        println("Precommit hook doesn't take any parameters")
-        exit(1)
-    }
-
+fun precommitHook() {
     val dotBunchFile = File(".bunch")
     if (!dotBunchFile.exists()) {
         println("Project's .bunch file wasn't found, hook is disabled")

@@ -1,4 +1,4 @@
-package org.jetbrains.bunches.precommitHook
+package org.jetbrains.bunches.precommit
 
 import org.eclipse.jgit.api.Git
 import java.io.File

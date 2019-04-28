@@ -3,5 +3,4 @@ rootProject.name = 'bunches'
 include 'bunch-cli'
 include 'bunch-gradle-plugin'
 include 'idea-plugin'
-include 'bunch-git-hook'
 

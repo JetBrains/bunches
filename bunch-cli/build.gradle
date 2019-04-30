@@ -4,7 +4,6 @@ mainClassName = "org.jetbrains.bunches.general.Bunch"
 dependencies {
     compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.11.0.201803080745-r'
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.2'
-    compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.3.31'
 }
 
 startScripts {

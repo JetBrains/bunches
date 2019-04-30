@@ -29,7 +29,7 @@ fun precommitHook() {
     for (file in commitFiles) {
         if (file.extension in extensions) continue
 
-                for (extension in extensions) {
+        for (extension in extensions) {
             val bunchFile = File(file.absolutePath + ".$extension")
             if (bunchFile !in commitFiles && bunchFile.exists()) {
                 forgottenFiles.add(bunchFile)

@@ -2,12 +2,9 @@ package org.jetbrains.bunches.ideaPlugin
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.ui.Messages
-import org.jetbrains.bunches.cleanup.cleanup
-import org.jetbrains.bunches.restore.RESTORE_CLEANUP_COMMIT_TITLE
 import org.jetbrains.bunches.restore.Settings
-import org.jetbrains.bunches.restore.doStepByStepSwitch
-import org.jetbrains.bunches.restore.doSwitch
 
 class SwitchAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
@@ -34,20 +31,12 @@ class SwitchAction : AnAction() {
         val settings = Settings(basePath,
                 switchSettings.branch,
                 switchSettings.commitMessage,
-                true,
+                switchSettings.stepByStep,
                 switchSettings.doCleanup)
 
-        if (switchSettings.stepByStep) {
-            doStepByStepSwitch(suffixes, settings)
-        } else {
-            doSwitch(suffixes, settings)
-        }
+        ProgressManager.getInstance().runProcessWithProgressAsynchronously(
+                BackgroundSwitch(project, suffixes, settings),
+                ProgressManager.getInstance().progressIndicator)
 
-        if (settings.doCleanup) {
-            cleanup(org.jetbrains.bunches.cleanup.Settings(
-                    settings.repoPath,
-                    extension = null,
-                    commitTitle = RESTORE_CLEANUP_COMMIT_TITLE, isNoCommit = false))
-        }
     }
 }

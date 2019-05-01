@@ -31,7 +31,7 @@ fun installHook(args: Array<String>) {
     File(hookPath).writeText("""
         #!/bin/sh
 
-        '$bunchPath precommit'
+        '$bunchPath precommit < /dev/tty'
         exit $?
     """.trimIndent())
 

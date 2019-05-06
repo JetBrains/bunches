@@ -3,6 +3,7 @@ package org.jetbrains.bunches.ideaPlugin
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.ui.Messages
 import org.jetbrains.bunches.restore.Settings
 
@@ -34,9 +35,12 @@ class SwitchAction : AnAction() {
                 switchSettings.stepByStep,
                 switchSettings.doCleanup)
 
+        val task = BackgroundSwitch(project, suffixes, settings)
+        val progressIndicator = BackgroundableProcessIndicator(task)
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(
-                BackgroundSwitch(project, suffixes, settings),
-                ProgressManager.getInstance().progressIndicator)
+                task,
+                progressIndicator
+        )
 
     }
 }

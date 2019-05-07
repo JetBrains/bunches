@@ -4,10 +4,11 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.bunches.restore.RESTORE_COMMIT_TITLE
 import javax.swing.JComponent
 
-class SwitchDialogKt(project: Project, bunches: List<String>?) : SwitchDialog(project) {
+class SwitchDialogKt(project: Project, bunches: List<String>) : SwitchDialog(project) {
     init {
         title = "Switch Bunches"
-        if (bunches != null && bunches.isNotEmpty()) bunches.forEach { comboSwitch.addItem(it) }
+        if (bunches.isNotEmpty())
+            bunches.forEach { comboSwitch.addItem(it) }
         else {
             comboSwitch.addItem("Nothing to show")
             comboSwitch.isEnabled = false

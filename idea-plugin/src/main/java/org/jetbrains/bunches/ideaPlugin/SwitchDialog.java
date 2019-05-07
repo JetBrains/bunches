@@ -3,6 +3,7 @@ package org.jetbrains.bunches.ideaPlugin;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
 
 public class SwitchDialog extends DialogWrapper {
@@ -17,6 +18,8 @@ public class SwitchDialog extends DialogWrapper {
         init();
     }
 
+    @Nullable
+    @Override
     public JComponent createCenterPanel() {
         return contentPane;
     }

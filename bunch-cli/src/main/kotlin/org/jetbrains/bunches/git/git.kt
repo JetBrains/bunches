@@ -10,9 +10,9 @@ import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import org.eclipse.jgit.treewalk.EmptyTreeIterator
+import org.jetbrains.bunches.general.exitWithError
 import java.io.File
 import java.io.IOException
-import java.util.*
 
 class ConfigureGitException(path: String, cause: Throwable? = null) :
         Throwable("Couldn't configure git at ${File(path).absolutePath}", cause)
@@ -37,16 +37,16 @@ fun CommitCommandEx.callEx() {
 fun Git.commitEx() = CommitCommandEx(repository)
 
 private fun CommitCommandEx.nativeCall(dir: File) {
-    val args = ArrayList<String>().apply {
-        add("git")
-        add("commit")
-        add("--quiet")
-        add("-m")
-        add(message.replace("\"", "\\\""))
-    }
+    val args = arrayListOf(
+            "git",
+            "commit",
+            "--quiet",
+            "-m",
+            message.replace("\"", "\\\"")
+    )
 
     if (author != null) {
-        args.add("--author=${author!!.toExternalString()}")
+        args.add("--author=${author.toExternalString()}")
     }
 
     (when {
@@ -70,7 +70,7 @@ private fun CommitCommandEx.nativeCall(dir: File) {
     process.destroy()
 
     if (exitValue != 0) {
-        System.exit(exitValue)
+        exitWithError("git exit code is $exitValue")
     }
 }
 

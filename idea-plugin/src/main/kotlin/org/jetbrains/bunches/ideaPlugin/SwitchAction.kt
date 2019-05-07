@@ -23,7 +23,7 @@ class SwitchAction : AnAction() {
             return
         }
 
-        val dialog = SwitchDialog(project, suffixes)
+        val dialog = SwitchDialogKt(project, suffixes)
         if (!dialog.showAndGet()) {
             return
         }

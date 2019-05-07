@@ -21,6 +21,11 @@
                     class="org.jetbrains.bunches.ideaPlugin.SwitchAction"
                     text="Switch">
             </action>
+            <action id="org.jetbrains.bunches.ideaPlugin.CleanupAction"
+                    class="org.jetbrains.bunches.ideaPlugin.CleanupAction"
+                    text="Cleanup">
+            </action>
         </group>
+
     </actions>
 </idea-plugin>

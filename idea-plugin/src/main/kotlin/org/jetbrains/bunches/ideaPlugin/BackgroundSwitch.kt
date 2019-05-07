@@ -19,7 +19,6 @@ class BackgroundSwitch(project: Project,
 ) : Task.Backgroundable(project, "Switch") {
     override fun run(indicator: ProgressIndicator) {
         indicator.isIndeterminate = true
-        //indicator.start()
         try {
             if (settings.step) {
                 this.title = "Step by step switch"
@@ -40,7 +39,6 @@ class BackgroundSwitch(project: Project,
                 Messages.showErrorDialog(project, e.message, "Switch error")
             }
         }
-        //indicator.stop()
     }
 
 }

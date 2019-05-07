@@ -8,7 +8,7 @@ import org.jetbrains.bunches.git.*
 import java.io.File
 
 const val EXT_PATTERN = "{ext}"
-const val DEFAULT_CLEANUP_COMMIT_TITLE = "~~~~ cleanup$EXT_PATTERN ~~~~"
+const val DEFAULT_CLEANUP_COMMIT_TITLE = "~~~~ cleanup $EXT_PATTERN ~~~~"
 const val NO_COMMIT_ = "--no-commit"
 const val EXT__ = "--ext="
 

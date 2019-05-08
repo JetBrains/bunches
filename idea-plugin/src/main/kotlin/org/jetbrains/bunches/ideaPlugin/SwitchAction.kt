@@ -17,13 +17,13 @@ class SwitchAction : AnAction() {
             return
         }
 
-        val suffixes = BunchFileUtils.bunchExtension(project)
-        if (suffixes == null) {
+        val extensions = BunchFileUtils.bunchExtension(project)
+        if (extensions == null) {
             Messages.showMessageDialog("Can't find list of supported bunches", "Switch error", Messages.getErrorIcon())
             return
         }
 
-        val dialog = SwitchDialogKt(project, suffixes)
+        val dialog = SwitchDialogKt(project, extensions)
         if (!dialog.showAndGet()) {
             return
         }
@@ -35,7 +35,7 @@ class SwitchAction : AnAction() {
                 switchSettings.stepByStep,
                 switchSettings.doCleanup)
 
-        val task = BackgroundSwitch(project, suffixes, settings)
+        val task = BackgroundSwitch(project, settings)
         val progressIndicator = BackgroundableProcessIndicator(task)
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(
                 task,

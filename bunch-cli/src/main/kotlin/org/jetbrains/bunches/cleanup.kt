@@ -1,4 +1,5 @@
 @file:JvmName("BunchCleanup")
+
 package org.jetbrains.bunches.cleanup
 
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
@@ -14,10 +15,11 @@ const val NO_COMMIT_ = "--no-commit"
 const val EXT__ = "--ext="
 
 data class Settings(
-        val repoPath: String,
-        val extension: String?,
-        val commitTitle: String? = DEFAULT_CLEANUP_COMMIT_TITLE,
-        val isNoCommit: Boolean)
+    val repoPath: String,
+    val extension: String?,
+    val commitTitle: String? = DEFAULT_CLEANUP_COMMIT_TITLE,
+    val isNoCommit: Boolean
+)
 
 fun main(args: Array<String>) {
     cleanup(args)
@@ -27,7 +29,8 @@ const val CLEANUP_DESCRIPTION = "Removes bunch file from repository directory."
 
 fun cleanup(args: Array<String>) {
     if (args.size !in 1..3) {
-        exitWithUsageError("""
+        exitWithUsageError(
+            """
             Usage: <git-path> [$EXT__<file-extension>] [<commit-title>|$NO_COMMIT_]
 
             $CLEANUP_DESCRIPTION
@@ -40,7 +43,8 @@ fun cleanup(args: Array<String>) {
 
             Example:
             bunch cleanup C:/Projects/kotlin
-            """.trimIndent())
+            """.trimIndent()
+        )
     }
 
     val repoPath = args[0]
@@ -56,10 +60,10 @@ fun cleanup(args: Array<String>) {
     val commitTitle = if (!isNoCommit) commitTitleOrNoCommit ?: DEFAULT_CLEANUP_COMMIT_TITLE else null
 
     val settings = Settings(
-            repoPath = repoPath,
-            extension = extension,
-            commitTitle = commitTitle,
-            isNoCommit = isNoCommit
+        repoPath = repoPath,
+        extension = extension,
+        commitTitle = commitTitle,
+        isNoCommit = isNoCommit
     )
 
     cleanup(settings)
@@ -81,10 +85,10 @@ fun cleanup(settings: Settings) {
     }
 
     val filesWithExtensions = root
-            .walkTopDown()
-            .onEnter { dir -> !(isGitDir(dir) || isGradleDir(dir) || isNestedGitRoot(dir, root)) }
-            .filter { child -> extensions.any { child.name.endsWith(it) } }
-            .toList()
+        .walkTopDown()
+        .onEnter { dir -> !(isGitDir(dir) || isGradleDir(dir) || isNestedGitRoot(dir, root)) }
+        .filter { child -> extensions.any { child.name.endsWith(it) } }
+        .toList()
 
     val changedFiles = ArrayList<FileChange>()
     for (cleanupFile in filesWithExtensions) {

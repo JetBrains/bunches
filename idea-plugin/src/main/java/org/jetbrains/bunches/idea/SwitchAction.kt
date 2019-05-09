@@ -31,11 +31,13 @@ class SwitchAction : AnAction() {
         }
 
         val switchSettings = dialog.getParameters()
-        val settings = Settings(basePath,
-                switchSettings.branch,
-                switchSettings.commitMessage,
-                switchSettings.stepByStep,
-                switchSettings.doCleanup)
+        val settings = Settings(
+            basePath,
+            switchSettings.branch,
+            switchSettings.commitMessage,
+            switchSettings.stepByStep,
+            switchSettings.doCleanup
+        )
 
         ProgressManager.getInstance().run(
             object : Task.Backgroundable(project, "Bunch Switch", false) {

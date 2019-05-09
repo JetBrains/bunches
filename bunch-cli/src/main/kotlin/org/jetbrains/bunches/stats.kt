@@ -1,5 +1,6 @@
 @file:Suppress("PackageDirectoryMismatch")
 @file:JvmName("BunchStats")
+
 package org.jetbrains.bunches.stats
 
 import org.jetbrains.bunches.check.isDeletedBunchFile
@@ -26,7 +27,8 @@ const val STATS_LS = "give a quick overview for all sub-dirs"
 
 fun stats(args: Array<String>) {
     if (args.size !in 1..2) {
-        exitWithUsageError("""
+        exitWithUsageError(
+            """
             Usage: [<kind: dir|ls>] <git-path>
 
             $STATS_DESCRIPTION
@@ -39,7 +41,8 @@ fun stats(args: Array<String>) {
 
             Example:
             bunch stats C:/Projects/kotlin
-            """.trimIndent())
+            """.trimIndent()
+        )
     }
 
     val kind = args[0].let {
@@ -120,7 +123,7 @@ fun doLsStats(path: String) {
                 count++
                 total++
             }
-        }.forEach {  }
+        }.forEach { }
 
     println()
     println("Total: $total")
@@ -138,6 +141,7 @@ private fun printLSDirName(dir: File, statsDir: File) =
     }
 
 private data class StatsDirs(val statsDir: File, val gitDir: File)
+
 private fun fetchStatsDirs(path: String): StatsDirs {
     val statsDir = File(path).absoluteFile
     when {

@@ -22,7 +22,7 @@ private fun isGradleBuildDir(dir: File): Boolean {
 fun isGitRoot(dir: File) = File(dir, ".git").exists()
 
 fun isNestedGitRoot(dir: File, baseGitRoot: File) =
-        isGitRoot(dir) && dir != baseGitRoot
+    isGitRoot(dir) && dir != baseGitRoot
 
 fun shouldIgnoreDir(dir: File, baseGitRoot: File) =
-        isGitDir(dir) || isOutDir(dir) || isGradleBuildDir(dir) || isGradleDir(dir) || isNestedGitRoot(dir, baseGitRoot)
+    isGitDir(dir) || isOutDir(dir) || isGradleBuildDir(dir) || isGradleDir(dir) || isNestedGitRoot(dir, baseGitRoot)

@@ -1,4 +1,5 @@
 @file:JvmName("BunchCheck")
+
 package org.jetbrains.bunches.check
 
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
@@ -15,14 +16,16 @@ fun main(args: Array<String>) {
     check(args)
 }
 
-const val CHECK_DESCRIPTION = "Check if commits have forgotten bunch files according to the HEAD of the given directory."
+const val CHECK_DESCRIPTION =
+    "Check if commits have forgotten bunch files according to the HEAD of the given directory."
 
 const val CH_SINCE = "since-ref"
 const val CH_UNTIL = "until-ref"
 
 fun check(args: Array<String>) {
     if (args.size !in 3..4) {
-        exitWithUsageError("""
+        exitWithUsageError(
+            """
             Usage: <git-path> <since-ref> <until-ref> [<extensions>]
 
             $CHECK_DESCRIPTION
@@ -35,14 +38,15 @@ fun check(args: Array<String>) {
 
             Example:
             bunch check C:/Projects/kotlin HEAD 377572896b7dc09a5e2aa6af29825ffe07f71e58
-            """.trimIndent())
+            """.trimIndent()
+        )
     }
 
     val settings = Settings(
-            repoPath = args[0],
-            sinceRef = args[1],
-            untilRef = args[2],
-            extensions = args.getOrNull(3)
+        repoPath = args[0],
+        sinceRef = args[1],
+        untilRef = args[2],
+        extensions = args.getOrNull(3)
     )
 
     doCheck(settings)

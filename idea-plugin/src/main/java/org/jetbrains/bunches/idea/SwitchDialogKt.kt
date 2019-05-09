@@ -23,10 +23,10 @@ class SwitchDialogKt(project: Project, bunches: List<String>) : SwitchDialog(pro
 
     fun getParameters(): SwitchParameters {
         return SwitchParameters(
-                comboSwitch.selectedItem as String,
-                checkStepByStep.isSelected,
-                checkCleanup.isSelected,
-                textFieldCommitMessage.text
+            comboSwitch.selectedItem as String,
+            checkStepByStep.isSelected,
+            checkCleanup.isSelected,
+            textFieldCommitMessage.text
         )
     }
 }

@@ -30,10 +30,10 @@ class CleanupAction : AnAction() {
 
         val cleanupSettings = dialog.getParameters()
         val settings = Settings(
-                basePath,
-                cleanupSettings.extension,
-                cleanupSettings.commitTitle,
-                cleanupSettings.isNoCommit
+            basePath,
+            cleanupSettings.extension,
+            cleanupSettings.commitTitle,
+            cleanupSettings.isNoCommit
         )
 
         ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Bunch Cleanup", false) {

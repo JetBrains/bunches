@@ -15,7 +15,7 @@ import java.io.File
 import java.io.IOException
 
 class ConfigureGitException(path: String, cause: Throwable? = null) :
-        Throwable("Couldn't configure git at ${File(path).absolutePath}", cause)
+    Throwable("Couldn't configure git at ${File(path).absolutePath}", cause)
 
 private const val COMMON_DIR_FILE_NAME = "commondir"
 
@@ -38,11 +38,11 @@ fun Git.commitEx() = CommitCommandEx(repository)
 
 private fun CommitCommandEx.nativeCall(dir: File) {
     val args = arrayListOf(
-            "git",
-            "commit",
-            "--quiet",
-            "-m",
-            message.replace("\"", "\\\"")
+        "git",
+        "commit",
+        "--quiet",
+        "-m",
+        message.replace("\"", "\\\"")
     )
 
     if (author != null) {
@@ -118,9 +118,9 @@ open class GitRepositoryBuilder : BaseRepositoryBuilder<GitRepositoryBuilder, Re
 
             try {
                 return GitRepositoryBuilder()
-                        .setWorkTree(gitFile.parentFile)
-                        .setGitDirFromWorkTree()
-                        .build()
+                    .setWorkTree(gitFile.parentFile)
+                    .setGitDirFromWorkTree()
+                    .build()
             } catch (io: IOException) {
                 throw ConfigureGitException(path, io)
             }
@@ -140,7 +140,7 @@ private val Repository.fullBranchWithWorkTree: String
     }
 
 private fun Repository.resolveOrFail(revStr: String) =
-        resolveEx(revStr) ?: throw IllegalArgumentException("revision '$revStr' was not found")
+    resolveEx(revStr) ?: throw IllegalArgumentException("revision '$revStr' was not found")
 
 fun readCommits(repositoryPath: String, untilRevString: String?, sinceRevString: String): List<CommitInfo> {
     return readCommits(repositoryPath) { git ->
@@ -157,22 +157,22 @@ fun readCommits(repositoryPath: String, logCommandSetup: LogCommand.(git: Git) -
 
     Git(repository).use { git ->
         return git.log()
-                .logCommandSetup(git)
-                .call()
-                .map { commit ->
-                    with(commit) {
-                        CommitInfo(
-                            hash = ObjectId.toString(id),
-                            parentHashes = parents.map { ObjectId.toString(it) },
-                            author = authorIdent,
-                            committer = committerIdent,
-                            time = commitTime,
-                            title = shortMessage,
-                            message = fullMessage,
-                            fileActions = collectActions(git, commit)
-                        )
-                    }
+            .logCommandSetup(git)
+            .call()
+            .map { commit ->
+                with(commit) {
+                    CommitInfo(
+                        hash = ObjectId.toString(id),
+                        parentHashes = parents.map { ObjectId.toString(it) },
+                        author = authorIdent,
+                        committer = committerIdent,
+                        time = commitTime,
+                        title = shortMessage,
+                        message = fullMessage,
+                        fileActions = collectActions(git, commit)
+                    )
                 }
+            }
     }
 }
 
@@ -235,22 +235,22 @@ fun commitChanges(repositoryPath: String, changeFiles: Collection<FileChange>, t
     }
 
     git.commitEx()
-            .setMessage(title)
-            .callEx()
+        .setMessage(title)
+        .callEx()
 }
 
 fun collectActions(git: Git, commit: RevCommit): List<FileAction> {
     val reader = git.repository.newObjectReader()
 
     val oldTreeIterator =
-            if (commit.parentCount != 0) {
-                CanonicalTreeParser().apply {
-                    reset(reader, commit.getParent(0).tree)
-                }
-
-            } else {
-                EmptyTreeIterator()
+        if (commit.parentCount != 0) {
+            CanonicalTreeParser().apply {
+                reset(reader, commit.getParent(0).tree)
             }
+
+        } else {
+            EmptyTreeIterator()
+        }
 
     val newTreeIterator = CanonicalTreeParser().apply {
         reset(reader, commit.tree)
@@ -289,16 +289,18 @@ fun DiffEntry.readNewContent(git: Git): String {
 }
 
 data class FileAction(
-        val changeType: DiffEntry.ChangeType?,
-        val newPath: String?,
-        val content: String)
+    val changeType: DiffEntry.ChangeType?,
+    val newPath: String?,
+    val content: String
+)
 
 data class CommitInfo(
-        val hash: String?,
-        val parentHashes: List<String>,
-        val author: PersonIdent?,
-        val committer: PersonIdent?,
-        val time: Int,
-        val title: String?,
-        val message: String?,
-        val fileActions: List<FileAction>)
+    val hash: String?,
+    val parentHashes: List<String>,
+    val author: PersonIdent?,
+    val committer: PersonIdent?,
+    val time: Int,
+    val title: String?,
+    val message: String?,
+    val fileActions: List<FileAction>
+)

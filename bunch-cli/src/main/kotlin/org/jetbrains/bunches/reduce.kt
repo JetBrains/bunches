@@ -1,14 +1,11 @@
 @file:JvmName("BunchReduce")
+
 package org.jetbrains.bunches.reduce
 
 import org.jetbrains.bunches.file.readUpdatePairsFromFile
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError
-import org.jetbrains.bunches.git.ChangeType
-import org.jetbrains.bunches.git.FileChange
-import org.jetbrains.bunches.git.commitChanges
-import org.jetbrains.bunches.git.isGitRoot
-import org.jetbrains.bunches.git.shouldIgnoreDir
+import org.jetbrains.bunches.git.*
 import org.jetbrains.bunches.restore.toBunchFile
 import java.io.File
 
@@ -31,7 +28,8 @@ const val RE_A_ = "action"
 
 fun reduce(args: Array<String>) {
     if (args.size !in 1..3) {
-        exitWithUsageError("""
+        exitWithUsageError(
+            """
             Usage: <git-path> [<action: print|delete|commit>] [<commit message>]
 
             $REDUCE_DESCRIPTION
@@ -45,7 +43,8 @@ fun reduce(args: Array<String>) {
 
             Example:
             bunch reduce C:/Projects/kotlin
-            """.trimIndent())
+            """.trimIndent()
+        )
     }
 
     val actionFromParam = args.getOrNull(1)?.let {
@@ -72,7 +71,8 @@ fun reduce(args: Array<String>) {
     val settings = Settings(
         repoPath = args[0],
         action = actionFromParam ?: ReduceAction.COMMIT,
-        commitMessage = commitMessageFromParam ?: DEFAULT_REDUCE_COMMIT_TITLE)
+        commitMessage = commitMessageFromParam ?: DEFAULT_REDUCE_COMMIT_TITLE
+    )
 
     doReduce(settings)
 }
@@ -93,19 +93,20 @@ fun doReduce(settings: Settings) {
     val extensions = rules.map { it.last() }.toSet() + base
 
     val filesWithDonorExtensions = root
-            .walkTopDown()
-            .onEnter { dir -> !shouldIgnoreDir(dir, root) }
-            .filter { child -> child.extension in extensions }
-            .toList()
+        .walkTopDown()
+        .onEnter { dir -> !shouldIgnoreDir(dir, root) }
+        .filter { child -> child.extension in extensions }
+        .toList()
 
     val affectedOriginFiles: Set<File> =
-            filesWithDonorExtensions.mapTo(HashSet(), { child -> File(child.parentFile, child.nameWithoutExtension) })
+        filesWithDonorExtensions.mapTo(HashSet(), { child -> File(child.parentFile, child.nameWithoutExtension) })
 
     val reduceFiles = ArrayList<File>()
     for (affectedOriginFile in affectedOriginFiles) {
         val contentMap: Map<String, String?> = extensions.map { extension ->
             val file = if (extension == base) affectedOriginFile else affectedOriginFile.toBunchFile(extension)
-            val content: String? = if (file.exists()) file.readText().replace(Regex("\\s*", RegexOption.MULTILINE), "") else null
+            val content: String? =
+                if (file.exists()) file.readText().replace(Regex("\\s*", RegexOption.MULTILINE), "") else null
             extension to content
         }.toMap()
 

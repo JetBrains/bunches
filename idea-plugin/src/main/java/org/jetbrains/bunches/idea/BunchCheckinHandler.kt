@@ -22,7 +22,10 @@ import java.io.File
 import javax.swing.JComponent
 import javax.swing.JPanel
 
-private var Project.bunchFileCheckEnabled: Boolean by NotNullableUserDataProperty(Key.create("IS_BUNCH_FILE_CHECK_ENABLED"), true)
+private var Project.bunchFileCheckEnabled: Boolean by NotNullableUserDataProperty(
+    Key.create("IS_BUNCH_FILE_CHECK_ENABLED"),
+    true
+)
 
 class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
     override fun createHandler(panel: CheckinProjectPanel, commitContext: CommitContext): CheckinHandler {
@@ -55,8 +58,8 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
         }
 
         override fun beforeCheckin(
-                executor: CommitExecutor?,
-                additionalDataConsumer: PairConsumer<Any, Any>?
+            executor: CommitExecutor?,
+            additionalDataConsumer: PairConsumer<Any, Any>?
         ): ReturnResult {
             if (!project.bunchFileCheckEnabled) return ReturnResult.COMMIT
 
@@ -86,9 +89,13 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
             }
 
             when (Messages.showYesNoCancelDialog(
-                    project,
-                    "Several bunch files haven't been updated:\n\n${filePaths.joinToString("\n")}\n\nDo you want to review them before commit?",
-                    "Forgotten Bunch Files", "Review", "Commit", CommonBundle.getCancelButtonText(), Messages.getWarningIcon()
+                project,
+                "Several bunch files haven't been updated:\n\n${filePaths.joinToString("\n")}\n\nDo you want to review them before commit?",
+                "Forgotten Bunch Files",
+                "Review",
+                "Commit",
+                CommonBundle.getCancelButtonText(),
+                Messages.getWarningIcon()
             )) {
                 YES -> {
                     return ReturnResult.CLOSE_WINDOW

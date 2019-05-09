@@ -26,9 +26,9 @@ class CleanupDialogKt(project: Project, extensions: List<String>) : CleanupDialo
 
     fun getParameters(): CleanupParameters {
         return CleanupParameters(
-                comboCleanup.selectedItem as String,
-                textFieldCommitMessage.text,
-                checkNoCommit.isSelected
+            comboCleanup.selectedItem as String,
+            textFieldCommitMessage.text,
+            checkNoCommit.isSelected
         )
     }
 }

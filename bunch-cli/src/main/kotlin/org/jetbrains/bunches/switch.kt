@@ -18,11 +18,12 @@ const val RESTORE_CLEANUP_COMMIT_TITLE = "~~~~ restore cleanup ~~~~"
 const val STEP_ = "--step"
 
 data class Settings(
-        val repoPath: String,
-        val rule: String,
-        val commitTitle: String = RESTORE_COMMIT_TITLE,
-        val step: Boolean,
-        val doCleanup: Boolean)
+    val repoPath: String,
+    val rule: String,
+    val commitTitle: String = RESTORE_COMMIT_TITLE,
+    val step: Boolean,
+    val doCleanup: Boolean
+)
 
 fun main(args: Array<String>) {
     restore(args)
@@ -30,7 +31,8 @@ fun main(args: Array<String>) {
 
 private const val CLEAN_UP = "--cleanup"
 
-const val SWITCH_DESCRIPTION = "Restores state of files for the particular branch by replacing base files with bunch counterparts."
+const val SWITCH_DESCRIPTION =
+    "Restores state of files for the particular branch by replacing base files with bunch counterparts."
 
 const val SW_COMMIT_T = "commit-title"
 
@@ -38,7 +40,8 @@ const val SW_BRANCHES_ = "branches-rule"
 
 fun restore(args: Array<String>) {
     if (args.size != 4 && args.size != 3 && args.size != 2) {
-        exitWithUsageError("""
+        exitWithUsageError(
+            """
             Usage: <git-path> <branches-rule> [$STEP_] [$CLEAN_UP] [<commit-title>]
 
             $SWITCH_DESCRIPTION
@@ -58,7 +61,8 @@ fun restore(args: Array<String>) {
 
             Example:
             bunch switch C:/Projects/kotlin as32
-            """.trimIndent())
+            """.trimIndent()
+        )
     }
 
     var commitTitle: String? = null
@@ -97,11 +101,11 @@ fun restore(args: Array<String>) {
     readOptionArg(args.getOrNull(4))
 
     val settings = Settings(
-            repoPath = args[0],
-            rule = args[1],
-            commitTitle = commitTitle ?: RESTORE_COMMIT_TITLE,
-            step = stepByStep ?: false,
-            doCleanup = doCleanup ?: false
+        repoPath = args[0],
+        rule = args[1],
+        commitTitle = commitTitle ?: RESTORE_COMMIT_TITLE,
+        step = stepByStep ?: false,
+        doCleanup = doCleanup ?: false
     )
 
     doSwitch(settings)
@@ -130,8 +134,11 @@ fun doSwitch(settings: Settings) {
     }
 
     if (settings.doCleanup) {
-        cleanup(org.jetbrains.bunches.cleanup.Settings(
-            settings.repoPath, extension = null, commitTitle = RESTORE_CLEANUP_COMMIT_TITLE, isNoCommit = false))
+        cleanup(
+            org.jetbrains.bunches.cleanup.Settings(
+                settings.repoPath, extension = null, commitTitle = RESTORE_CLEANUP_COMMIT_TITLE, isNoCommit = false
+            )
+        )
     }
 }
 
@@ -146,13 +153,13 @@ fun doStepByStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: St
     }
 
     val filesWithDonorExtensions = root
-            .walkTopDown()
-            .onEnter { dir -> !shouldIgnoreDir(dir, root) }
-            .filter { child -> child.extension in donorExtensionsInStepByStepOrder }
-            .toList()
+        .walkTopDown()
+        .onEnter { dir -> !shouldIgnoreDir(dir, root) }
+        .filter { child -> child.extension in donorExtensionsInStepByStepOrder }
+        .toList()
 
     val affectedOriginFiles: Set<File> =
-            filesWithDonorExtensions.mapTo(HashSet()) { child -> File(child.parentFile, child.nameWithoutExtension) }
+        filesWithDonorExtensions.mapTo(HashSet()) { child -> File(child.parentFile, child.nameWithoutExtension) }
 
     run {
         val backupChanges = HashSet<FileChange>()
@@ -169,28 +176,28 @@ fun doStepByStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: St
 
                 originFile.copyTo(baseCopiedFile)
                 backupChanges.add(
-                        FileChange(
-                                ChangeType.ADD,
-                                baseCopiedFile
-                        )
+                    FileChange(
+                        ChangeType.ADD,
+                        baseCopiedFile
+                    )
                 )
             } else {
                 // File was absent and going to be introduced.
                 // Create empty bunch files to show it's going to be removed in old branch.
                 baseCopiedFile.createNewFile()
                 backupChanges.add(
-                        FileChange(
-                                ChangeType.ADD,
-                                baseCopiedFile
-                        )
+                    FileChange(
+                        ChangeType.ADD,
+                        baseCopiedFile
+                    )
                 )
             }
         }
 
         commitChanges(
-                repoPath,
-                backupChanges,
-                RESTORE_BACKUP_COMMIT_TITLE
+            repoPath,
+            backupChanges,
+            RESTORE_BACKUP_COMMIT_TITLE
         )
     }
 
@@ -224,9 +231,9 @@ fun doStepByStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: St
 
         if (branchChanges.isNotEmpty()) {
             commitChanges(
-                    repoPath,
-                    branchChanges,
-                    commitTitle.replace("{target}", extension)
+                repoPath,
+                branchChanges,
+                commitTitle.replace("{target}", extension)
             )
         }
     }
@@ -245,13 +252,13 @@ fun doOneStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: Strin
     val changedFiles = HashSet<FileChange>()
 
     val filesWithDonorExtensions = root
-            .walkTopDown()
-            .onEnter { dir -> !shouldIgnoreDir(dir, root) }
-            .filter { child -> child.extension in donorExtensionsPrioritized }
-            .toList()
+        .walkTopDown()
+        .onEnter { dir -> !shouldIgnoreDir(dir, root) }
+        .filter { child -> child.extension in donorExtensionsPrioritized }
+        .toList()
 
     val affectedOriginFiles: Set<File> =
-            filesWithDonorExtensions.mapTo(HashSet()) { child -> File(child.parentFile, child.nameWithoutExtension) }
+        filesWithDonorExtensions.mapTo(HashSet()) { child -> File(child.parentFile, child.nameWithoutExtension) }
 
     for (originFile in affectedOriginFiles) {
         val originFileModificationType: ChangeType
@@ -291,9 +298,9 @@ fun doOneStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: Strin
         }
 
         val targetFile = donorExtensionsPrioritized
-                .asSequence()
-                .map { extension -> originFile.toBunchFile(extension) }
-                .first { it.exists() }
+            .asSequence()
+            .map { extension -> originFile.toBunchFile(extension) }
+            .first { it.exists() }
 
         if (targetFile.isDirectory) {
             exitWithError("Patch specific directories are not supported: $targetFile")

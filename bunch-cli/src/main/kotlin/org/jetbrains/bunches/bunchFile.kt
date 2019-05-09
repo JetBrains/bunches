@@ -9,7 +9,8 @@ fun readRuleFromFile(endSuffix: String, path: String): String {
     val file = File(path, BUNCH_FILE_NAME)
     if (!file.exists()) {
         throw BunchException(
-            "Can't build rule for restore branch from '$endSuffix'. File '${file.canonicalPath}' doesn't exist")
+            "Can't build rule for restore branch from '$endSuffix'. File '${file.canonicalPath}' doesn't exist"
+        )
     }
 
     val branchRules = file.readLines().map { it.trim() }.filter { it.isNotEmpty() }

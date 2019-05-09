@@ -52,7 +52,8 @@ fun main(args: Array<String>) {
 
 fun doMain(args: Array<String>) {
     if (args.isEmpty()) {
-        exitWithUsageError("""
+        exitWithUsageError(
+            """
             Usage: switch|cp|cleanup|check|reduce|stats|--version <args>
 
             switch  - $SWITCH_DESCRIPTION
@@ -64,7 +65,8 @@ fun doMain(args: Array<String>) {
 
             Example:
             bunch switch . as32
-            """.trimIndent())
+            """.trimIndent()
+        )
     }
 
     val command = args[0]

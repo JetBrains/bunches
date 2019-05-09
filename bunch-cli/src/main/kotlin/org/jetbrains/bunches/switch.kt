@@ -103,16 +103,28 @@ fun restore(args: Array<String>) {
             doCleanup = doCleanup ?: false
     )
 
-    val suffixes = getRuleSuffixes(settings)
+    doSwitch(settings)
+}
+
+fun doSwitch(settings: Settings) {
+    val parameterRuleStr = settings.rule
+    val rule = if (parameterRuleStr.contains('_')) {
+        parameterRuleStr
+    } else {
+        // Short rule format with destination bunch only
+        readRuleFromFile(parameterRuleStr, settings.repoPath) ?: exitWithError()
+    }
+
+    val suffixes = rule.split("_")
     if (suffixes.isEmpty()) {
-        exitWithError()
+        exitWithError("Don't know how to switch to `$parameterRuleStr`")
     }
 
     if (suffixes.size != 1) {
         if (settings.step) {
-            doStepByStepSwitch(suffixes, settings)
+            doStepByStepSwitch(suffixes, settings.repoPath, settings.commitTitle)
         } else {
-            doSwitch(suffixes, settings)
+            doOneStepSwitch(suffixes, settings.repoPath, settings.commitTitle)
         }
     }
 
@@ -122,11 +134,11 @@ fun restore(args: Array<String>) {
     }
 }
 
-fun doStepByStepSwitch(suffixes: List<String>, settings: Settings) {
+fun doStepByStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: String) {
     val originBranchExtension = suffixes.first()
     val donorExtensionsInStepByStepOrder = suffixes.subList(1, suffixes.size).toSet()
 
-    val root = File(settings.repoPath)
+    val root = File(repoPath)
 
     if (!isGitRoot(root)) {
         exitWithError("Repository directory with branch is expected")
@@ -175,7 +187,7 @@ fun doStepByStepSwitch(suffixes: List<String>, settings: Settings) {
         }
 
         commitChanges(
-                settings.repoPath,
+                repoPath,
                 backupChanges,
                 RESTORE_BACKUP_COMMIT_TITLE
         )
@@ -211,19 +223,19 @@ fun doStepByStepSwitch(suffixes: List<String>, settings: Settings) {
 
         if (branchChanges.isNotEmpty()) {
             commitChanges(
-                    settings.repoPath,
+                    repoPath,
                     branchChanges,
-                    settings.commitTitle.replace("{target}", extension)
+                    commitTitle.replace("{target}", extension)
             )
         }
     }
 }
 
-fun doSwitch(suffixes: List<String>, settings: Settings) {
+fun doOneStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: String) {
     val originBranchExtension = suffixes.first()
     val donorExtensionsPrioritized = suffixes.subList(1, suffixes.size).reversed().toSet()
 
-    val root = File(settings.repoPath)
+    val root = File(repoPath)
 
     if (!isGitRoot(root)) {
         exitWithError("Repository directory with branch is expected")
@@ -311,27 +323,10 @@ fun doSwitch(suffixes: List<String>, settings: Settings) {
     }
 
     commitChanges(
-        settings.repoPath,
+        repoPath,
         changedFiles,
-        settings.commitTitle.replace("{target}", suffixes.last())
+        commitTitle.replace("{target}", suffixes.last())
     )
 }
 
 fun File.toBunchFile(extension: String) = File(parentFile, "$name.$extension")
-
-fun getRuleSuffixes(settings: Settings): List<String> {
-    val suffixes = settings.rule.split("_")
-    return when {
-        suffixes.isEmpty() -> {
-            System.err.println("There should be at target branch in pattern: ${settings.rule}")
-            emptyList()
-        }
-
-        suffixes.size == 1 -> {
-            val ruleFromFile = readRuleFromFile(suffixes.first(), settings.repoPath) ?: return emptyList()
-            return ruleFromFile.split("_")
-        }
-
-        else -> suffixes
-    }
-}

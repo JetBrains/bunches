@@ -1,4 +1,4 @@
-package org.jetbrains.bunches.idea
+package org.jetbrains.bunches.idea.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -8,6 +8,7 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.ui.Messages
 import org.jetbrains.bunches.cleanup.Settings
 import org.jetbrains.bunches.cleanup.cleanup
+import org.jetbrains.bunches.idea.util.BunchFileUtils
 
 class CleanupAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {

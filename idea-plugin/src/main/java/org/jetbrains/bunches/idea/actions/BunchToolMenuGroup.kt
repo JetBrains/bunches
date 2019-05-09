@@ -1,4 +1,4 @@
-package org.jetbrains.bunches.idea
+package org.jetbrains.bunches.idea.actions
 
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 

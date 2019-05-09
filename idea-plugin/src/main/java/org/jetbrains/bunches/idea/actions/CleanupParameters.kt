@@ -1,4 +1,4 @@
-package org.jetbrains.bunches.idea
+package org.jetbrains.bunches.idea.actions
 
 data class CleanupParameters(
     val extension: String,

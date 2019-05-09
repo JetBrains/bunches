@@ -1,4 +1,4 @@
-package org.jetbrains.bunches.idea
+package org.jetbrains.bunches.idea.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -6,6 +6,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.ui.Messages
+import org.jetbrains.bunches.idea.util.BunchFileUtils
 import org.jetbrains.bunches.restore.Settings
 import org.jetbrains.bunches.restore.doSwitch
 

@@ -1,4 +1,4 @@
-package org.jetbrains.bunches.idea
+package org.jetbrains.bunches.idea.actions
 
 data class SwitchParameters(
     val branch: String,

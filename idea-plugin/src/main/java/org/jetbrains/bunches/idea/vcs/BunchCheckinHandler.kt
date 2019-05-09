@@ -1,4 +1,4 @@
-package org.jetbrains.bunches.idea
+package org.jetbrains.bunches.idea.vcs
 
 import com.intellij.BundleBase.replaceMnemonicAmpersand
 import com.intellij.CommonBundle
@@ -13,10 +13,10 @@ import com.intellij.openapi.vcs.changes.CommitExecutor
 import com.intellij.openapi.vcs.checkin.CheckinHandler
 import com.intellij.openapi.vcs.checkin.CheckinHandlerFactory
 import com.intellij.openapi.vcs.ui.RefreshableOnComponent
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.NonFocusableCheckBox
 import com.intellij.util.PairConsumer
-import org.jetbrains.bunches.file.BUNCH_FILE_NAME
+import org.jetbrains.bunches.idea.util.BunchFileUtils
+import org.jetbrains.bunches.idea.util.NotNullableUserDataProperty
 import java.awt.GridLayout
 import java.io.File
 import javax.swing.JComponent
@@ -105,23 +105,5 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
 
             return ReturnResult.CANCEL
         }
-    }
-}
-
-object BunchFileUtils {
-    fun bunchFile(project: Project): VirtualFile? {
-        @Suppress("DEPRECATION") val baseDir = project.baseDir ?: return null
-        return baseDir.findChild(BUNCH_FILE_NAME)
-    }
-
-    fun bunchExtension(project: Project): List<String>? {
-        val bunchFile: VirtualFile = bunchFile(project) ?: return null
-        val file = File(bunchFile.path)
-        if (!file.exists()) return null
-
-        val lines = file.readLines().map { it.trim() }.filter { it.isNotEmpty() }
-        if (lines.size <= 1) return null
-
-        return lines.drop(1).map { it.split('_').first() }
     }
 }

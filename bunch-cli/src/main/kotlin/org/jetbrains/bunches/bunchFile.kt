@@ -1,22 +1,22 @@
 package org.jetbrains.bunches.file
 
+import org.jetbrains.bunches.BunchException
 import java.io.File
 
 const val BUNCH_FILE_NAME = ".bunch"
 
-fun readRuleFromFile(endSuffix: String, path: String): String? {
+fun readRuleFromFile(endSuffix: String, path: String): String {
     val file = File(path, BUNCH_FILE_NAME)
     if (!file.exists()) {
-        System.err.println("Can't build rule for restore branch from '$endSuffix'. File '${file.canonicalPath}' doesn't exist ")
-        return null
+        throw BunchException(
+            "Can't build rule for restore branch from '$endSuffix'. File '${file.canonicalPath}' doesn't exist")
     }
 
     val branchRules = file.readLines().map { it.trim() }.filter { it.isNotEmpty() }
 
     val currentBranchSuffix = branchRules.firstOrNull()
     if (currentBranchSuffix == null) {
-        System.err.println("First line in '${file.canonicalPath}' should contain current branch name")
-        return null
+        throw BunchException("First line in '${file.canonicalPath}' should contain current branch name")
     }
 
     if (currentBranchSuffix == endSuffix) {
@@ -25,8 +25,7 @@ fun readRuleFromFile(endSuffix: String, path: String): String? {
 
     val requestedRule = branchRules.find { it == endSuffix || it.startsWith(endSuffix + "_") }
     if (requestedRule == null) {
-        System.err.println("Can't find rule for '$endSuffix' in file '${file.canonicalPath}'")
-        return null
+        throw BunchException("Can't find rule for '$endSuffix' in file '${file.canonicalPath}'")
     }
 
     val ruleTargetToCurrent = (requestedRule + "_$currentBranchSuffix").split("_")

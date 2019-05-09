@@ -113,7 +113,7 @@ fun doSwitch(settings: Settings) {
         parameterRuleStr
     } else {
         // Short rule format with destination bunch only
-        readRuleFromFile(parameterRuleStr, settings.repoPath) ?: exitWithError()
+        readRuleFromFile(parameterRuleStr, settings.repoPath)
     }
 
     val suffixes = rule.split("_")

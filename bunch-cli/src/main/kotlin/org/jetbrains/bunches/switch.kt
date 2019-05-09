@@ -4,6 +4,7 @@
 package org.jetbrains.bunches.restore
 
 import org.jetbrains.bunches.cleanup.cleanup
+import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readRuleFromFile
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError
@@ -45,7 +46,7 @@ fun restore(args: Array<String>) {
             <git-path>        - Directory with repository (parent directory for .git).
 
             <$SW_BRANCHES_>   - Set of file suffixes separated with `_` showing what files should be affected and priority
-                                of application. If only target branch is given file <git-path>/.bunch will be checked for
+                                of application. If only target branch is given file <git-path>/$BUNCH_FILE_NAME will be checked for
                                 pattern.
 
             $STEP_            - Do switch step by step with intermediate commits after applying each step

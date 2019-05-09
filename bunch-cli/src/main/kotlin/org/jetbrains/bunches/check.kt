@@ -1,6 +1,7 @@
 @file:JvmName("BunchCheck")
 package org.jetbrains.bunches.check
 
+import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError
@@ -29,7 +30,7 @@ fun check(args: Array<String>) {
             <git-path>   - Directory with repository (parent directory for .git).
             <$CH_SINCE>  - Reference to the most recent commit that should be checked.
             <$CH_UNTIL>  - Parent of the last commit that should be checked.
-            <extensions> - Set of extensions to check with '_' separator. '.bunch' file will be used if
+            <extensions> - Set of extensions to check with '_' separator. '$BUNCH_FILE_NAME' file will be used if
                            the option is missing.
 
             Example:

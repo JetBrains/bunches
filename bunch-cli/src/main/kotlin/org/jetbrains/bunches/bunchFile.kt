@@ -2,8 +2,10 @@ package org.jetbrains.bunches.file
 
 import java.io.File
 
+const val BUNCH_FILE_NAME = ".bunch"
+
 fun readRuleFromFile(endSuffix: String, path: String): String? {
-    val file = File(path, ".bunch")
+    val file = File(path, BUNCH_FILE_NAME)
     if (!file.exists()) {
         System.err.println("Can't build rule for restore branch from '$endSuffix'. File '${file.canonicalPath}' doesn't exist ")
         return null
@@ -35,7 +37,7 @@ fun readRuleFromFile(endSuffix: String, path: String): String? {
 data class UpdateInfo(val base: String, val rules: List<List<String>>)
 
 fun readUpdatePairsFromFile(path: String): UpdateInfo? {
-    val file = File(path, ".bunch")
+    val file = File(path, BUNCH_FILE_NAME)
     if (!file.exists()) {
         System.err.println("File '${file.canonicalPath}' doesn't exist ")
         return null
@@ -60,11 +62,11 @@ fun readUpdatePairsFromFile(path: String): UpdateInfo? {
 }
 
 fun readExtensionsFromFile(rootPath: String): List<String>? {
-    return readExtensionsFromFileImpl(File(rootPath, ".bunch"))
+    return readExtensionsFromFileImpl(File(rootPath, BUNCH_FILE_NAME))
 }
 
 fun readExtensionsFromFile(dir: File): List<String>? {
-    return readExtensionsFromFileImpl(File(dir, ".bunch"))
+    return readExtensionsFromFileImpl(File(dir, BUNCH_FILE_NAME))
 }
 
 private fun readExtensionsFromFileImpl(file: File): List<String>? {

@@ -16,6 +16,7 @@ import com.intellij.openapi.vcs.ui.RefreshableOnComponent
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.NonFocusableCheckBox
 import com.intellij.util.PairConsumer
+import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import java.awt.GridLayout
 import java.io.File
 import javax.swing.JComponent
@@ -103,7 +104,7 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
 object BunchFileUtils {
     fun bunchFile(project: Project): VirtualFile? {
         @Suppress("DEPRECATION") val baseDir = project.baseDir ?: return null
-        return baseDir.findChild(".bunch")
+        return baseDir.findChild(BUNCH_FILE_NAME)
     }
 
     fun bunchExtension(project: Project): List<String>? {

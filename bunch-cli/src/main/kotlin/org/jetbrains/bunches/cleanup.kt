@@ -1,6 +1,7 @@
 @file:JvmName("BunchCleanup")
 package org.jetbrains.bunches.cleanup
 
+import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError
@@ -33,7 +34,7 @@ fun cleanup(args: Array<String>) {
 
             <git-path>             - Directory with repository (parent directory for .git).
             $EXT__<file-extension> - Particular extension for remove.
-                                     All files with extensions found in '.bunch' file will be removed if not set.
+                                     All files with extensions found in '$BUNCH_FILE_NAME' file will be removed if not set.
             <commit-title>         - Title for the cleanup commit. "$DEFAULT_CLEANUP_COMMIT_TITLE" is used by default.
             $NO_COMMIT_            - Do not commit changes.
 

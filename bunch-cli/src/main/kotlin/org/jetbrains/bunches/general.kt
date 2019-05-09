@@ -30,6 +30,18 @@ fun exitWithError(message: String? = null): Nothing {
     throw BunchException(message)
 }
 
+inline fun process(args: Array<String>, f: (Array<String>) -> Unit) {
+    try {
+        f(args)
+    } catch (e: BunchParametersException) {
+        printExceptionToSystemError(1, args, e)
+    } catch (e: BunchException) {
+        printExceptionToSystemError(2, args, e)
+    } catch (e: Throwable) {
+        printExceptionToSystemError(3, args, e)
+    }
+}
+
 fun printExceptionToSystemError(errorCode: Int, args: Array<String>, e: Throwable): Nothing {
     if (args.contains("--verbose")) {
         System.err.println(e)
@@ -41,15 +53,7 @@ fun printExceptionToSystemError(errorCode: Int, args: Array<String>, e: Throwabl
 }
 
 fun main(args: Array<String>) {
-    try {
-        doMain(args)
-    } catch (e: BunchParametersException) {
-        printExceptionToSystemError(1, args, e)
-    } catch (e: BunchException) {
-        printExceptionToSystemError(2, args, e)
-    } catch (e: Throwable) {
-        printExceptionToSystemError(3, args, e)
-    }
+    process(args, ::doMain)
 }
 
 fun doMain(args: Array<String>) {

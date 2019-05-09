@@ -1,4 +1,4 @@
-package org.jetbrains.bunches.ideaPlugin
+package org.jetbrains.bunches.idea
 
 import com.intellij.openapi.project.Project
 import org.jetbrains.bunches.cleanup.DEFAULT_CLEANUP_COMMIT_TITLE

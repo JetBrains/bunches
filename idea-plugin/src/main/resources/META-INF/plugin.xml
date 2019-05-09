@@ -9,20 +9,20 @@
     <vendor url="http://www.jetbrains.com">JetBrains</vendor>
 
     <extensions defaultExtensionNs="com.intellij">
-        <checkinHandlerFactory implementation="org.jetbrains.bunches.ideaPlugin.BunchFileCheckInHandlerFactory"/>
+        <checkinHandlerFactory implementation="org.jetbrains.bunches.idea.BunchFileCheckInHandlerFactory"/>
     </extensions>
 
     <actions>
-        <group id="org.jetbrains.bunches.ideaPlugin.BunchToolMenuGroup"
-               class="org.jetbrains.bunches.ideaPlugin.BunchToolMenuGroup"
+        <group id="org.jetbrains.bunches.idea.BunchToolMenuGroup"
+               class="org.jetbrains.bunches.idea.BunchToolMenuGroup"
                text="Bunch tool" popup="true">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
-            <action id="org.jetbrains.bunches.ideaPlugin.SwitchAction"
-                    class="org.jetbrains.bunches.ideaPlugin.SwitchAction"
+            <action id="org.jetbrains.bunches.idea.SwitchAction"
+                    class="org.jetbrains.bunches.idea.SwitchAction"
                     text="Switch">
             </action>
-            <action id="org.jetbrains.bunches.ideaPlugin.CleanupAction"
-                    class="org.jetbrains.bunches.ideaPlugin.CleanupAction"
+            <action id="org.jetbrains.bunches.idea.CleanupAction"
+                    class="org.jetbrains.bunches.idea.CleanupAction"
                     text="Cleanup">
             </action>
         </group>

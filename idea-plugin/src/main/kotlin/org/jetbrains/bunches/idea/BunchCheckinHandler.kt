@@ -1,4 +1,4 @@
-package org.jetbrains.bunches.ideaPlugin
+package org.jetbrains.bunches.idea
 
 import com.intellij.BundleBase.replaceMnemonicAmpersand
 import com.intellij.CommonBundle

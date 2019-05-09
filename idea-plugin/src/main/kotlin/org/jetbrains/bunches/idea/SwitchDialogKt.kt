@@ -1,4 +1,4 @@
-package org.jetbrains.bunches.ideaPlugin
+package org.jetbrains.bunches.idea
 
 import com.intellij.openapi.project.Project
 import org.jetbrains.bunches.restore.RESTORE_COMMIT_TITLE

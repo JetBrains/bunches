@@ -1,4 +1,4 @@
-package org.jetbrains.bunches.ideaPlugin
+package org.jetbrains.bunches.idea
 
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.UserDataHolder

@@ -21,8 +21,7 @@ fun precommitHook() {
     val extensions = getBunchExtensions(dotBunchFile) ?: return
 
     val git = Git.open(File(""))
-    val status = git.status().call()
-    val commitFiles = (status.added + status.changed + status.removed).map { File(it) }.toSet()
+    val commitFiles = git.diff().setCached(true).call().map { File(it.newPath) }.toSet()
 
     val forgottenFiles = HashSet<File>()
 

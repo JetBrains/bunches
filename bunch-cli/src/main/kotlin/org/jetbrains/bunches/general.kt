@@ -86,7 +86,7 @@ fun doMain(args: Array<String>) {
         "reduce" -> reduce(commandArgs)
         "stats" -> stats(commandArgs)
         "installHook" -> installHook(commandArgs)
-        "precommit" -> precommitHook()
+        "precommit" -> precommitHook(commandArgs)
 
         "--version" -> printVersion()
 

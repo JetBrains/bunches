@@ -53,8 +53,14 @@ fun installHook(args: Array<String>) {
         """
         #!/bin/sh
 
-        '$bunchExecutablePath' precommit < /dev/tty
-        exit $?
+        if [[ -t 1 ]]
+        then
+            files="${'$'}(git diff --cached --name-only | while read file ; do echo -n "'${'$'}file' "; done)"
+            eval "'$bunchExecutablePath' precommit ${'$'}files < /dev/tty"
+            exit $?
+        else
+            exit 0
+        fi
         """.trimIndent()
     )
 

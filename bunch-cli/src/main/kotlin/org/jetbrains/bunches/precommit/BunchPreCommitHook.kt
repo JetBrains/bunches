@@ -1,6 +1,5 @@
 package org.jetbrains.bunches.precommit
 
-import org.eclipse.jgit.api.Git
 import java.io.File
 import java.lang.System.exit
 import java.util.*
@@ -12,7 +11,7 @@ fun getBunchExtensions(dotBunchFile: File): Set<String>? {
     return lines.drop(1).map { it.split('_').first() }.toSet()
 }
 
-fun precommitHook() {
+fun precommitHook(args: Array<String>) {
     val dotBunchFile = File(".bunch")
     if (!dotBunchFile.exists()) {
         println("Project's .bunch file wasn't found, hook is disabled")
@@ -20,9 +19,8 @@ fun precommitHook() {
     }
     val extensions = getBunchExtensions(dotBunchFile) ?: return
 
-    val git = Git.open(File(""))
-    val status = git.status().call()
-    val commitFiles = (status.added + status.changed + status.removed).map { File(it) }.toSet()
+
+    val commitFiles = args.map { File(it) }.toSet()
 
     val forgottenFiles = HashSet<File>()
 

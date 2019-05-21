@@ -25,6 +25,8 @@ class BunchCompareFilesAction : CompareFilesAction() {
         val extensions = BunchFileUtils.bunchExtension(project) ?: return null
         if (files.any { !it.isValid }) return null
 
+        if (files.size != 1) return null
+
         val file1 = files[0]
         val file2 = VirtualFileManager.getInstance()
             .findFileByUrl(
@@ -64,10 +66,7 @@ class BunchCompareFilesAction : CompareFilesAction() {
 
         if (files.size != 1) return false
 
-        if (files.any { it.extension in extensions }) {
-            return true
-        }
-        return false
+        return files.any { it.extension in extensions }
     }
 
     fun getBunchFileRealExtension(file: VirtualFile, bunchExtensions: List<String>): String {

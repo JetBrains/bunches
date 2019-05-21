@@ -25,9 +25,9 @@
                     class="org.jetbrains.bunches.idea.actions.CleanupAction"
                     text="Cleanup">
             </action>
-            <action id="BunchCompareFilesActions" class="org.jetbrains.bunches.idea.actions.BunchCompareFilesActions"
+            <action id="BunchCompareFilesActions" class="org.jetbrains.bunches.idea.actions.BunchCompareFilesAction"
                     text="BunchCompareFilesActions">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl D"/>
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift D"/>
             </action>
         </group>
 

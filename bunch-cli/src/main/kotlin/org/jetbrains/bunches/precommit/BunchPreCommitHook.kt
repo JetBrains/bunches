@@ -38,7 +38,7 @@ fun precommitHook(args: Array<String>) {
 
     println("""
         Some bunch files were not included in commit:
-        ${forgottenFiles.joinToString("\n")}
+        ${forgottenFiles.joinToString("\n        ")}
         Do you want to continue? (Y/N)
         """.trimIndent())
     when (readLine()) {

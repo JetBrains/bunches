@@ -39,6 +39,14 @@ fun installHook(args: Array<String>) {
         exitWithError("Pre-commit hook already exists")
     }
 
+    val hookFile = File(hookPath)
+    if (!hookFile.createNewFile()) {
+        exitWithError("Failed to create hook file")
+    }
+    if (!hookFile.setExecutable(true)) {
+        exitWithError("Failed to make hook executable")
+    }
+
     // Directories structure: app/lib/jar
     val jarURI = ::installHook::class.java.protectionDomain.codeSource.location.toURI()
     val installationDir = File(jarURI).parentFile.parentFile
@@ -49,7 +57,7 @@ fun installHook(args: Array<String>) {
     }
 
     val bunchExecutablePath = bunchExecutableFile.canonicalPath
-    File(hookPath).writeText(
+    hookFile.writeText(
         """
         #!/bin/sh
 

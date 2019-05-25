@@ -12,7 +12,7 @@ fun main(args: Array<String>) {
 }
 
 fun installHook(args: Array<String>) {
-    if (args.isEmpty()) {
+    if (args.size > 1) {
         exitWithUsageError(
             """
             Usage: <git-path>
@@ -24,13 +24,13 @@ fun installHook(args: Array<String>) {
         )
     }
 
-    val gitPath = args[0]
+    val gitPath = if (args.isEmpty()) File("").canonicalPath else args[0]
     if (!File(gitPath).exists()) {
         exitWithError("Directory $gitPath doesn't exist")
     }
 
     val dotGitPath = "$gitPath/.git"
-    if (!File(dotGitPath).exists()) {
+    if (!File(dotGitPath).isDirectory) {
         exitWithError("Directory $gitPath is not a repository")
     }
 

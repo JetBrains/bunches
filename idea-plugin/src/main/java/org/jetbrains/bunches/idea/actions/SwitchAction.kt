@@ -1,5 +1,7 @@
 package org.jetbrains.bunches.idea.actions
 
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.progress.ProgressIndicator
@@ -48,6 +50,12 @@ class SwitchAction : AnAction() {
 
                 override fun onThrowable(error: Throwable) {
                     Messages.showErrorDialog(project, error.message, "Switch error")
+                    Notification(
+                        "Bunch tool",
+                        "Switch error",
+                        error.message ?: "Switch fail",
+                        NotificationType.ERROR
+                    ).notify(project)
                 }
             }
         )

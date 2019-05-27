@@ -1,5 +1,7 @@
 package org.jetbrains.bunches.idea.actions
 
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.progress.ProgressIndicator
@@ -43,7 +45,12 @@ class CleanupAction : AnAction() {
             }
 
             override fun onThrowable(error: Throwable) {
-                Messages.showErrorDialog(project, error.message, "Cleanup error")
+                Notification(
+                    "Bunch tool",
+                    "Cleanup error",
+                    error.message ?: "Cleanup fail",
+                    NotificationType.ERROR
+                ).notify(project)
             }
         })
     }

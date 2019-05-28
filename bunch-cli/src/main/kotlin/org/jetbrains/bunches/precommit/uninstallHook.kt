@@ -37,37 +37,27 @@ fun uninstallHook(args: Array<String>) {
         exitWithError("Pre-commit hook is not found")
     }
 
-    // Directories structure: app/lib/jar
-    val jarURI = ::installHook::class.java.protectionDomain.codeSource.location.toURI()
-    val installationDir = File(jarURI).parentFile.parentFile
+    val hookCode = hookFile.readText()
 
-    val bunchExecutableFile = File(installationDir, "bin/bunch")
-    if (!bunchExecutableFile.exists()) {
-        exitWithError("Can't find executable file `$bunchExecutableFile`")
-    }
 
-    val bunchExecutablePath = bunchExecutableFile.canonicalPath
+    if (checkHookCode(hookCode)) {
+        val hookParams = hookCodeParams(hookCode)
 
-    val hookText = """
-        #!/bin/sh
-
-        if [[ -t 1 ]]
-        then
-            files="${'$'}(git diff --cached --name-only | while read file ; do echo -n "'${'$'}file' "; done)"
-            eval "'$bunchExecutablePath' precommit ${'$'}files < /dev/tty"
-            exit $?
-        else
-            exit 0
-        fi
-        """.trimIndent()
-
-    if (hookFile.readText() == hookText) {
         if (hookFile.delete()) {
-            println("Successfully uninstalled hook")
-        } else {
-            exitWithError("Couldn't delete hook file")
+            if (hookParams.oldHookPath == ":")
+                println("Successfully uninstalled hook")
+            else {
+
+                val oldHookFile = File(hookParams.oldHookPath)
+                if (oldHookFile.renameTo(File("$dotGitPath/hooks/pre-commit")))
+                    println("Successfully uninstalled hook, renamed old hook back to pre-commit")
+                else
+                    exitWithError("Uninstalled hook, but couldn't rename old hook back to pre-commit")
+            }
         }
-    } else {
-        exitWithError("Precommit hook exists, but is not a forgotten files checker")
+        else
+            exitWithError("Couldn't delete hook file")
     }
+    else
+        exitWithError("Precommit hook exists, but is not a forgotten files checker")
 }

@@ -35,9 +35,44 @@ fun installHook(args: Array<String>) {
     }
 
     val hookPath = "$dotGitPath/hooks/pre-commit"
+    val oldHookNewName: String
     if (File(hookPath).exists()) {
-        exitWithError("Pre-commit hook already exists")
+        if (checkHookCode(File(hookPath).readText()))
+            exitWithError("Bunch file checking hook is already installed")
+
+        println(
+            """
+            Other hook was found
+            Do you want the new name to be generated (1) or rename it by yourself? (2)
+            Type 1 or 2
+            To cancel installation press ctrl+c
+            """.trimIndent()
+        )
+        when (readLine()) {
+            "1" -> {
+                val tempFile = createTempFile("pre-commit", "", File("$dotGitPath/hooks"))
+                oldHookNewName = tempFile.relativeTo(File("$dotGitPath/hooks")).path
+                tempFile.delete()
+            }
+            "2" -> {
+                oldHookNewName = readLine() ?: exitWithError("New name was not provided")
+            }
+            else -> {
+                val tempFile = createTempFile("pre-commit", "", File("$dotGitPath/hooks"))
+                oldHookNewName = tempFile.relativeTo(File("$dotGitPath/hooks")).path
+                tempFile.delete()
+            }
+        }
+
+        if(File(hookPath).renameTo(File("$dotGitPath/hooks/$oldHookNewName")))
+            println("Old hook was renamed to $oldHookNewName and will still be called")
+        else
+            exitWithError("Couldn't rename existing hook")
+
     }
+    else
+        oldHookNewName = ""
+
 
     val hookFile = File(hookPath)
     if (!hookFile.createNewFile()) {
@@ -55,22 +90,12 @@ fun installHook(args: Array<String>) {
     if (!bunchExecutableFile.exists()) {
         exitWithError("Can't find executable file `$bunchExecutableFile`")
     }
-
+    val oldHookPath = if(oldHookNewName != "")
+        "'$dotGitPath/hooks/$oldHookNewName'"
+    else
+        ":"
     val bunchExecutablePath = bunchExecutableFile.canonicalPath
-    hookFile.writeText(
-        """
-        #!/bin/sh
 
-        if [[ -t 1 ]]
-        then
-            files="${'$'}(git diff --cached --name-only | while read file ; do echo -n "'${'$'}file' "; done)"
-            eval "'$bunchExecutablePath' precommit ${'$'}files < /dev/tty"
-            exit $?
-        else
-            exit 0
-        fi
-        """.trimIndent()
-    )
-
+    hookFile.writeText(hookCodeFromTemplate(bunchExecutablePath, oldHookPath))
     println("Bunch pre-commit hook has been successfully installed")
 }

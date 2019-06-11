@@ -64,13 +64,11 @@ fun installHook(args: Array<String>) {
             }
         }
 
-        if(File(hookPath).renameTo(File("$dotGitPath/hooks/$oldHookNewName")))
+        if (File(hookPath).renameTo(File("$dotGitPath/hooks/$oldHookNewName")))
             println("Old hook was renamed to $oldHookNewName and will still be called")
         else
             exitWithError("Couldn't rename existing hook")
-
-    }
-    else
+    } else
         oldHookNewName = ""
 
 
@@ -90,10 +88,12 @@ fun installHook(args: Array<String>) {
     if (!bunchExecutableFile.exists()) {
         exitWithError("Can't find executable file `$bunchExecutableFile`")
     }
-    val oldHookPath = if(oldHookNewName != "")
+
+    val oldHookPath = if (oldHookNewName != "")
         "'$dotGitPath/hooks/$oldHookNewName'"
     else
         ":"
+
     val bunchExecutablePath = bunchExecutableFile.canonicalPath
 
     hookFile.writeText(hookCodeFromTemplate(bunchExecutablePath, oldHookPath))

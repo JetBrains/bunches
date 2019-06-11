@@ -17,19 +17,19 @@ fun uninstallHook(args: Array<String>) {
 
             Uninstalls git hook that checks forgotten bunch files
 
-            <git-path>   - Directory with repository (parent directory for .git).
+            <git-path>   - Directory with repository base (parent directory for .git directory).
             """.trimIndent()
         )
     }
 
     val gitPath = if (args.isEmpty()) File("").canonicalPath else args[0]
     if (!File(gitPath).exists()) {
-        exitWithError("Directory $gitPath doesn't exist")
+        exitWithError("Directory `$gitPath` doesn't exist")
     }
 
     val dotGitPath = "$gitPath/.git"
     if (!File(dotGitPath).isDirectory) {
-        exitWithError("Directory $gitPath is not a repository")
+        exitWithError("Directory `$gitPath` is not a repository.")
     }
 
     val hookFile = File("$dotGitPath/hooks/pre-commit")
@@ -39,25 +39,22 @@ fun uninstallHook(args: Array<String>) {
 
     val hookCode = hookFile.readText()
 
-
-    if (checkHookCode(hookCode)) {
-        val hookParams = hookCodeParams(hookCode)
-
-        if (hookFile.delete()) {
-            if (hookParams.oldHookPath == ":")
-                println("Successfully uninstalled hook")
-            else {
-
-                val oldHookFile = File(hookParams.oldHookPath)
-                if (oldHookFile.renameTo(File("$dotGitPath/hooks/pre-commit")))
-                    println("Successfully uninstalled hook, renamed old hook back to pre-commit")
-                else
-                    exitWithError("Uninstalled hook, but couldn't rename old hook back to pre-commit")
-            }
-        }
-        else
-            exitWithError("Couldn't delete hook file")
+    if (!checkHookCode(hookCode)) {
+        exitWithError("Precommit hook exists but this is not the bunch tool hook")
     }
-    else
-        exitWithError("Precommit hook exists, but is not a forgotten files checker")
+
+    val hookParams = hookCodeParams(hookCode)
+    if (!hookFile.delete()) {
+        exitWithError("Couldn't delete hook file")
+    }
+
+    if (hookParams.oldHookPath == ":")
+        println("Successfully uninstalled hook")
+    else {
+        val oldHookFile = File(hookParams.oldHookPath)
+        if (oldHookFile.renameTo(File("$dotGitPath/hooks/pre-commit")))
+            println("Successfully uninstalled. Old pre-commit hook was reverted.")
+        else
+            exitWithError("Successfully uninstalled. Old pre-commit hook wasn't restored.")
+    }
 }

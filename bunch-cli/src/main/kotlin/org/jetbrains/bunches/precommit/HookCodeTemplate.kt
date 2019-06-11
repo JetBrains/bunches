@@ -1,11 +1,17 @@
 package org.jetbrains.bunches.precommit
 
+private const val BUNCH_HOOK_COMMENT_MARKER = "#bunch tool pre-commit hook"
+private const val BUNCH_EXECUTABLE_PATH_COMMENT_MARKER = "#executable"
+private const val OLD_HOOK_PATH_COMMENT_MARKER = "#old"
+
 fun hookCodeFromTemplate(bunchExecutablePath: String, oldHookPath: String): String {
     return """
         #!/bin/sh
 
-        #bunch tool pre-commit hook
-
+        $BUNCH_HOOK_COMMENT_MARKER
+        $BUNCH_EXECUTABLE_PATH_COMMENT_MARKER '$bunchExecutablePath'
+        $OLD_HOOK_PATH_COMMENT_MARKER $oldHookPath
+        
         $oldHookPath
         exitCode=${'$'}?
         if [[ "${'$'}exitCode" -ne 0 ]]
@@ -24,19 +30,27 @@ fun hookCodeFromTemplate(bunchExecutablePath: String, oldHookPath: String): Stri
         """.trimIndent()
 }
 
-fun checkHookCode(hookCode: String): Boolean = hookCode.lines()[2] == "#bunch tool pre-commit hook"
-
+fun checkHookCode(hookCode: String): Boolean = hookCode.lines().any { it.trim() == BUNCH_HOOK_COMMENT_MARKER }
 
 data class HookParams(val bunchExecutablePath: String, val oldHookPath: String)
 
+private fun extractPathWithPrefix(hookCodeLines: List<String>, commentMarker: String): String? {
+    val pathWithQuotes = hookCodeLines.firstOrNull { it.trimStart().startsWith(commentMarker) }
+        ?.removePrefix(commentMarker)
+        ?.trim() ?: return null
+
+    if (!pathWithQuotes.startsWith("'") || !pathWithQuotes.endsWith("'")) {
+        return null
+    }
+
+    return pathWithQuotes.removeSurrounding("'")
+}
+
 fun hookCodeParams(hookCode: String): HookParams {
     val hookCodeLines = hookCode.lines()
-    val bunchExecutablePath = hookCodeLines[14].
-        drop("""eval "'""".length).
-        dropLast("""' precommit ${'$'}files < /dev/tty"""".length)
 
-    val oldHookPath = if(hookCodeLines[4] != ":")
-        hookCodeLines[4].substring(1, hookCodeLines[4].length - 1) else ":"
+    val bunchExecutablePath = extractPathWithPrefix(hookCodeLines, BUNCH_EXECUTABLE_PATH_COMMENT_MARKER)  ?: "."
+    val oldHookPath = extractPathWithPrefix(hookCodeLines, OLD_HOOK_PATH_COMMENT_MARKER) ?: ":"
 
     return HookParams(bunchExecutablePath, oldHookPath)
 }

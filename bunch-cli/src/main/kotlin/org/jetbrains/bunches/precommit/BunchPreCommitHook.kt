@@ -37,10 +37,10 @@ fun precommitHook(args: Array<String>) {
     if (forgottenFiles.isEmpty()) exit(0)
 
     println("""
-        Some bunch files were not included in commit:
-        ${forgottenFiles.joinToString("\n        ")}
-        Do you want to continue? (Y/N)
-        """.trimIndent())
+        |Some bunch files were not included in commit:
+        |${forgottenFiles.joinToString("\n|")}
+        |Do you want to continue? (Y/N)
+    """.trimMargin())
     when (readLine()) {
         "Y", "y", "Yes", "yes", "" -> exit(0)
         "N", "n", "No", "no" -> exit(1)

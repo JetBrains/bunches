@@ -25,7 +25,7 @@ class BunchCompareFilesAction : CompareFilesAction() {
         if (files.size != 1) return null
         if (files.any { !it.isValid }) return null
 
-        val extensions = BunchFileUtils.bunchExtension(project) ?: return null
+        val extensions = BunchFileUtils.bunchExtensions(project) ?: return null
 
         val bunchFile = files.single()
         val baseFile = VirtualFileManager.getInstance().findFileByUrl(bunchFile.url.substringBeforeLast('.'))
@@ -61,12 +61,12 @@ class BunchCompareFilesAction : CompareFilesAction() {
         val files = e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY) ?: return false
         val file = files.singleOrNull() ?: return false
 
-        val extensions = BunchFileUtils.bunchExtension(project) ?: return false
+        val extensions = BunchFileUtils.bunchExtensions(project) ?: return false
 
         return file.extension in extensions
     }
 
-    private fun getBunchFileRealExtension(file: VirtualFile, bunchExtensions: List<String>): String? {
+    private fun getBunchFileRealExtension(file: VirtualFile, bunchExtensions: Collection<String>): String? {
         return if (file.extension in bunchExtensions) {
             file.nameWithoutExtension.substringAfterLast('.').takeIf { !it.isBlank() }
         } else {
@@ -74,7 +74,7 @@ class BunchCompareFilesAction : CompareFilesAction() {
         }
     }
 
-    private fun getDocumentContent(project: Project, file: VirtualFile, extensions: List<String>): DiffContent? {
+    private fun getDocumentContent(project: Project, file: VirtualFile, extensions: Collection<String>): DiffContent? {
         val bunchFileRealExtension = getBunchFileRealExtension(file, extensions) ?: return null
         val document = FileDocumentManager.getInstance().getDocument(file) ?: return null
         val fileType = FileTypeManager.getInstance().getFileTypeByExtension(bunchFileRealExtension)

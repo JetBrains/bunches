@@ -11,7 +11,7 @@ object BunchFileUtils {
         return baseDir.findChild(BUNCH_FILE_NAME)
     }
 
-    fun bunchExtension(project: Project): List<String>? {
+    fun bunchExtensions(project: Project): Set<String>? {
         val bunchFile: VirtualFile = bunchFile(project) ?: return null
         val file = File(bunchFile.path)
         if (!file.exists()) return null
@@ -19,6 +19,6 @@ object BunchFileUtils {
         val lines = file.readLines().map { it.trim() }.filter { it.isNotEmpty() }
         if (lines.size <= 1) return null
 
-        return lines.drop(1).map { it.split('_').first() }
+        return lines.drop(1).map { it.split('_').first() }.toSet()
     }
 }

@@ -4,7 +4,7 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.bunches.restore.RESTORE_COMMIT_TITLE
 import javax.swing.JComponent
 
-class SwitchDialogKt(project: Project, bunches: List<String>) : SwitchDialog(project) {
+class SwitchDialogKt(project: Project, bunches: Collection<String>) : SwitchDialog(project) {
     init {
         title = "Switch Bunches"
         if (bunches.isNotEmpty())

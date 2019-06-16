@@ -63,7 +63,7 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
         ): ReturnResult {
             if (!project.bunchFileCheckEnabled) return ReturnResult.COMMIT
 
-            val extensions = BunchFileUtils.bunchExtension(project)?.toSet() ?: return ReturnResult.COMMIT
+            val extensions = BunchFileUtils.bunchExtensions(project)?.toSet() ?: return ReturnResult.COMMIT
 
             val forgottenFiles = HashSet<File>()
             val commitFiles = checkInProjectPanel.files.filter { it.isFile }.toSet()

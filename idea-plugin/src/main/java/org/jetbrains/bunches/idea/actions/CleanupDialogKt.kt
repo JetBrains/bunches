@@ -4,7 +4,7 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.bunches.cleanup.DEFAULT_CLEANUP_COMMIT_TITLE
 import javax.swing.JComponent
 
-class CleanupDialogKt(project: Project, extensions: List<String>) : CleanupDialog(project) {
+class CleanupDialogKt(project: Project, extensions: Collection<String>) : CleanupDialog(project) {
     init {
         title = "Cleanup Bunches"
         if (extensions.isNotEmpty())

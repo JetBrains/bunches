@@ -22,7 +22,7 @@ class SwitchAction : AnAction() {
             return
         }
 
-        val extensions = BunchFileUtils.bunchExtension(project)
+        val extensions = BunchFileUtils.bunchExtensions(project)
         if (extensions == null) {
             Messages.showMessageDialog("Can't find list of supported bunches", "Switch error", Messages.getErrorIcon())
             return

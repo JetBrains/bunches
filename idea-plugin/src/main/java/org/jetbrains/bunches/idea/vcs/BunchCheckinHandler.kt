@@ -82,7 +82,8 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
 
             if (forgottenFiles.isEmpty()) return ReturnResult.COMMIT
 
-            val projectBaseFile = File(project.basePath)
+            val pathname = project.basePath ?: return ReturnResult.COMMIT
+            val projectBaseFile = File(pathname)
             var filePaths = forgottenFiles.map { it.relativeTo(projectBaseFile).path }.sorted()
             if (filePaths.size > 15) {
                 filePaths = filePaths.take(15) + "..."

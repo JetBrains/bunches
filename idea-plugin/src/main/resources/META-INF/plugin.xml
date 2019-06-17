@@ -9,8 +9,18 @@
     <vendor url="http://www.jetbrains.com">JetBrains</vendor>
 
     <extensions defaultExtensionNs="com.intellij">
+        <fileTypeFactory implementation="org.jetbrains.bunches.idea.highlighting.BunchFileTypeFactory"/>
+        <lang.substitutor
+                language="TEXT"
+                implementationClass="org.jetbrains.bunches.idea.highlighting.BunchLanguageSubstitutor"/>
         <checkinHandlerFactory implementation="org.jetbrains.bunches.idea.vcs.BunchFileCheckInHandlerFactory"/>
     </extensions>
+
+    <project-components>
+        <component>
+            <implementation-class>org.jetbrains.bunches.idea.highlighting.BunchProjectComponent</implementation-class>
+        </component>
+    </project-components>
 
     <actions>
         <group id="org.jetbrains.bunches.idea.actions.BunchToolMenuGroup"
@@ -30,7 +40,5 @@
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift D"/>
             </action>
         </group>
-
-
     </actions>
 </idea-plugin>

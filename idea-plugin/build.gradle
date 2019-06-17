@@ -29,4 +29,10 @@ compileTestKotlin {
 intellij {
     version '2018.3.5'
     pluginName = 'bunch-tool-idea-plugin'
+    updateSinceUntilBuild = true
+}
+
+patchPluginXml {
+    sinceBuild = ideaSinceBuild
+    untilBuild = ideaUntilBuild
 }

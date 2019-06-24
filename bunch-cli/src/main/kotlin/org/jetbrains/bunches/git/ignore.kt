@@ -1,6 +1,9 @@
 package org.jetbrains.bunches.git
 
+import org.eclipse.jgit.ignore.IgnoreNode
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileNotFoundException
 
 fun isGradleDir(dir: File) = dir.name == ".gradle"
 
@@ -16,6 +19,24 @@ private fun isGradleBuildDir(dir: File): Boolean {
     return false
 }
 
+fun parseGitIgnore(baseGitRoot: File): IgnoreNode? {
+    val gitignoreFile = File(baseGitRoot, ".gitignore")
+    try {
+        FileInputStream(gitignoreFile).use {
+            val ignore = IgnoreNode()
+            ignore.parse(it)
+            return ignore
+        }
+    } catch (e: FileNotFoundException) {
+        return null
+    }
+}
+
+// If '.gitignore' file doesn't exist 'ignore' will be null and '==' returns false
+// We skip '.gitignore' check in this case
+fun checkIgnoreList(dir: File, ignore: IgnoreNode?): Boolean =
+    ignore?.isIgnored(dir.name, dir.isDirectory) == IgnoreNode.MatchResult.IGNORED
+
 // Git root directory contains ".git" sub-directory.
 // Git worktree directory contains ".git" file.
 // Both cases are covered by this function.
@@ -24,5 +45,5 @@ fun isGitRoot(dir: File) = File(dir, ".git").exists()
 fun isNestedGitRoot(dir: File, baseGitRoot: File) =
     isGitRoot(dir) && dir != baseGitRoot
 
-fun shouldIgnoreDir(dir: File, baseGitRoot: File) =
-    isGitDir(dir) || isOutDir(dir) || isGradleBuildDir(dir) || isGradleDir(dir) || isNestedGitRoot(dir, baseGitRoot)
+fun shouldIgnoreDir(dir: File, baseGitRoot: File, ignore: IgnoreNode?) =
+    isGitDir(dir) || isOutDir(dir) || isGradleBuildDir(dir) || isGradleDir(dir) || checkIgnoreList(dir, ignore) || isNestedGitRoot(dir, baseGitRoot)

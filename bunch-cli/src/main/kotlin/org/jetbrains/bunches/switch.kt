@@ -154,9 +154,11 @@ fun doStepByStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: St
         exitWithError("Repository directory with branch is expected")
     }
 
+    val gitignoreParseResult = parseGitIgnore(root)
+
     val filesWithDonorExtensions = root
         .walkTopDown()
-        .onEnter { dir -> !shouldIgnoreDir(dir, root) }
+        .onEnter { dir -> !shouldIgnoreDir(dir, root, gitignoreParseResult) }
         .filter { child -> child.extension in donorExtensionsInStepByStepOrder }
         .toList()
 
@@ -251,11 +253,13 @@ fun doOneStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: Strin
         exitWithError("Repository directory with branch is expected")
     }
 
+    val gitignoreParseResult = parseGitIgnore(root)
+
     val changedFiles = HashSet<FileChange>()
 
     val filesWithDonorExtensions = root
         .walkTopDown()
-        .onEnter { dir -> !shouldIgnoreDir(dir, root) }
+        .onEnter { dir -> !shouldIgnoreDir(dir, root, gitignoreParseResult) }
         .filter { child -> child.extension in donorExtensionsPrioritized }
         .toList()
 

@@ -30,6 +30,11 @@ class BunchLanguageSubstitutor : LanguageSubstitutor() {
                 return null
             }
 
+            if (secondExtension.toLowerCase() == "kt") {
+                // Temporary disable till problem with Kotlin resolve is fixed
+                return null
+            }
+
             val actualFileType = FileTypeManager.getInstance().getFileTypeByExtension(secondExtension)
             if (actualFileType is LanguageFileType) {
                 return actualFileType.language

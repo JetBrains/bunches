@@ -86,7 +86,7 @@ fun cleanup(settings: Settings) {
 
     val filesWithExtensions = root
         .walkTopDown()
-        .onEnter { dir -> !(isGitDir(dir) || isGradleDir(dir) || isNestedGitRoot(dir, root)) }
+        .onEnter { dir -> !shouldIgnoreDir(dir, root) }
         .filter { child -> extensions.any { child.name.endsWith(it) } }
         .toList()
 

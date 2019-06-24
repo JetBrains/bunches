@@ -7,6 +7,7 @@ import org.jetbrains.bunches.check.isDeletedBunchFile
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError
+import org.jetbrains.bunches.git.parseGitIgnore
 import org.jetbrains.bunches.git.shouldIgnoreDir
 import java.io.File
 
@@ -77,9 +78,11 @@ fun doDirStats(path: String) {
     val (statsDir, gitRoot) = fetchStatsDirs(path)
     val extensions = readExtensionsFromFile(gitRoot) ?: exitWithError()
 
+    val gitignoreParseResult = parseGitIgnore(gitRoot)
+
     val bunchFiles = statsDir
         .walkTopDown()
-        .onEnter { dir -> !shouldIgnoreDir(dir, gitRoot) }
+        .onEnter { dir -> !shouldIgnoreDir(dir, gitRoot, gitignoreParseResult) }
         .filter { child -> child.extension in extensions }
         .toList()
 
@@ -95,13 +98,15 @@ fun doLsStats(path: String) {
     val (statsDir, gitRoot) = fetchStatsDirs(path)
     val extensions = readExtensionsFromFile(gitRoot) ?: exitWithError()
 
+    val gitignoreParseResult = parseGitIgnore(gitRoot)
+
     var count = 0
     var total = 0
 
     statsDir
         .walkTopDown()
         .onEnter { dir ->
-            val ignoreDir = shouldIgnoreDir(dir, gitRoot)
+            val ignoreDir = shouldIgnoreDir(dir, gitRoot, gitignoreParseResult)
             if (ignoreDir) {
                 val lsName = printLSDirName(dir, statsDir)
                 if (lsName != null) {

@@ -86,7 +86,9 @@ fun getReducibleFiles(repoPath: String, bunchPath: String) : ArrayList<File> {
         exitWithError("Repository directory with branch is expected")
     }
 
+	val gitignoreParseResult = parseGitIgnore(root)
     val (base, rules) = readUpdatePairsFromFile(bunchPath) ?: exitWithError()
+
     if (rules.isEmpty()) {
         exitWithError()
     }
@@ -95,7 +97,7 @@ fun getReducibleFiles(repoPath: String, bunchPath: String) : ArrayList<File> {
 
     val filesWithDonorExtensions = root
         .walkTopDown()
-        .onEnter { dir -> !shouldIgnoreDir(dir, root) }
+        .onEnter { dir -> !shouldIgnoreDir(dir, root, gitignoreParseResult) }
         .filter { child -> child.extension in extensions }
         .toList()
 

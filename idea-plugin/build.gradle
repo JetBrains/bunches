@@ -4,8 +4,6 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
 }
 
-version buildNumber
-
 repositories {
     mavenCentral()
 }

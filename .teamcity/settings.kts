@@ -29,7 +29,7 @@ object Main : BuildType({
     steps {
         gradle {
             name = "Build All"
-            tasks = "clean build -P buildNumber %build.number%"
+            tasks = "clean build -Pversion=%build.number%"
             buildFile = ""
             gradleWrapperPath = ""
         }

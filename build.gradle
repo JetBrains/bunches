@@ -13,8 +13,7 @@ buildscript {
 
 subprojects {
     group = 'org.jetbrains.tooling'
-    version = '0.9.1'
-
+    
     repositories {
         mavenCentral()
     }

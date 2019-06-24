@@ -34,7 +34,7 @@ fun parseGitIgnore(baseGitRoot: File): IgnoreNode? {
 
 // If '.gitignore' file doesn't exist 'ignore' will be null and '==' returns false
 // We skip '.gitignore' check in this case
-fun checkIgnoreList(dir: File, ignore: IgnoreNode?): Boolean =
+fun checkIgnoreList(dir: File, ignore: IgnoreNode?) =
     ignore?.isIgnored(dir.name, dir.isDirectory) == IgnoreNode.MatchResult.IGNORED
 
 // Git root directory contains ".git" sub-directory.

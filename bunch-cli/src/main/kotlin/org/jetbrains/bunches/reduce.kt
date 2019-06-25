@@ -79,7 +79,7 @@ fun reduce(args: Array<String>) {
 
 private data class UpdatePair(val from: String, val to: String)
 
-fun doReduce(settings: Settings) {
+fun doReduce(settings: Settings) : ArrayList<File>?{
     val root = File(settings.repoPath)
     if (!isGitRoot(root)) {
         exitWithError("Repository directory with branch is expected")
@@ -134,7 +134,7 @@ fun doReduce(settings: Settings) {
         for (file in reduceFiles) {
             println(file)
         }
-        return
+        return reduceFiles
     }
 
     assert(settings.action == ReduceAction.DELETE || settings.action == ReduceAction.COMMIT)
@@ -148,6 +148,8 @@ fun doReduce(settings: Settings) {
     if (settings.action == ReduceAction.COMMIT) {
         commitChanges(settings.repoPath, changedFiles, settings.commitMessage)
     }
+
+    return null
 }
 
 

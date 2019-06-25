@@ -7,7 +7,6 @@ import javax.swing.JList
 
 
 class ReduceDialogKt(project : Project, files : ArrayList<File>?) : ReduceDialog(project) {
-
     init {
         title = "Reduce"
         if (files == null || files.isEmpty()) {

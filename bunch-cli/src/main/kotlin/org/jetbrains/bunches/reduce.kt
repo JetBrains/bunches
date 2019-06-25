@@ -15,7 +15,7 @@ enum class ReduceAction {
     COMMIT
 }
 
-data class Settings(val repoPath: String, val action: ReduceAction, val commitMessage: String)
+data class Settings(val repoPath: String, val bunchPath: String, val action: ReduceAction, val commitMessage: String)
 
 fun main(args: Array<String>) {
     reduce(args)
@@ -70,6 +70,7 @@ fun reduce(args: Array<String>) {
 
     val settings = Settings(
         repoPath = args[0],
+        bunchPath = args[0],
         action = actionFromParam ?: ReduceAction.COMMIT,
         commitMessage = commitMessageFromParam ?: DEFAULT_REDUCE_COMMIT_TITLE
     )
@@ -79,13 +80,13 @@ fun reduce(args: Array<String>) {
 
 private data class UpdatePair(val from: String, val to: String)
 
-fun doReduce(settings: Settings) : ArrayList<File>?{
-    val root = File(settings.repoPath)
+fun getReducibleFiles(repoPath: String, bunchPath: String) : ArrayList<File> {
+    val root = File(repoPath)
     if (!isGitRoot(root)) {
         exitWithError("Repository directory with branch is expected")
     }
 
-    val (base, rules) = readUpdatePairsFromFile(settings.repoPath) ?: exitWithError()
+    val (base, rules) = readUpdatePairsFromFile(bunchPath) ?: exitWithError()
     if (rules.isEmpty()) {
         exitWithError()
     }
@@ -128,19 +129,23 @@ fun doReduce(settings: Settings) : ArrayList<File>?{
             }
         }
     }
+    return reduceFiles
+}
+
+fun doReduce(settings: Settings) {
+    val files = getReducibleFiles(settings.repoPath, settings.bunchPath)
 
     if (settings.action == ReduceAction.PRINT) {
-        reduceFiles.sort()
-        for (file in reduceFiles) {
+        files.sort()
+        for (file in files) {
             println(file)
         }
-        return reduceFiles
     }
 
     assert(settings.action == ReduceAction.DELETE || settings.action == ReduceAction.COMMIT)
 
     val changedFiles = ArrayList<FileChange>()
-    for (file in reduceFiles) {
+    for (file in files) {
         file.delete()
         changedFiles.add(FileChange(ChangeType.REMOVE, file))
     }
@@ -148,8 +153,6 @@ fun doReduce(settings: Settings) : ArrayList<File>?{
     if (settings.action == ReduceAction.COMMIT) {
         commitChanges(settings.repoPath, changedFiles, settings.commitMessage)
     }
-
-    return null
 }
 
 

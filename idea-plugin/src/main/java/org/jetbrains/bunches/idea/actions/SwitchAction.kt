@@ -9,6 +9,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.ui.Messages
 import org.jetbrains.bunches.idea.util.BunchFileUtils
+import org.jetbrains.bunches.idea.util.BunchFileUtils.vcsRootPath
 import org.jetbrains.bunches.restore.Settings
 import org.jetbrains.bunches.restore.doSwitch
 
@@ -33,9 +34,20 @@ class SwitchAction : AnAction() {
             return
         }
 
+        val repoPath = vcsRootPath(project)
+        if (repoPath == null) {
+            return
+        }
+
+        val bunchPath = BunchFileUtils.bunchPath(project)
+        if (bunchPath == null) {
+            return
+        }
+
         val switchSettings = dialog.getParameters()
         val settings = Settings(
-            basePath,
+            repoPath,
+            bunchPath,
             switchSettings.branch,
             switchSettings.commitMessage,
             switchSettings.stepByStep,

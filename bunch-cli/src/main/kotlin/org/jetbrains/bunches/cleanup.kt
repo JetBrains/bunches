@@ -16,6 +16,7 @@ const val EXT__ = "--ext="
 
 data class Settings(
     val repoPath: String,
+    val bunchPath: String,
     val extension: String?,
     val commitTitle: String? = DEFAULT_CLEANUP_COMMIT_TITLE,
     val isNoCommit: Boolean
@@ -61,6 +62,7 @@ fun cleanup(args: Array<String>) {
 
     val settings = Settings(
         repoPath = repoPath,
+        bunchPath = repoPath,
         extension = extension,
         commitTitle = commitTitle,
         isNoCommit = isNoCommit
@@ -73,7 +75,7 @@ fun cleanup(settings: Settings) {
     val extensions = if (settings.extension != null) {
         setOf(settings.extension)
     } else {
-        readExtensionsFromFile(settings.repoPath)?.toSet()
+        readExtensionsFromFile(settings.bunchPath)?.toSet()
     }?.map { ".$it" }
 
     if (extensions == null) exitWithError()

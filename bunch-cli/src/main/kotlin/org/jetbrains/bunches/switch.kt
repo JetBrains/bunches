@@ -19,6 +19,7 @@ const val STEP_ = "--step"
 
 data class Settings(
     val repoPath: String,
+    val bunchPath: String,
     val rule: String,
     val commitTitle: String = RESTORE_COMMIT_TITLE,
     val step: Boolean,
@@ -102,6 +103,7 @@ fun restore(args: Array<String>) {
 
     val settings = Settings(
         repoPath = args[0],
+        bunchPath = args[0],
         rule = args[1],
         commitTitle = commitTitle ?: RESTORE_COMMIT_TITLE,
         step = stepByStep ?: false,
@@ -117,7 +119,7 @@ fun doSwitch(settings: Settings) {
         parameterRuleStr
     } else {
         // Short rule format with destination bunch only
-        readRuleFromFile(parameterRuleStr, settings.repoPath)
+        readRuleFromFile(parameterRuleStr, settings.bunchPath)
     }
 
     val suffixes = rule.split("_")
@@ -136,7 +138,7 @@ fun doSwitch(settings: Settings) {
     if (settings.doCleanup) {
         cleanup(
             org.jetbrains.bunches.cleanup.Settings(
-                settings.repoPath, extension = null, commitTitle = RESTORE_CLEANUP_COMMIT_TITLE, isNoCommit = false
+                settings.repoPath, settings.bunchPath, extension = null, commitTitle = RESTORE_CLEANUP_COMMIT_TITLE, isNoCommit = false
             )
         )
     }

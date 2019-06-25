@@ -11,6 +11,8 @@ import com.intellij.openapi.ui.Messages
 import org.jetbrains.bunches.cleanup.Settings
 import org.jetbrains.bunches.cleanup.cleanup
 import org.jetbrains.bunches.idea.util.BunchFileUtils
+import org.jetbrains.bunches.idea.util.BunchFileUtils.bunchPath
+import org.jetbrains.bunches.idea.util.BunchFileUtils.vcsRootPath
 
 class CleanupAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
@@ -31,9 +33,20 @@ class CleanupAction : AnAction() {
             return
         }
 
+        val repoPath = vcsRootPath(project)
+        if (repoPath == null) {
+            return
+        }
+
+        val bunchPath = bunchPath(project)
+        if (bunchPath == null) {
+            return
+        }
+
         val cleanupSettings = dialog.getParameters()
         val settings = Settings(
-            basePath,
+            repoPath,
+            bunchPath,
             cleanupSettings.extension,
             cleanupSettings.commitTitle,
             cleanupSettings.isNoCommit

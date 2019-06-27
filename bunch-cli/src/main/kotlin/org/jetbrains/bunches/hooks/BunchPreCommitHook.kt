@@ -1,27 +1,11 @@
-package org.jetbrains.bunches.precommit
+package org.jetbrains.bunches.hooks
 
 import java.io.File
 import java.lang.System.exit
-import java.util.*
 
-fun getBunchExtensions(dotBunchFile: File): Set<String>? {
-    val lines = dotBunchFile.readLines().map { it.trim() }.filter { !it.isEmpty() }
-    if (lines.size <= 1) return null
-
-    return lines.drop(1).map { it.split('_').first() }.toSet()
-}
-
-fun precommitHook(args: Array<String>) {
-    val dotBunchFile = File(".bunch")
-    if (!dotBunchFile.exists()) {
-        println("Project's .bunch file wasn't found, hook is disabled")
-        exit(0)
-    }
-    val extensions = getBunchExtensions(dotBunchFile) ?: return
-
-
+fun precommitLostFiles(args: Array<String>): HashSet<File>? {
+    val extensions = getExtensions()
     val commitFiles = args.map { File(it) }.toSet()
-
     val forgottenFiles = HashSet<File>()
 
     for (file in commitFiles) {
@@ -34,7 +18,14 @@ fun precommitHook(args: Array<String>) {
             }
         }
     }
-    if (forgottenFiles.isEmpty()) exit(0)
+    return forgottenFiles
+}
+
+fun precommitHook(args: Array<String>) {
+    val forgottenFiles = precommitLostFiles(args) ?: return
+    if (forgottenFiles.isEmpty()) {
+        exit(0)
+    }
 
     println("""
         |Some bunch files were not included in commit:

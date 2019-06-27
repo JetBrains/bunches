@@ -1,4 +1,4 @@
-package org.jetbrains.bunches.precommit
+package org.jetbrains.bunches.hooks
 
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError
@@ -10,19 +10,26 @@ fun main(args: Array<String>) {
 }
 
 fun uninstallHook(args: Array<String>) {
-    if (args.size > 1) {
+    if (args.size > 2 || args.isEmpty()) {
         exitWithUsageError(
             """
-            Usage: <git-path>
+            Usage: <type> [<git-path>]
 
             Uninstalls git hook that checks forgotten bunch files
 
-            <git-path>   - Directory with repository base (parent directory for .git directory).
+            <git-path>   -- Directory with repository base (parent directory for .git directory).
+            <type>       -- Type of hook to install (commit or rebase) 
             """.trimIndent()
         )
     }
 
-    val gitPath = if (args.isEmpty()) File("").canonicalPath else args[0]
+    val type = when (args[0]) {
+        "commit" -> "pre-commit"
+        "rebase" -> "pre-rebase"
+        else -> exitWithError("Unknown hook type")
+    }
+
+    val gitPath = if (args.size == 1) File("").canonicalPath else args[1]
     if (!File(gitPath).exists()) {
         exitWithError("Directory `$gitPath` doesn't exist")
     }
@@ -32,15 +39,15 @@ fun uninstallHook(args: Array<String>) {
         exitWithError("Directory `$gitPath` is not a repository.")
     }
 
-    val hookFile = File("$dotGitPath/hooks/pre-commit")
+    val hookFile = File("$dotGitPath/hooks/$type")
     if (!hookFile.exists()) {
-        exitWithError("Pre-commit hook is not found")
+        exitWithError("$type hook is not found")
     }
 
     val hookCode = hookFile.readText()
 
-    if (!checkHookCode(hookCode)) {
-        exitWithError("Precommit hook exists but this is not the bunch tool hook")
+    if (!checkHookCode(hookCode, type)) {
+        exitWithError("$type hook exists but this is not the bunch tool hook")
     }
 
     val hookParams = hookCodeParams(hookCode)
@@ -52,9 +59,9 @@ fun uninstallHook(args: Array<String>) {
         println("Successfully uninstalled hook")
     else {
         val oldHookFile = File(hookParams.oldHookPath)
-        if (oldHookFile.renameTo(File("$dotGitPath/hooks/pre-commit")))
-            println("Successfully uninstalled. Old pre-commit hook was reverted.")
+        if (oldHookFile.renameTo(File("$dotGitPath/hooks/$type")))
+            println("Successfully uninstalled. Old $type hook was reverted.")
         else
-            exitWithError("Successfully uninstalled. Old pre-commit hook wasn't restored.")
+            exitWithError("Successfully uninstalled. Old $type hook wasn't restored.")
     }
 }

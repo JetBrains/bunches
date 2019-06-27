@@ -1,6 +1,6 @@
 @file:JvmName("InstallHook")
 
-package org.jetbrains.bunches.precommit
+package org.jetbrains.bunches.hooks
 
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError
@@ -12,20 +12,30 @@ fun main(args: Array<String>) {
 }
 
 fun installHook(args: Array<String>) {
-    if (args.size > 1) {
+    if (args.size > 2 || args.isEmpty()) {
         exitWithUsageError(
             """
-            Usage: <git-path>
+            Usage: <type> [<git-path>]
 
             Installs git hook that checks forgotten bunch files
 
-            <git-path>   - Directory with repository (parent directory for .git).
+            <git-path>   -- Directory with repository (parent directory for .git).
+            <type>       -- Type of hook to install (commit or rebase) 
+            
             """.trimIndent()
         )
     }
+    val gitPath = if (args.size == 1) File("").canonicalPath else args[1]
 
-    val gitPath = if (args.isEmpty()) File("").canonicalPath else args[0]
-    if (!File(gitPath).exists()) {
+    val type = when (args[0]) {
+        "commit" -> "pre-commit"
+        "rebase" -> "pre-rebase"
+        else -> exitWithError("Unknown hook type")
+    }
+
+    File(gitPath).absoluteFile.setReadable(true)
+    println(gitPath + " " + File(gitPath).absolutePath)
+    if (!File(gitPath).absoluteFile.exists()) {
         exitWithError("Directory $gitPath doesn't exist")
     }
 
@@ -34,10 +44,16 @@ fun installHook(args: Array<String>) {
         exitWithError("Directory $gitPath is not a repository")
     }
 
-    val hookPath = "$dotGitPath/hooks/pre-commit"
+    val hookPath = "$dotGitPath/hooks/$type"
+    installOneHook(hookPath, type, dotGitPath)
+
+    println("Bunch $type hook has been successfully installed")
+}
+
+fun installOneHook(hookPath: String, type: String, dotGitPath: String) {
     val oldHookNewName: String
     if (File(hookPath).exists()) {
-        if (checkHookCode(File(hookPath).readText()))
+        if (checkHookCode(File(hookPath).readText(), type))
             exitWithError("Bunch file checking hook is already installed")
 
         println(
@@ -50,7 +66,7 @@ fun installHook(args: Array<String>) {
         )
         when (readLine()) {
             "1" -> {
-                val tempFile = createTempFile("pre-commit", "", File("$dotGitPath/hooks"))
+                val tempFile = createTempFile(type, "", File("$dotGitPath/hooks"))
                 oldHookNewName = tempFile.relativeTo(File("$dotGitPath/hooks")).path
                 tempFile.delete()
             }
@@ -58,7 +74,7 @@ fun installHook(args: Array<String>) {
                 oldHookNewName = readLine() ?: exitWithError("New name was not provided")
             }
             else -> {
-                val tempFile = createTempFile("pre-commit", "", File("$dotGitPath/hooks"))
+                val tempFile = createTempFile(type, "", File("$dotGitPath/hooks"))
                 oldHookNewName = tempFile.relativeTo(File("$dotGitPath/hooks")).path
                 tempFile.delete()
             }
@@ -68,11 +84,11 @@ fun installHook(args: Array<String>) {
             println("Old hook was renamed to $oldHookNewName and will still be called")
         else
             exitWithError("Couldn't rename existing hook")
-    } else
+    } else {
         oldHookNewName = ""
+    }
 
-
-    val hookFile = File(hookPath)
+    val hookFile = File(hookPath).absoluteFile
     if (!hookFile.createNewFile()) {
         exitWithError("Failed to create hook file")
     }
@@ -80,11 +96,11 @@ fun installHook(args: Array<String>) {
         exitWithError("Failed to make hook executable")
     }
 
-    // Directories structure: app/lib/jar
-    val jarURI = ::installHook::class.java.protectionDomain.codeSource.location.toURI()
-    val installationDir = File(jarURI).parentFile.parentFile
+//    Directories structure: app/lib/jar
+//    val jarURI = ::installHook::class.java.protectionDomain.codeSource.location.toURI()
+//    val installationDir = File(jarURI).parentFile.parentFile
 
-    val bunchExecutableFile = File(installationDir, "bin/bunch")
+    val bunchExecutableFile = File("build/install/bunch-cli/bin/", "bunch")
     if (!bunchExecutableFile.exists()) {
         exitWithError("Can't find executable file `$bunchExecutableFile`")
     }
@@ -96,6 +112,9 @@ fun installHook(args: Array<String>) {
 
     val bunchExecutablePath = bunchExecutableFile.canonicalPath
 
-    hookFile.writeText(hookCodeFromTemplate(bunchExecutablePath, oldHookPath))
-    println("Bunch pre-commit hook has been successfully installed")
+    hookFile.writeText(when(type) {
+        "pre-commit" -> preCommitHookCodeFromTemplate(bunchExecutablePath, oldHookPath)
+        "pre-rebase" -> preRebaseCodeWithBashCommand(bunchExecutablePath, oldHookPath)
+        else -> ""
+    })
 }

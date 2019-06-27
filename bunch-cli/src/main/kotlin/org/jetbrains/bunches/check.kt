@@ -2,6 +2,7 @@
 
 package org.jetbrains.bunches.check
 
+import org.eclipse.jgit.diff.DiffEntry
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.exitWithError
@@ -66,6 +67,7 @@ fun doCheck(settings: Settings) {
 
     println("Result:")
     for (commit in commits) {
+        println("Checking commit ${commit.message!!.trim()}...")
         val affectedPaths = commit.fileActions.mapNotNullTo(HashSet()) { it.newPath }
 
         val forgottenFilesPaths = ArrayList<String>()
@@ -75,8 +77,10 @@ fun doCheck(settings: Settings) {
 
             for (extension in extensions) {
                 val bunchFilePath = "$newPath.$extension"
-                if (bunchFilePath !in affectedPaths && File(settings.repoPath, bunchFilePath).exists()) {
+                val file = File(settings.repoPath, bunchFilePath)
+                if (bunchFilePath !in affectedPaths && file.exists() && !isCommittedAfter(file, commits, commit)) {
                     forgottenFilesPaths.add(bunchFilePath)
+                    println(file.name + " didnt modified, maybe forgotten")
                 }
             }
         }
@@ -89,7 +93,7 @@ fun doCheck(settings: Settings) {
             }
         }
 
-        if (!forgottenFilesPaths.isEmpty()) {
+        if (forgottenFilesPaths.isNotEmpty()) {
             problemCommitsFound = true
 
             println("${commit.hash} ${commitAuthorString(commit)} ${commit.title}")
@@ -97,6 +101,8 @@ fun doCheck(settings: Settings) {
                 println("    $forgottenPath ${if (isDeletedWithCache(forgottenPath)) "[deleted]" else ""}")
             }
             println()
+        } else {
+            println("${commit.message} is OK")
         }
     }
 
@@ -106,6 +112,24 @@ fun doCheck(settings: Settings) {
 
     println("${commits.size} commits have been checked. No problem commits found.")
 }
+
+fun isCommittedAfter(file: File, commits: List<CommitInfo>, commit: CommitInfo): Boolean {
+
+    for (current in commits) {
+        if (current == commit) {
+            return false
+        }
+        for (action in current.fileActions) {
+            if (action.changeType == DiffEntry.ChangeType.ADD
+                && action.newPath != null
+                && File(action.newPath).name == file.name) {
+                return true
+            }
+        }
+    }
+    return true
+}
+
 
 fun isDeletedBunchFile(bunchFile: File): Boolean = bunchFile.exists() && bunchFile.readText().trim().isEmpty()
 

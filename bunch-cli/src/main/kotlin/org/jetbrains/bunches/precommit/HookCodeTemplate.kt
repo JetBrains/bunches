@@ -19,7 +19,7 @@ fun hookCodeFromTemplate(bunchExecutablePath: String, oldHookPath: String): Stri
             exit ${'$'}exitCode
         fi
 
-        if [[ -t 1 ]]
+        if [[ -t 0 ]] || [[ -t 1 ]] || [[ -t 2 ]]
         then
             files="${'$'}(git diff --cached --name-only | while read file ; do echo -n "'${'$'}file' "; done)"
             eval "'$bunchExecutablePath' precommit ${'$'}files < /dev/tty"

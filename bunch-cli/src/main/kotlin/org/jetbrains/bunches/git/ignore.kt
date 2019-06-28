@@ -20,14 +20,14 @@ private fun isGradleBuildDir(dir: File): Boolean {
 
 fun parseGitIgnore(baseGitRoot: File): IgnoreNode? {
     val gitignoreFile = File(baseGitRoot, ".gitignore")
-    try {
-        gitignoreFile.inputStream().use {
-            val ignore = IgnoreNode()
-            ignore.parse(it)
-            return ignore
-        }
-    } catch (e: FileNotFoundException) {
+    if (!gitignoreFile.exists()) {
         return null
+    }
+
+    gitignoreFile.inputStream().use {
+        val ignore = IgnoreNode()
+        ignore.parse(it)
+        return ignore
     }
 }
 

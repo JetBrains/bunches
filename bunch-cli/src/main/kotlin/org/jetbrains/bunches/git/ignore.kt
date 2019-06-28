@@ -2,7 +2,6 @@ package org.jetbrains.bunches.git
 
 import org.eclipse.jgit.ignore.IgnoreNode
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileNotFoundException
 
 fun isGradleDir(dir: File) = dir.name == ".gradle"
@@ -22,7 +21,7 @@ private fun isGradleBuildDir(dir: File): Boolean {
 fun parseGitIgnore(baseGitRoot: File): IgnoreNode? {
     val gitignoreFile = File(baseGitRoot, ".gitignore")
     try {
-        FileInputStream(gitignoreFile).use {
+        gitignoreFile.inputStream().use {
             val ignore = IgnoreNode()
             ignore.parse(it)
             return ignore

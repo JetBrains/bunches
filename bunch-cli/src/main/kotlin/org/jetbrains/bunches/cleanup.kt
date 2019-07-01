@@ -86,9 +86,11 @@ fun cleanup(settings: Settings) {
         exitWithError("Repository directory with branch is expected")
     }
 
+    val gitignoreParseResult = parseGitIgnore(root)
+
     val filesWithExtensions = root
         .walkTopDown()
-        .onEnter { dir -> !shouldIgnoreDir(dir, root) }
+        .onEnter { dir -> !shouldIgnoreDir(dir, root, gitignoreParseResult) }
         .filter { child -> extensions.any { child.name.endsWith(it) } }
         .toList()
 

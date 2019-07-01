@@ -2,21 +2,8 @@ package org.jetbrains.bunches.git
 
 import org.eclipse.jgit.ignore.IgnoreNode
 import java.io.File
-import java.io.FileNotFoundException
-
-fun isGradleDir(dir: File) = dir.name == ".gradle"
 
 fun isGitDir(dir: File) = dir.name == ".git"
-
-private fun isOutDir(dir: File) = dir.isDirectory && dir.name == "out"
-
-private fun isGradleBuildDir(dir: File): Boolean {
-    if (dir.name != "build") return false
-    if (File(dir.parentFile, "build.gradle.kts").exists()) return true
-    if (File(dir.parentFile, "build.gradle").exists()) return true
-
-    return false
-}
 
 fun parseGitIgnore(baseGitRoot: File): IgnoreNode? {
     val gitignoreFile = File(baseGitRoot, ".gitignore")
@@ -45,4 +32,4 @@ fun isNestedGitRoot(dir: File, baseGitRoot: File) =
     isGitRoot(dir) && dir != baseGitRoot
 
 fun shouldIgnoreDir(dir: File, baseGitRoot: File, ignore: IgnoreNode?) =
-    isGitDir(dir) || isOutDir(dir) || isGradleBuildDir(dir) || isGradleDir(dir) || checkIgnoreList(dir, ignore) || isNestedGitRoot(dir, baseGitRoot)
+    isGitDir(dir) || isNestedGitRoot(dir, baseGitRoot) || checkIgnoreList(dir, ignore)

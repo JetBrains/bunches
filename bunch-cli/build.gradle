@@ -1,9 +1,14 @@
 apply plugin: 'application'
 mainClassName = "org.jetbrains.bunches.general.Bunch"
 
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
 dependencies {
     compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.11.0.201803080745-r'
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.2'
+    implementation 'com.github.ajalt:clikt:2.0.0'
 }
 
 startScripts {

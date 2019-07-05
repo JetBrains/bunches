@@ -8,7 +8,7 @@ import org.jetbrains.bunches.general.process
 import java.io.File
 
 fun main(args: Array<String>) {
-    process(args, ::installHookCommand)
+//    process(args, ::installHookCommand)
 }
 
 fun installHookCommand(args: Array<String>) {

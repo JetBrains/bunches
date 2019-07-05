@@ -2,17 +2,26 @@
 
 package org.jetbrains.bunches.cleanup
 
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.requireObject
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.validate
+import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.exitWithError
-import org.jetbrains.bunches.general.exitWithUsageError
+import org.jetbrains.bunches.general.partial
+import org.jetbrains.bunches.general.process
 import org.jetbrains.bunches.git.*
 import java.io.File
+import java.nio.file.Paths
 
 const val EXT_PATTERN = "{ext}"
 const val DEFAULT_CLEANUP_COMMIT_TITLE = "~~~~ cleanup $EXT_PATTERN ~~~~"
-const val NO_COMMIT_ = "--no-commit"
-const val EXT__ = "--ext="
+
+const val CLEANUP_DESCRIPTION = "Removes bunch file from repository directory."
 
 data class Settings(
     val repoPath: String,
@@ -22,53 +31,31 @@ data class Settings(
     val isNoCommit: Boolean
 )
 
-fun main(args: Array<String>) {
-    cleanup(args)
+class CleanUp : CliktCommand(help = CLEANUP_DESCRIPTION) {
+    val config by requireObject<Map<String, Boolean>>()
+    val repoPath by option("-C", help = "path to git repository")
+        .path(exists = true, fileOkay = false)
+        .default(Paths.get(".").toAbsolutePath().normalize())
+    val extension by option("--ext", help = "Particular extension for remove. All files with extensions found in '$BUNCH_FILE_NAME' file will be removed if not set.")
+    val isNoCommit by option("--no-commit", help = "Do not commit changes.").flag()
+    val commitTitle by option("-m", help = "Title for the cleanup commit. \"$DEFAULT_CLEANUP_COMMIT_TITLE\" is used by default.")
+        .validate {
+            require(!isNoCommit) { "'No-commit' flag is set. Commit will not be created, you can't provide message for it." }
+        }
+    override fun run() {
+        val settings = Settings(
+            repoPath = repoPath.toString(),
+            bunchPath = repoPath.toString(),
+            extension = extension,
+            commitTitle = commitTitle,
+            isNoCommit = isNoCommit
+        )
+        process(config.getValue("VERBOSE"), ::cleanup.partial(settings))
+    }
 }
 
-const val CLEANUP_DESCRIPTION = "Removes bunch file from repository directory."
-
-fun cleanup(args: Array<String>) {
-    if (args.size !in 1..3) {
-        exitWithUsageError(
-            """
-            Usage: <git-path> [$EXT__<file-extension>] [<commit-title>|$NO_COMMIT_]
-
-            $CLEANUP_DESCRIPTION
-
-            <git-path>             - Directory with repository (parent directory for .git).
-            $EXT__<file-extension> - Particular extension for remove.
-                                     All files with extensions found in '$BUNCH_FILE_NAME' file will be removed if not set.
-            <commit-title>         - Title for the cleanup commit. "$DEFAULT_CLEANUP_COMMIT_TITLE" is used by default.
-            $NO_COMMIT_            - Do not commit changes.
-
-            Example:
-            bunch cleanup C:/Projects/kotlin
-            """.trimIndent()
-        )
-    }
-
-    val repoPath = args[0]
-    val extension = args.getOrNull(1)?.takeIf { it.startsWith(EXT__) }?.substringAfter(EXT__)
-    val commitIndex = if (extension == null) 1 else 2
-
-    val commitTitleOrNoCommit = args.getOrNull(commitIndex)
-    if (commitIndex == 1 && args.size == 3) {
-        exitWithUsageError("Unknown parameter: '${args[2]}'")
-    }
-
-    val isNoCommit = commitTitleOrNoCommit == NO_COMMIT_
-    val commitTitle = if (!isNoCommit) commitTitleOrNoCommit ?: DEFAULT_CLEANUP_COMMIT_TITLE else null
-
-    val settings = Settings(
-        repoPath = repoPath,
-        bunchPath = repoPath,
-        extension = extension,
-        commitTitle = commitTitle,
-        isNoCommit = isNoCommit
-    )
-
-    cleanup(settings)
+fun main(args: Array<String>) {
+    CleanUp().main(listOf())
 }
 
 fun cleanup(settings: Settings) {

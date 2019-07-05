@@ -1,31 +1,28 @@
 package org.jetbrains.bunches.idea.actions
 
-import com.intellij.diff.DiffContentFactory
-import com.intellij.diff.DiffRequestFactory
-import com.intellij.diff.actions.CompareFilesAction
-import com.intellij.diff.contents.DiffContent
-import com.intellij.diff.requests.DiffRequest
-import com.intellij.diff.requests.SimpleDiffRequest
+import com.intellij.diff.actions.BaseShowDiffAction
+import com.intellij.diff.actions.CompareFileWithEditorAction
+import com.intellij.diff.chains.DiffRequestChain
+import com.intellij.diff.contents.DocumentContent
+import com.intellij.diff.util.DiffUserDataKeys
+import com.intellij.diff.util.Side
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.fileTypes.FileTypeManager
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.util.Pair
 import com.intellij.openapi.vfs.VirtualFileManager
 import org.jetbrains.bunches.idea.util.BunchFileUtils
 
-class BunchCompareFilesAction : CompareFilesAction() {
-    override fun getDiffRequest(e: AnActionEvent): DiffRequest? {
-        val project = e.project ?: return null
+class BunchCompareFilesAction : CompareFileWithEditorAction() {
+
+    override fun getDiffRequestChain(e: AnActionEvent): DiffRequestChain? {
+        val project = e.project
 
         val files = e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY) ?: return null
         if (files.size != 1) return null
         if (files.any { !it.isValid }) return null
-
-        val extensions = BunchFileUtils.bunchExtensions(project) ?: return null
 
         val bunchFile = files.single()
         val baseFile = VirtualFileManager.getInstance().findFileByUrl(bunchFile.url.substringBeforeLast('.'))
@@ -37,22 +34,25 @@ class BunchCompareFilesAction : CompareFilesAction() {
                 "Base file was not found",
                 NotificationType.ERROR
             ).notify(project)
-
             return null
         }
 
-        val bunchDiffContent = getDocumentContent(project, bunchFile, extensions) ?: return null
-        val baseDiffContent = getDocumentContent(project, baseFile, extensions) ?: return null
+        if (bunchFile == null) {
+            return null
+        }
 
-        val diffFactory = DiffRequestFactory.getInstance()
+        val chain = BaseShowDiffAction.createMutableChainFromFiles(project, baseFile, bunchFile)
 
-        return SimpleDiffRequest(
-            diffFactory.getTitle(bunchFile, baseFile),
-            bunchDiffContent,
-            baseDiffContent,
-            diffFactory.getTitle(bunchFile),
-            diffFactory.getTitle(baseFile)
-        )
+        val editorContent = chain.content2
+        if (editorContent is DocumentContent) {
+            val editors = EditorFactory.getInstance().getEditors(editorContent.document)
+            if (editors.isNotEmpty()) {
+                val currentLine = editors[0].caretModel.logicalPosition.line
+                chain.putRequestUserData(DiffUserDataKeys.SCROLL_TO_LINE, Pair.create(Side.RIGHT, currentLine))
+            }
+        }
+
+        return chain
     }
 
     override fun isAvailable(e: AnActionEvent): Boolean {
@@ -64,20 +64,5 @@ class BunchCompareFilesAction : CompareFilesAction() {
         val extensions = BunchFileUtils.bunchExtensions(project) ?: return false
 
         return file.extension in extensions
-    }
-
-    private fun getBunchFileRealExtension(file: VirtualFile, bunchExtensions: Collection<String>): String? {
-        return if (file.extension in bunchExtensions) {
-            file.nameWithoutExtension.substringAfterLast('.').takeIf { !it.isBlank() }
-        } else {
-            file.extension
-        }
-    }
-
-    private fun getDocumentContent(project: Project, file: VirtualFile, extensions: Collection<String>): DiffContent? {
-        val bunchFileRealExtension = getBunchFileRealExtension(file, extensions) ?: return null
-        val document = FileDocumentManager.getInstance().getDocument(file) ?: return null
-        val fileType = FileTypeManager.getInstance().getFileTypeByExtension(bunchFileRealExtension)
-        return DiffContentFactory.getInstance().create(project, document.text, fileType)
     }
 }

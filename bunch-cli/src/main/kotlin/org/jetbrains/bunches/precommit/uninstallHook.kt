@@ -6,7 +6,7 @@ import org.jetbrains.bunches.general.process
 import java.io.File
 
 fun main(args: Array<String>) {
-    process(args, ::uninstallHook)
+    //process(args, ::uninstallHook)
 }
 
 fun uninstallHook(args: Array<String>) {

@@ -3,19 +3,26 @@
 
 package org.jetbrains.bunches.restore
 
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.requireObject
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.cleanup.cleanup
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readRuleFromFile
 import org.jetbrains.bunches.general.exitWithError
-import org.jetbrains.bunches.general.exitWithUsageError
+import org.jetbrains.bunches.general.partial
+import org.jetbrains.bunches.general.process
 import org.jetbrains.bunches.git.*
 import java.io.File
+import java.nio.file.Paths
 
 const val RESTORE_COMMIT_TITLE = "~~~~ switch {target} ~~~~"
 const val RESTORE_BACKUP_COMMIT_TITLE = "~~~~ backup files ~~~~"
 const val RESTORE_CLEANUP_COMMIT_TITLE = "~~~~ restore cleanup ~~~~"
-
-const val STEP_ = "--step"
 
 data class Settings(
     val repoPath: String,
@@ -27,90 +34,45 @@ data class Settings(
 )
 
 fun main(args: Array<String>) {
-    restore(args)
+    SwitchCommand().main(args)
 }
-
-private const val CLEAN_UP = "--cleanup"
 
 const val SWITCH_DESCRIPTION =
     "Restores state of files for the particular branch by replacing base files with bunch counterparts."
 
-const val SW_COMMIT_T = "commit-title"
+val SWITCH_EXAMPLE =
+    """
+    Example:
+    bunch switch -C C:/Projects/kotlin as32
+    """.trimIndent()
 
 const val SW_BRANCHES_ = "branches-rule"
 
-fun restore(args: Array<String>) {
-    if (args.size != 4 && args.size != 3 && args.size != 2) {
-        exitWithUsageError(
-            """
-            Usage: <git-path> <branches-rule> [$STEP_] [$CLEAN_UP] [<commit-title>]
-
-            $SWITCH_DESCRIPTION
-
-            <git-path>        - Directory with repository (parent directory for .git).
-
-            <$SW_BRANCHES_>   - Set of file suffixes separated with `_` showing what files should be affected and priority
-                                of application. If only target branch is given file <git-path>/$BUNCH_FILE_NAME will be checked for
-                                pattern.
-
-            $STEP_            - Do switch step by step with intermediate commits after applying each step
-
-            $CLEAN_UP         - Remove bunch files after branch restore (executes 'cleanup' command with default arguments).
-
-            <$SW_COMMIT_T>    - Title for the switch commit. "$RESTORE_COMMIT_TITLE" is used by default. {target} pattern
-                                in message will be replaced with the target branch suffix.
-
-            Example:
-            bunch switch C:/Projects/kotlin as32
-            """.trimIndent()
+class SwitchCommand : CliktCommand(name = "switch", help = SWITCH_DESCRIPTION, epilog = SWITCH_EXAMPLE) {
+    val config by requireObject<Map<String, Boolean>>()
+    val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
+        .path(exists = true, fileOkay = false)
+        .default(Paths.get(".").toAbsolutePath().normalize())
+    val rule by argument(name = "<$SW_BRANCHES_>",
+        help = """Set of file suffixes separated with `_` showing what files should be affected and priority
+            of application. If only target branch is given file <git-path>/$BUNCH_FILE_NAME will be checked for
+            pattern.""".trimIndent())
+    val stepByStep by option("--step", help = "Do switch step by step with intermediate commits after applying each step.").flag()
+    val cleanUp by option("--cleanup", help = "Remove bunch files after branch restore (executes 'cleanup' command with default arguments).").flag()
+    val commitTitle by option("-m",
+        help = """Title for the switch commit. \"$RESTORE_COMMIT_TITLE\" is used by default. {target} pattern
+            in message will be replaced with the target branch suffix.""".trimIndent()).default(RESTORE_COMMIT_TITLE)
+    override fun run() {
+        val settings = Settings(
+            repoPath = repoPath.toString(),
+            bunchPath = repoPath.toString(),
+            rule = rule,
+            commitTitle = commitTitle,
+            step = stepByStep,
+            doCleanup = cleanUp
         )
+        process(config.getValue("VERBOSE"), ::doSwitch.partial(settings))
     }
-
-    var commitTitle: String? = null
-    var doCleanup: Boolean? = null
-    var stepByStep: Boolean? = null
-
-    fun readOptionArg(value: String?) {
-        if (value == null) return
-        when (value) {
-            STEP_ -> {
-                if (stepByStep != null) {
-                    exitWithUsageError("Reassign of $STEP_ parameter")
-                }
-
-                stepByStep = true
-            }
-            CLEAN_UP -> {
-                if (doCleanup != null) {
-                    exitWithUsageError("Reassign of $CLEAN_UP parameter")
-                }
-
-                doCleanup = true
-            }
-            else -> {
-                if (commitTitle != null) {
-                    exitWithUsageError("Reassign of <commit-title> parameter")
-                }
-
-                commitTitle = value
-            }
-        }
-    }
-
-    readOptionArg(args.getOrNull(2))
-    readOptionArg(args.getOrNull(3))
-    readOptionArg(args.getOrNull(4))
-
-    val settings = Settings(
-        repoPath = args[0],
-        bunchPath = args[0],
-        rule = args[1],
-        commitTitle = commitTitle ?: RESTORE_COMMIT_TITLE,
-        step = stepByStep ?: false,
-        doCleanup = doCleanup ?: false
-    )
-
-    doSwitch(settings)
 }
 
 fun doSwitch(settings: Settings) {

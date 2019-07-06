@@ -6,32 +6,15 @@ package org.jetbrains.bunches.general
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.findObject
 import com.github.ajalt.clikt.core.subcommands
-import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.options.versionOption
-import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.BunchException
 import org.jetbrains.bunches.BunchParametersException
 import org.jetbrains.bunches.ManifestReader
-import org.jetbrains.bunches.check.CHECK_DESCRIPTION
-import org.jetbrains.bunches.check.check
-import org.jetbrains.bunches.cleanup.CLEANUP_DESCRIPTION
-import org.jetbrains.bunches.cleanup.CleanUp
-import org.jetbrains.bunches.cleanup.cleanup
-import org.jetbrains.bunches.cp.CHERRY_PICK_DESCRIPTION
-import org.jetbrains.bunches.cp.cherryPick
-import org.jetbrains.bunches.precommit.installHook
-import org.jetbrains.bunches.precommit.precommitHook
-import org.jetbrains.bunches.precommit.uninstallHook
-import org.jetbrains.bunches.reduce.REDUCE_DESCRIPTION
-import org.jetbrains.bunches.reduce.reduce
-import org.jetbrains.bunches.restore.SWITCH_DESCRIPTION
-import org.jetbrains.bunches.restore.restore
-import org.jetbrains.bunches.stats.STATS_DESCRIPTION
-import org.jetbrains.bunches.stats.stats
-import java.nio.file.Path
+import org.jetbrains.bunches.cleanup.CleanUpCommand
+import org.jetbrains.bunches.cp.CherryPickCommand
+import org.jetbrains.bunches.restore.SwitchCommand
 import kotlin.system.exitProcess
 
 fun exitWithUsageError(message: String): Nothing {
@@ -64,15 +47,14 @@ fun printExceptionToSystemError(errorCode: Int, verbose: Boolean, e: Throwable):
     exitProcess(errorCode)
 }
 
-val commands = listOf(CleanUp())
+val commands = listOf(CleanUpCommand(), CherryPickCommand(), SwitchCommand())
 
 fun <A, B> Function1<A, B>.partial(a: A): () -> B {
     return {invoke(a)}
 }
 
 fun main(args: Array<String>) {
-    val a2rgs = readLine()?.split(" ")?.toTypedArray()!!
-    BunchCli().subcommands(commands).main(a2rgs)
+    BunchCli().subcommands(commands).main(args)
 }
 
 class BunchCli : CliktCommand(name = "bunch") {

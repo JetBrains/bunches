@@ -7,7 +7,6 @@ import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readExtensionsFromFile
@@ -31,17 +30,15 @@ data class Settings(
     val isNoCommit: Boolean
 )
 
-class CleanUp : CliktCommand(help = CLEANUP_DESCRIPTION) {
+class CleanUpCommand : CliktCommand(name = "cleanup", help = CLEANUP_DESCRIPTION) {
     val config by requireObject<Map<String, Boolean>>()
-    val repoPath by option("-C", help = "path to git repository")
+    val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
         .path(exists = true, fileOkay = false)
         .default(Paths.get(".").toAbsolutePath().normalize())
     val extension by option("--ext", help = "Particular extension for remove. All files with extensions found in '$BUNCH_FILE_NAME' file will be removed if not set.")
-    val isNoCommit by option("--no-commit", help = "Do not commit changes.").flag()
+    val isNoCommit by option("--no-commit", help = "Do not commit changes. -m option will be ignored").flag()
     val commitTitle by option("-m", help = "Title for the cleanup commit. \"$DEFAULT_CLEANUP_COMMIT_TITLE\" is used by default.")
-        .validate {
-            require(!isNoCommit) { "'No-commit' flag is set. Commit will not be created, you can't provide message for it." }
-        }
+        .default(DEFAULT_CLEANUP_COMMIT_TITLE)
     override fun run() {
         val settings = Settings(
             repoPath = repoPath.toString(),
@@ -55,7 +52,7 @@ class CleanUp : CliktCommand(help = CLEANUP_DESCRIPTION) {
 }
 
 fun main(args: Array<String>) {
-    CleanUp().main(listOf())
+    CleanUpCommand().main(args)
 }
 
 fun cleanup(settings: Settings) {

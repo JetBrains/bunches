@@ -2,12 +2,20 @@
 
 package org.jetbrains.bunches.reduce
 
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.requireObject
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.switch
+import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.file.readUpdatePairsFromFile
 import org.jetbrains.bunches.general.exitWithError
-import org.jetbrains.bunches.general.exitWithUsageError
+import org.jetbrains.bunches.general.partial
+import org.jetbrains.bunches.general.process
 import org.jetbrains.bunches.git.*
 import org.jetbrains.bunches.restore.toBunchFile
 import java.io.File
+import java.nio.file.Paths
 
 enum class ReduceAction {
     PRINT,
@@ -18,64 +26,44 @@ enum class ReduceAction {
 data class Settings(val repoPath: String, val bunchPath: String, val action: ReduceAction, val commitMessage: String)
 
 fun main(args: Array<String>) {
-    reduce(args)
+    ReduceCommand().main(args)
 }
 
 const val REDUCE_DESCRIPTION = "Check repository for unneeded files with the same content."
 const val DEFAULT_REDUCE_COMMIT_TITLE = "~~~~ reduce ~~~~"
+val REDUCE_EXAMPLE =
+    """
+    Example:
+    bunch reduce C:/Projects/kotlin
+    """.trimIndent()
 
-const val RE_A_ = "action"
+val ACTION_HELP =
+    """
+    Action that should be applied to redundant files. "commit" is used by default.
+        print - print the list in console
+        delete - only delete files
+        commit - delete files and commit them
+    """.trimIndent()
 
-fun reduce(args: Array<String>) {
-    if (args.size !in 1..3) {
-        exitWithUsageError(
-            """
-            Usage: <git-path> [<action: print|delete|commit>] [<commit message>]
+val ACTIONS = mapOf("--print" to ReduceAction.PRINT, "--delete" to ReduceAction.DELETE, "--commit" to ReduceAction.COMMIT)
 
-            $REDUCE_DESCRIPTION
-
-            <git-path>       - Directory with repository (parent directory for .git)
-            <$RE_A_>         - Action that should be applied to redundant files. "commit" is used by default.
-                                 print - print the list in console
-                                 delete - only delete files
-                                 commit - delete files and commit them
-            <commit message> - Commit message for "commit" action. "~~~~ reduce ~~~~" is used by default.
-
-            Example:
-            bunch reduce C:/Projects/kotlin
-            """.trimIndent()
+class ReduceCommand : CliktCommand(name = "reduce", help = REDUCE_DESCRIPTION, epilog = REDUCE_EXAMPLE) {
+    val config by requireObject<Map<String, Boolean>>()
+    val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
+        .path(exists = true, fileOkay = false)
+        .default(Paths.get(".").toAbsolutePath().normalize())
+    val action by option(help = ACTION_HELP).switch(ACTIONS).default(ReduceAction.COMMIT)
+    val commitTitle by option("-m", help = "Commit message for \"commit\" action. $DEFAULT_REDUCE_COMMIT_TITLE is used by default.")
+        .default(DEFAULT_REDUCE_COMMIT_TITLE)
+    override fun run() {
+        val settings = Settings(
+            repoPath = repoPath.toString(),
+            bunchPath = repoPath.toString(),
+            action = action,
+            commitMessage = commitTitle
         )
+        process(config.getValue("VERBOSE"), ::doReduce.partial(settings))
     }
-
-    val actionFromParam = args.getOrNull(1)?.let {
-        when (it) {
-            "print" -> ReduceAction.PRINT
-            "delete" -> ReduceAction.DELETE
-            "commit" -> ReduceAction.COMMIT
-            else -> {
-                if (args.size == 3) {
-                    exitWithUsageError("Unknown action: '$it'")
-                }
-
-                null
-            }
-        }
-    }
-
-    if (args.size == 3 && actionFromParam != ReduceAction.COMMIT) {
-        exitWithUsageError("Commit message is ignored for '$actionFromParam'")
-    }
-
-    val commitMessageFromParam = args.getOrNull(if (actionFromParam == null) 1 else 2)
-
-    val settings = Settings(
-        repoPath = args[0],
-        bunchPath = args[0],
-        action = actionFromParam ?: ReduceAction.COMMIT,
-        commitMessage = commitMessageFromParam ?: DEFAULT_REDUCE_COMMIT_TITLE
-    )
-
-    doReduce(settings)
 }
 
 private data class UpdatePair(val from: String, val to: String)

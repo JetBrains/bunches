@@ -12,8 +12,10 @@ import com.github.ajalt.clikt.parameters.options.versionOption
 import org.jetbrains.bunches.BunchException
 import org.jetbrains.bunches.BunchParametersException
 import org.jetbrains.bunches.ManifestReader
+import org.jetbrains.bunches.check.CheckCommand
 import org.jetbrains.bunches.cleanup.CleanUpCommand
 import org.jetbrains.bunches.cp.CherryPickCommand
+import org.jetbrains.bunches.reduce.ReduceCommand
 import org.jetbrains.bunches.restore.SwitchCommand
 import kotlin.system.exitProcess
 
@@ -47,7 +49,7 @@ fun printExceptionToSystemError(errorCode: Int, verbose: Boolean, e: Throwable):
     exitProcess(errorCode)
 }
 
-val commands = listOf(CleanUpCommand(), CherryPickCommand(), SwitchCommand())
+val commands = listOf(CleanUpCommand(), CherryPickCommand(), SwitchCommand(), CheckCommand(), ReduceCommand())
 
 fun <A, B> Function1<A, B>.partial(a: A): () -> B {
     return {invoke(a)}

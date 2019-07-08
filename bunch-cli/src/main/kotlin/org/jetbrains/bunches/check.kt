@@ -2,55 +2,58 @@
 
 package org.jetbrains.bunches.check
 
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.requireObject
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.types.path
 import org.eclipse.jgit.diff.DiffEntry
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.exitWithError
-import org.jetbrains.bunches.general.exitWithUsageError
+import org.jetbrains.bunches.general.partial
+import org.jetbrains.bunches.general.process
 import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.readCommits
 import java.io.File
+import java.nio.file.Paths
 
 data class Settings(val repoPath: String, val sinceRef: String, val untilRef: String, val extensions: String?)
 
 fun main(args: Array<String>) {
-    check(args)
+    CheckCommand().main(args)
 }
 
 const val CHECK_DESCRIPTION =
     "Check if commits have forgotten bunch files according to the HEAD of the given directory."
 
+val CHECK_EXAMPLE =
+    """
+    Example:
+    bunch check C:/Projects/kotlin HEAD 377572896b7dc09a5e2aa6af29825ffe07f71e58
+    """.trimIndent()
+
 const val CH_SINCE = "since-ref"
 const val CH_UNTIL = "until-ref"
 
-fun check(args: Array<String>) {
-    if (args.size !in 3..4) {
-        exitWithUsageError(
-            """
-            Usage: <git-path> <since-ref> <until-ref> [<extensions>]
-
-            $CHECK_DESCRIPTION
-
-            <git-path>   - Directory with repository (parent directory for .git).
-            <$CH_SINCE>  - Reference to the most recent commit that should be checked.
-            <$CH_UNTIL>  - Parent of the last commit that should be checked.
-            <extensions> - Set of extensions to check with '_' separator. '$BUNCH_FILE_NAME' file will be used if
-                           the option is missing.
-
-            Example:
-            bunch check C:/Projects/kotlin HEAD 377572896b7dc09a5e2aa6af29825ffe07f71e58
-            """.trimIndent()
+class CheckCommand : CliktCommand(name = "check", help = CHECK_DESCRIPTION, epilog = CHECK_EXAMPLE) {
+    val config by requireObject<Map<String, Boolean>>()
+    val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
+        .path(exists = true, fileOkay = false)
+        .default(Paths.get(".").toAbsolutePath().normalize())
+    val sinceRef by argument(name = "<$CH_SINCE>",  help = "Reference to the most recent commit that should be checked.")
+    val untilRef by argument(name = "<$CH_UNTIL>", help = "Parent of the last commit that should be checked.")
+    val extension by option("--ext", help = "Set of extensions to check with '_' separator. '$BUNCH_FILE_NAME' file will be used if the option is missing.")
+    override fun run() {
+        val settings = Settings(
+            repoPath = repoPath.toString(),
+            sinceRef = sinceRef,
+            untilRef = untilRef,
+            extensions = extension
         )
+        process(config.getValue("VERBOSE"), ::doCheck.partial(settings))
     }
-
-    val settings = Settings(
-        repoPath = args[0],
-        sinceRef = args[1],
-        untilRef = args[2],
-        extensions = args.getOrNull(3)
-    )
-
-    doCheck(settings)
 }
 
 fun doCheck(settings: Settings) {

@@ -4,8 +4,6 @@ import com.intellij.BundleBase.replaceMnemonicAmpersand
 import com.intellij.CommonBundle
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import com.intellij.openapi.ui.Messages.NO
-import com.intellij.openapi.ui.Messages.YES
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vcs.CheckinProjectPanel
 import com.intellij.openapi.vcs.changes.CommitContext
@@ -13,12 +11,18 @@ import com.intellij.openapi.vcs.changes.CommitExecutor
 import com.intellij.openapi.vcs.checkin.CheckinHandler
 import com.intellij.openapi.vcs.checkin.CheckinHandlerFactory
 import com.intellij.openapi.vcs.ui.RefreshableOnComponent
+import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.psi.PsiFile
+import com.intellij.psi.search.FilenameIndex
+import com.intellij.psi.search.ProjectScope
 import com.intellij.ui.NonFocusableCheckBox
 import com.intellij.util.PairConsumer
 import org.jetbrains.bunches.idea.util.BunchFileUtils
 import org.jetbrains.bunches.idea.util.NotNullableUserDataProperty
 import java.awt.GridLayout
 import java.io.File
+import javax.security.auth.callback.ConfirmationCallback.NO
+import javax.security.auth.callback.ConfirmationCallback.YES
 import javax.swing.JComponent
 import javax.swing.JPanel
 
@@ -32,8 +36,11 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
         return BunchCheckInHandler(panel)
     }
 
-    class BunchCheckInHandler(private val checkInProjectPanel: CheckinProjectPanel) : CheckinHandler() {
+    class BunchCheckInHandler(
+        private val checkInProjectPanel: CheckinProjectPanel
+    ) : CheckinHandler() {
         private val project get() = checkInProjectPanel.project
+
 
         override fun getBeforeCheckinConfigurationPanel(): RefreshableOnComponent? {
             BunchFileUtils.bunchFile(project) ?: return null
@@ -57,6 +64,13 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
             }
         }
 
+        private fun getPsiFile(file: File): PsiFile? {
+            return FilenameIndex.getFilesByName(
+                project, file.name,
+                ProjectScope.getContentScope(project)
+            ).firstOrNull()
+        }
+
         override fun beforeCheckin(
             executor: CommitExecutor?,
             additionalDataConsumer: PairConsumer<Any, Any>?
@@ -65,40 +79,42 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
 
             val extensions = BunchFileUtils.bunchExtensions(project)?.toSet() ?: return ReturnResult.COMMIT
 
-            val forgottenFiles = HashSet<File>()
+            val forgottenFiles = mutableSetOf<File>()
+            val allFiles = mutableMapOf<PsiFile, List<PsiFile>>()
             val commitFiles = checkInProjectPanel.files.filter { it.isFile }.toSet()
+
             for (file in commitFiles) {
                 if (file.extension in extensions) continue
 
                 val parent = file.parent ?: continue
                 val name = file.name
-                for (extension in extensions) {
-                    val bunchFile = File(parent, "$name.$extension")
-                    if (bunchFile !in commitFiles && bunchFile.exists()) {
-                        forgottenFiles.add(bunchFile)
-                    }
-                }
+                val psiFile = getPsiFile(file) ?: continue
+
+                val bunchFiles = extensions.map { File(parent, "$name.$it") }.filter { it.exists() }
+
+                allFiles[psiFile] = bunchFiles.mapNotNull { getPsiFile(it) }.toList()
+                forgottenFiles.addAll(bunchFiles.filter { it !in commitFiles })
             }
 
-            if (forgottenFiles.isEmpty()) return ReturnResult.COMMIT
-
-            val pathname = project.basePath ?: return ReturnResult.COMMIT
-            val projectBaseFile = File(pathname)
-            var filePaths = forgottenFiles.map { it.relativeTo(projectBaseFile).path }.sorted()
-            if (filePaths.size > 15) {
-                filePaths = filePaths.take(15) + "..."
+            if (forgottenFiles.isEmpty()) {
+                return ReturnResult.COMMIT
             }
 
             when (Messages.showYesNoCancelDialog(
                 project,
-                "Several bunch files haven't been updated:\n\n${filePaths.joinToString("\n")}\n\nDo you want to review them before commit?",
+                "Several bunch files haven't been updated\nDo you want to review them before commit?",
                 "Forgotten Bunch Files",
-                "Review",
-                "Commit",
+                "Yes",
+                "No",
                 CommonBundle.getCancelButtonText(),
                 Messages.getWarningIcon()
             )) {
                 YES -> {
+                    val window = ToolWindowManager.getInstance(project).getToolWindow("Bunch Tool")
+                    CheckToolWindowFactory.createToolWindowContent(
+                        window, forgottenFiles, allFiles,
+                        checkInProjectPanel
+                    )
                     return ReturnResult.CLOSE_WINDOW
                 }
                 NO -> return ReturnResult.COMMIT

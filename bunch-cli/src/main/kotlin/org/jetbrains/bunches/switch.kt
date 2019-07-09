@@ -3,8 +3,6 @@
 
 package org.jetbrains.bunches.restore
 
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
@@ -13,9 +11,8 @@ import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.cleanup.cleanup
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readRuleFromFile
+import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.general.exitWithError
-import org.jetbrains.bunches.general.partial
-import org.jetbrains.bunches.general.process
 import org.jetbrains.bunches.git.*
 import java.io.File
 import java.nio.file.Paths
@@ -48,8 +45,11 @@ val SWITCH_EXAMPLE =
 
 const val SW_BRANCHES_ = "branches-rule"
 
-class SwitchCommand : CliktCommand(name = "switch", help = SWITCH_DESCRIPTION, epilog = SWITCH_EXAMPLE) {
-    val config by requireObject<Map<String, Boolean>>()
+class SwitchCommand : BunchSubCommand(
+    name = "switch",
+    help = SWITCH_DESCRIPTION,
+    epilog = SWITCH_EXAMPLE
+) {
     val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
         .path(exists = true, fileOkay = false)
         .default(Paths.get(".").toAbsolutePath().normalize())
@@ -71,7 +71,7 @@ class SwitchCommand : CliktCommand(name = "switch", help = SWITCH_DESCRIPTION, e
             step = stepByStep,
             doCleanup = cleanUp
         )
-        process(config.getValue("VERBOSE"), ::doSwitch.partial(settings))
+        process { doSwitch(settings) }
     }
 }
 

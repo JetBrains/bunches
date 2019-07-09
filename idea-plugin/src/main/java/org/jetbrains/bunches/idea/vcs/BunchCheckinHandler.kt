@@ -26,7 +26,7 @@ import javax.security.auth.callback.ConfirmationCallback.YES
 import javax.swing.JComponent
 import javax.swing.JPanel
 
-private var Project.bunchFileCheckEnabled: Boolean by NotNullableUserDataProperty(
+internal var Project.bunchFileCheckEnabled: Boolean by NotNullableUserDataProperty(
     Key.create("IS_BUNCH_FILE_CHECK_ENABLED"),
     true
 )

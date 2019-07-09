@@ -69,14 +69,18 @@ class SimpleCheckToolWindow(
         AnAction("Commit", "Commit all previously chosen files", AllIcons.Actions.Commit) {
 
         override fun actionPerformed(e: AnActionEvent) {
-            CommitChangeListDialog.commitChanges(
+            project.bunchFileCheckEnabled = false
+            if (CommitChangeListDialog.commitChanges(
                 project,
                 checkInProjectPanel.selectedChanges,
                 null,
                 null,
                 checkInProjectPanel.commitMessage
-            )
-            closeTab()
+                )
+            ) {
+                closeTab()
+            }
+            project.bunchFileCheckEnabled = true
         }
     }
 }

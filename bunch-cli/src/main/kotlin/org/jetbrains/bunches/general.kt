@@ -5,6 +5,7 @@ package org.jetbrains.bunches.general
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.findObject
+import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -17,6 +18,7 @@ import org.jetbrains.bunches.cleanup.CleanUpCommand
 import org.jetbrains.bunches.cp.CherryPickCommand
 import org.jetbrains.bunches.reduce.ReduceCommand
 import org.jetbrains.bunches.restore.SwitchCommand
+import org.jetbrains.bunches.stats.StatCommand
 import kotlin.system.exitProcess
 
 fun exitWithUsageError(message: String): Nothing {
@@ -49,24 +51,37 @@ fun printExceptionToSystemError(errorCode: Int, verbose: Boolean, e: Throwable):
     exitProcess(errorCode)
 }
 
-val commands = listOf(CleanUpCommand(), CherryPickCommand(), SwitchCommand(), CheckCommand(), ReduceCommand())
-
-fun <A, B> Function1<A, B>.partial(a: A): () -> B {
-    return {invoke(a)}
-}
-
 fun main(args: Array<String>) {
-    BunchCli().subcommands(commands).main(args)
+    BunchCli().main(args)
 }
 
 class BunchCli : CliktCommand(name = "bunch") {
     init {
         versionOption(getVersion())
+        subcommands(
+            CleanUpCommand(),
+            CherryPickCommand(),
+            SwitchCommand(),
+            CheckCommand(),
+            ReduceCommand(),
+            StatCommand()
+        )
     }
     val verbose by option("--verbose").flag()
     val config by findObject { mutableMapOf<String, Boolean>() }
     override fun run() {
         config["VERBOSE"] = verbose
+    }
+}
+
+abstract class BunchSubCommand(
+    val help: String = "",
+    val epilog: String = "",
+    val name: String? = null
+) : CliktCommand(help, epilog, name) {
+    val config by requireObject<Map<String, Boolean>>()
+    fun process(commandAction: () -> Unit) {
+        process(config.getValue("VERBOSE"), commandAction)
     }
 }
 

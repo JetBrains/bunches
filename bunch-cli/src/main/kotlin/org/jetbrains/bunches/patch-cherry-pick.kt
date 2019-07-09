@@ -3,14 +3,11 @@
 
 package org.jetbrains.bunches.cp
 
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.path
-import org.jetbrains.bunches.general.partial
-import org.jetbrains.bunches.general.process
+import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.git.reCommitPatched
 import org.jetbrains.bunches.git.readCommits
 import java.nio.file.Paths
@@ -39,8 +36,11 @@ const val CP_SINCE = "since-ref"
 const val CP_UNTIL = "until-ref"
 const val CP_SX = "extension"
 
-class CherryPickCommand : CliktCommand(name = "cp", help = CHERRY_PICK_DESCRIPTION, epilog = CHERRY_PICK_EXAMPLE) {
-    val config by requireObject<Map<String, Boolean>>()
+class CherryPickCommand : BunchSubCommand(
+    name = "cp",
+    help = CHERRY_PICK_DESCRIPTION,
+    epilog = CHERRY_PICK_EXAMPLE
+) {
     val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
         .path(exists = true, fileOkay = false)
         .default(Paths.get(".").toAbsolutePath().normalize())
@@ -48,8 +48,13 @@ class CherryPickCommand : CliktCommand(name = "cp", help = CHERRY_PICK_DESCRIPTI
     val untilRef by argument(name = "<$CP_UNTIL>", help = "Parent of the last commit that should be ported (hash of \"==== switch 182 ====\" for instance).")
     val extension by argument(name = "<$CP_SX>", help = "Suffix for ported files.")
     override fun run() {
-        val settings = Settings(repoPath.toString(), sinceRef, untilRef, extension)
-        process(config.getValue("VERBOSE"), ::cherryPick.partial(settings))
+        val settings = Settings(
+            gitPath = repoPath.toString(),
+            branch = sinceRef,
+            untilHash = untilRef,
+            suffix = extension
+        )
+        process { cherryPick(settings) }
     }
 }
 

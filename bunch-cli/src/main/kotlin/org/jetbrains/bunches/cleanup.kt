@@ -2,17 +2,14 @@
 
 package org.jetbrains.bunches.cleanup
 
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readExtensionsFromFile
+import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.general.exitWithError
-import org.jetbrains.bunches.general.partial
-import org.jetbrains.bunches.general.process
 import org.jetbrains.bunches.git.*
 import java.io.File
 import java.nio.file.Paths
@@ -30,8 +27,10 @@ data class Settings(
     val isNoCommit: Boolean
 )
 
-class CleanUpCommand : CliktCommand(name = "cleanup", help = CLEANUP_DESCRIPTION) {
-    val config by requireObject<Map<String, Boolean>>()
+class CleanUpCommand : BunchSubCommand(
+    name = "cleanup",
+    help = CLEANUP_DESCRIPTION
+) {
     val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
         .path(exists = true, fileOkay = false)
         .default(Paths.get(".").toAbsolutePath().normalize())
@@ -47,7 +46,7 @@ class CleanUpCommand : CliktCommand(name = "cleanup", help = CLEANUP_DESCRIPTION
             commitTitle = commitTitle,
             isNoCommit = isNoCommit
         )
-        process(config.getValue("VERBOSE"), ::cleanup.partial(settings))
+        process { cleanup(settings) }
     }
 }
 

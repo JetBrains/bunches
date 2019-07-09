@@ -2,16 +2,13 @@
 
 package org.jetbrains.bunches.reduce
 
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.switch
 import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.file.readUpdatePairsFromFile
+import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.general.exitWithError
-import org.jetbrains.bunches.general.partial
-import org.jetbrains.bunches.general.process
 import org.jetbrains.bunches.git.*
 import org.jetbrains.bunches.restore.toBunchFile
 import java.io.File
@@ -47,8 +44,11 @@ val ACTION_HELP =
 
 val ACTIONS = mapOf("--print" to ReduceAction.PRINT, "--delete" to ReduceAction.DELETE, "--commit" to ReduceAction.COMMIT)
 
-class ReduceCommand : CliktCommand(name = "reduce", help = REDUCE_DESCRIPTION, epilog = REDUCE_EXAMPLE) {
-    val config by requireObject<Map<String, Boolean>>()
+class ReduceCommand : BunchSubCommand(
+    name = "reduce",
+    help = REDUCE_DESCRIPTION,
+    epilog = REDUCE_EXAMPLE
+) {
     val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
         .path(exists = true, fileOkay = false)
         .default(Paths.get(".").toAbsolutePath().normalize())
@@ -62,7 +62,7 @@ class ReduceCommand : CliktCommand(name = "reduce", help = REDUCE_DESCRIPTION, e
             action = action,
             commitMessage = commitTitle
         )
-        process(config.getValue("VERBOSE"), ::doReduce.partial(settings))
+        process { doReduce(settings) }
     }
 }
 

@@ -2,8 +2,6 @@
 
 package org.jetbrains.bunches.check
 
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
@@ -11,9 +9,8 @@ import com.github.ajalt.clikt.parameters.types.path
 import org.eclipse.jgit.diff.DiffEntry
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readExtensionsFromFile
+import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.general.exitWithError
-import org.jetbrains.bunches.general.partial
-import org.jetbrains.bunches.general.process
 import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.readCommits
 import java.io.File
@@ -37,8 +34,11 @@ val CHECK_EXAMPLE =
 const val CH_SINCE = "since-ref"
 const val CH_UNTIL = "until-ref"
 
-class CheckCommand : CliktCommand(name = "check", help = CHECK_DESCRIPTION, epilog = CHECK_EXAMPLE) {
-    val config by requireObject<Map<String, Boolean>>()
+class CheckCommand : BunchSubCommand(
+    name = "check",
+    help = CHECK_DESCRIPTION,
+    epilog = CHECK_EXAMPLE
+) {
     val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
         .path(exists = true, fileOkay = false)
         .default(Paths.get(".").toAbsolutePath().normalize())
@@ -52,7 +52,7 @@ class CheckCommand : CliktCommand(name = "check", help = CHECK_DESCRIPTION, epil
             untilRef = untilRef,
             extensions = extension
         )
-        process(config.getValue("VERBOSE"), ::doCheck.partial(settings))
+        process { doCheck(settings) }
     }
 }
 

@@ -54,4 +54,9 @@ object Main : BuildType({
 object BunchTool : GitVcsRoot({
     name = "Bunch Tool"
     url = "https://github.com/JetBrains/bunches.git"
+    branch = "master"
+    branchSpec = """
+        +:refs/heads/(master)
+        +:refs/heads/(rr/*)
+    """.trimIndent()
 })

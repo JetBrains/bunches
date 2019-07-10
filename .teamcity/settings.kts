@@ -1,6 +1,7 @@
 import jetbrains.buildServer.configs.kotlin.v2018_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.v2018_2.project
+import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.v2018_2.vcs.GitVcsRoot
 import jetbrains.buildServer.configs.kotlin.v2018_2.version
 
@@ -32,6 +33,15 @@ object Main : BuildType({
             tasks = "clean build -Pversion=%build.number%"
             buildFile = ""
             gradleWrapperPath = ""
+        }
+    }
+
+    triggers {
+        vcs {
+            branchFilter = """
+                +:<default>
+                +:rr/*
+            """.trimIndent()
         }
     }
 

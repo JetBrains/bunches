@@ -1,9 +1,24 @@
 package org.jetbrains.bunches.hooks
 
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.arguments.multiple
+import com.github.ajalt.clikt.parameters.types.file
 import org.jetbrains.bunches.getExtensions
 import java.io.File
 import java.lang.System.exit
 import java.nio.file.Path
+
+class PrecommitHookCommand : CliktCommand(
+    name = "precommit",
+    help = "technical function"
+) {
+    val commitFiles by argument().file().multiple()
+
+    override fun run() {
+        precommitHook(commitFiles.toSet())
+    }
+}
 
 fun precommitLostFiles(args: Array<String>): HashSet<File>? {
     val extensions = getExtensions(args[0])

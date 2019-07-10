@@ -5,14 +5,12 @@ package org.jetbrains.bunches.cleanup
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.git.*
 import java.io.File
-import java.nio.file.Paths
 
 const val EXT_PATTERN = "{ext}"
 const val DEFAULT_CLEANUP_COMMIT_TITLE = "~~~~ cleanup $EXT_PATTERN ~~~~"
@@ -31,13 +29,20 @@ class CleanUpCommand : BunchSubCommand(
     name = "cleanup",
     help = CLEANUP_DESCRIPTION
 ) {
-    val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
-        .path(exists = true, fileOkay = false)
-        .default(Paths.get(".").toAbsolutePath().normalize())
-    val extension by option("--ext", help = "Particular extension for remove. All files with extensions found in '$BUNCH_FILE_NAME' file will be removed if not set.")
+    val extension by option(
+        "--ext",
+        help = "Particular extension for remove. " +
+                "All files with extensions found in '$BUNCH_FILE_NAME' file will be removed if not set."
+    )
+
     val isNoCommit by option("--no-commit", help = "Do not commit changes. -m option will be ignored").flag()
-    val commitTitle by option("-m", help = "Title for the cleanup commit. \"$DEFAULT_CLEANUP_COMMIT_TITLE\" is used by default.")
-        .default(DEFAULT_CLEANUP_COMMIT_TITLE)
+
+    val commitTitle by option(
+        "-m",
+        help = "Title for the cleanup commit. " +
+                "\"$DEFAULT_CLEANUP_COMMIT_TITLE\" is used by default."
+    ).default(DEFAULT_CLEANUP_COMMIT_TITLE)
+
     override fun run() {
         val settings = Settings(
             repoPath = repoPath.toString(),
@@ -46,6 +51,7 @@ class CleanUpCommand : BunchSubCommand(
             commitTitle = commitTitle,
             isNoCommit = isNoCommit
         )
+
         process { cleanup(settings) }
     }
 }

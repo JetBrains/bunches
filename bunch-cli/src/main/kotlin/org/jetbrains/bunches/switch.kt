@@ -7,7 +7,6 @@ import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.cleanup.cleanup
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readRuleFromFile
@@ -15,7 +14,6 @@ import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.git.*
 import java.io.File
-import java.nio.file.Paths
 
 const val RESTORE_COMMIT_TITLE = "~~~~ switch {target} ~~~~"
 const val RESTORE_BACKUP_COMMIT_TITLE = "~~~~ backup files ~~~~"
@@ -51,18 +49,29 @@ class SwitchCommand : BunchSubCommand(
     help = SWITCH_DESCRIPTION,
     epilog = SWITCH_EXAMPLE
 ) {
-    val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
-        .path(exists = true, fileOkay = false)
-        .default(Paths.get(".").toAbsolutePath().normalize())
-    val rule by argument(name = "<$SW_BRANCHES_>",
+    val rule by argument(
+        name = "<$SW_BRANCHES_>",
         help = """Set of file suffixes separated with `_` showing what files should be affected and priority
             of application. If only target branch is given file <git-path>/$BUNCH_FILE_NAME will be checked for
-            pattern.""".trimIndent())
-    val stepByStep by option("--step", help = "Do switch step by step with intermediate commits after applying each step.").flag()
-    val cleanUp by option("--cleanup", help = "Remove bunch files after branch restore (executes 'cleanup' command with default arguments).").flag()
-    val commitTitle by option("-m",
+            pattern.""".trimIndent()
+    )
+
+    val stepByStep by option(
+        "--step",
+        help = "Do switch step by step with intermediate commits after applying each step."
+    ).flag()
+
+    val cleanUp by option(
+        "--cleanup",
+        help = "Remove bunch files after branch restore (executes 'cleanup' command with default arguments)."
+    ).flag()
+
+    val commitTitle by option(
+        "-m",
         help = """Title for the switch commit. \"$RESTORE_COMMIT_TITLE\" is used by default. {target} pattern
-            in message will be replaced with the target branch suffix.""".trimIndent()).default(RESTORE_COMMIT_TITLE)
+            in message will be replaced with the target branch suffix.""".trimIndent()
+    ).default(RESTORE_COMMIT_TITLE)
+
     override fun run() {
         val settings = Settings(
             repoPath = repoPath.toString(),
@@ -72,6 +81,7 @@ class SwitchCommand : BunchSubCommand(
             step = stepByStep,
             doCleanup = cleanUp
         )
+
         process { doSwitch(settings) }
     }
 }

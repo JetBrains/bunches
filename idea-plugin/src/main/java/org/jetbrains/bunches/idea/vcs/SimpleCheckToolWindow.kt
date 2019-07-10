@@ -4,13 +4,19 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.openapi.vcs.CheckinProjectPanel
+import com.intellij.openapi.vcs.changes.ChangeListChange
+import com.intellij.openapi.vcs.changes.ChangeListManagerImpl
+import com.intellij.openapi.vcs.changes.LocalChangeListImpl
 import com.intellij.openapi.vcs.changes.ui.CommitChangeListDialog
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowContentUiType
 import com.intellij.psi.PsiFile
+import com.intellij.ui.PopupHandler
 import com.intellij.ui.components.JBScrollPane
+import org.jetbrains.bunches.idea.actions.BunchCompareFilesAction
+import org.jetbrains.bunches.idea.util.BunchFileUtils.isBunchFile
 import java.awt.GridLayout
-import java.io.File
 import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.JToolBar
@@ -18,12 +24,14 @@ import javax.swing.tree.DefaultMutableTreeNode
 
 class SimpleCheckToolWindow(
     private val toolWindow: ToolWindow,
-    forgottenFiles: Set<File>,
+    forgottenFiles: Set<VirtualFile>,
     all: Map<PsiFile, List<PsiFile>>,
     private val checkInProjectPanel: CheckinProjectPanel
 ) {
 
+    private val allFiles = checkInProjectPanel.virtualFiles
     private val project = checkInProjectPanel.project
+    private val mainChanges = checkInProjectPanel.selectedChanges.toList()
     private val panel: SimpleToolWindowPanel = SimpleToolWindowPanel(false)
     private val filesTree: ForgottenFilesTree = ForgottenFilesTree(
         DefaultMutableTreeNode("root"),
@@ -42,6 +50,7 @@ class SimpleCheckToolWindow(
         }
 
         setToolBar()
+        setPopupMenu()
 
         toolWindow.apply {
             setDefaultContentUiType(ToolWindowContentUiType.TABBED)
@@ -65,22 +74,100 @@ class SimpleCheckToolWindow(
         }
     }
 
+    private fun setPopupMenu() {
+        val actionGroup = DefaultActionGroup().apply {
+            add(SetCheckedAction())
+            add(SetUncheckedAction())
+            addSeparator()
+            add(ActionManager.getInstance().getAction(IdeActions.ACTION_EDIT_SOURCE))
+            addSeparator()
+            add(DiffAction())
+        }
+        PopupHandler.installPopupHandler(filesTree, actionGroup, ActionPlaces.POPUP, ActionManager.getInstance())
+    }
+
     private inner class CommitWithoutCheck :
-        AnAction("Commit", "Commit all previously chosen files", AllIcons.Actions.Commit) {
+        AnAction("Commit", "Commit previously chosen and added files", AllIcons.Actions.Commit) {
 
         override fun actionPerformed(e: AnActionEvent) {
+            val changeListManager = ChangeListManagerImpl.getInstanceImpl(project)
+            val changes = mainChanges.toMutableList()
+            val firstChange = (changes.firstOrNull() ?: return) as ChangeListChange
+
+            changes.addAll(filesTree.getSelected().mapNotNull { changeListManager.getChange(it) }.map {
+                ChangeListChange(
+                    it,
+                    firstChange.changeListName,
+                    firstChange.changeListId
+                )
+            })
+
             project.bunchFileCheckEnabled = false
             if (CommitChangeListDialog.commitChanges(
-                project,
-                checkInProjectPanel.selectedChanges,
-                null,
-                null,
-                checkInProjectPanel.commitMessage
+                    project,
+                    changes,
+                    LocalChangeListImpl.Builder(project, firstChange.changeListName).setChanges(changes).build(),
+                    null,
+                    checkInProjectPanel.commitMessage
                 )
             ) {
                 closeTab()
             }
             project.bunchFileCheckEnabled = true
+        }
+    }
+
+    private inner class SetCheckedAction :
+        AnAction("Add to commit", "Add all current changes to commit", AllIcons.Actions.Redo) {
+
+        init {
+            registerCustomShortcutSet(CommonShortcuts.ENTER, panel)
+        }
+
+        override fun actionPerformed(e: AnActionEvent) {
+            filesTree.addSelected(filesTree.psiFile?.virtualFile)
+        }
+
+        override fun update(e: AnActionEvent) {
+            val file = filesTree.psiFile ?: return
+            if (file.virtualFile in filesTree.getSelected() || !isBunchFile(
+                    file.virtualFile,
+                    project
+                ) || file.virtualFile in allFiles
+            ) {
+                e.presentation.isEnabled = false
+                e.presentation.isVisible = false
+            }
+        }
+    }
+
+    private inner class SetUncheckedAction :
+        AnAction("Remove from commit", "Remove all current changes from commit", AllIcons.Actions.Undo) {
+
+        init {
+            registerCustomShortcutSet(CommonShortcuts.ENTER, panel)
+        }
+
+        override fun actionPerformed(e: AnActionEvent) {
+            filesTree.removeSelected(filesTree.psiFile?.virtualFile)
+        }
+
+        override fun update(e: AnActionEvent) {
+            val file = filesTree.psiFile ?: return
+            if (file.virtualFile !in filesTree.getSelected() || !isBunchFile(
+                    file.virtualFile,
+                    project
+                ) || file.virtualFile in allFiles
+            ) {
+                e.presentation.isEnabled = false
+                e.presentation.isVisible = false
+            }
+        }
+    }
+
+    private inner class DiffAction : BunchCompareFilesAction() {
+        override fun getFile(e: AnActionEvent): VirtualFile? {
+            return filesTree.psiFile?.virtualFile
         }
     }
 }

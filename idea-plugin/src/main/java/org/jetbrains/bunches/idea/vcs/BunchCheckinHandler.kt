@@ -11,16 +11,16 @@ import com.intellij.openapi.vcs.changes.CommitExecutor
 import com.intellij.openapi.vcs.checkin.CheckinHandler
 import com.intellij.openapi.vcs.checkin.CheckinHandlerFactory
 import com.intellij.openapi.vcs.ui.RefreshableOnComponent
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiFile
-import com.intellij.psi.search.FilenameIndex
-import com.intellij.psi.search.ProjectScope
+import com.intellij.psi.PsiManager
 import com.intellij.ui.NonFocusableCheckBox
 import com.intellij.util.PairConsumer
 import org.jetbrains.bunches.idea.util.BunchFileUtils
+import org.jetbrains.bunches.idea.util.BunchFileUtils.getAllBunchFiles
 import org.jetbrains.bunches.idea.util.NotNullableUserDataProperty
 import java.awt.GridLayout
-import java.io.File
 import javax.security.auth.callback.ConfirmationCallback.NO
 import javax.security.auth.callback.ConfirmationCallback.YES
 import javax.swing.JComponent
@@ -64,11 +64,8 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
             }
         }
 
-        private fun getPsiFile(file: File): PsiFile? {
-            return FilenameIndex.getFilesByName(
-                project, file.name,
-                ProjectScope.getContentScope(project)
-            ).firstOrNull()
+        private fun getPsiFile(file: VirtualFile): PsiFile? {
+            return PsiManager.getInstance(project).findFile(file)
         }
 
         override fun beforeCheckin(
@@ -79,18 +76,16 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
 
             val extensions = BunchFileUtils.bunchExtensions(project)?.toSet() ?: return ReturnResult.COMMIT
 
-            val forgottenFiles = mutableSetOf<File>()
+            val forgottenFiles = mutableSetOf<VirtualFile>()
             val allFiles = mutableMapOf<PsiFile, List<PsiFile>>()
-            val commitFiles = checkInProjectPanel.files.filter { it.isFile }.toSet()
+            val commitFiles = checkInProjectPanel.virtualFiles.toSet()
+
 
             for (file in commitFiles) {
                 if (file.extension in extensions) continue
-
-                val parent = file.parent ?: continue
-                val name = file.name
                 val psiFile = getPsiFile(file) ?: continue
 
-                val bunchFiles = extensions.map { File(parent, "$name.$it") }.filter { it.exists() }
+                val bunchFiles = getAllBunchFiles(psiFile.virtualFile, project)
 
                 allFiles[psiFile] = bunchFiles.mapNotNull { getPsiFile(it) }.toList()
                 forgottenFiles.addAll(bunchFiles.filter { it !in commitFiles })

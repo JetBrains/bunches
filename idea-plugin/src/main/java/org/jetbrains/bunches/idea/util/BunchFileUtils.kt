@@ -8,10 +8,10 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vcs.VcsRoot
 import com.intellij.openapi.vcs.roots.VcsRootDetector
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.containers.ContainerUtil
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.git.isGitRoot
-import org.jetbrains.bunches.reduce.getReducibleFiles
 import java.io.File
 
 object BunchFileUtils {
@@ -31,6 +31,24 @@ object BunchFileUtils {
         }
 
         return simplePath(roots.first())
+    }
+
+    fun isBunchFile(file: VirtualFile, project: Project): Boolean {
+        return file.extension in ( bunchExtensions(project) ?: return false)
+    }
+
+    fun getMainFile(file: VirtualFile, project: Project): VirtualFile? {
+        if (!isBunchFile(file, project)) {
+            return null
+        }
+        return VirtualFileManager.getInstance().findFileByUrl(file.url.substringBeforeLast('.'))
+    }
+
+    fun getAllBunchFiles(file: VirtualFile, project: Project): List<VirtualFile> {
+        val extensions = bunchExtensions(project) ?: return listOf()
+        return extensions.mapNotNull {
+            VirtualFileManager.getInstance().findFileByUrl(file.url + ".$it")
+        }
     }
 
     fun bunchPath(project: Project) : String? {

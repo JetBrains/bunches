@@ -4,13 +4,9 @@
 package org.jetbrains.bunches.cp
 
 import com.github.ajalt.clikt.parameters.arguments.argument
-import com.github.ajalt.clikt.parameters.options.default
-import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.git.reCommitPatched
 import org.jetbrains.bunches.git.readCommits
-import java.nio.file.Paths
 
 data class Settings(
     val gitPath: String,
@@ -41,12 +37,15 @@ class CherryPickCommand : BunchSubCommand(
     help = CHERRY_PICK_DESCRIPTION,
     epilog = CHERRY_PICK_EXAMPLE
 ) {
-    val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
-        .path(exists = true, fileOkay = false)
-        .default(Paths.get(".").toAbsolutePath().normalize())
-    val sinceRef by argument(name = "<$CP_SINCE>",  help = "Reference to most recent commit that should be ported.")
-    val untilRef by argument(name = "<$CP_UNTIL>", help = "Parent of the last commit that should be ported (hash of \"==== switch 182 ====\" for instance).")
-    val extension by argument(name = "<$CP_SX>", help = "Suffix for ported files.")
+    val sinceRef by argument("<$CP_SINCE>",  help = "Reference to most recent commit that should be ported.")
+
+    val untilRef by argument(
+        "<$CP_UNTIL>",
+        help = "Parent of the last commit that should be ported (hash of \"==== switch 182 ====\" for instance)."
+    )
+
+    val extension by argument("<$CP_SX>", help = "Suffix for ported files.")
+
     override fun run() {
         val settings = Settings(
             gitPath = repoPath.toString(),
@@ -54,6 +53,7 @@ class CherryPickCommand : BunchSubCommand(
             untilHash = untilRef,
             suffix = extension
         )
+
         process { cherryPick(settings) }
     }
 }

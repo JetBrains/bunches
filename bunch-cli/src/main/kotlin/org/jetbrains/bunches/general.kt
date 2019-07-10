@@ -7,18 +7,24 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.findObject
 import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.core.subcommands
+import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.versionOption
+import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.BunchException
 import org.jetbrains.bunches.BunchParametersException
 import org.jetbrains.bunches.ManifestReader
 import org.jetbrains.bunches.check.CheckCommand
 import org.jetbrains.bunches.cleanup.CleanUpCommand
 import org.jetbrains.bunches.cp.CherryPickCommand
+import org.jetbrains.bunches.precommit.InstallHookCommand
+import org.jetbrains.bunches.precommit.PrecommitHookCommand
+import org.jetbrains.bunches.precommit.UninstallHookCommand
 import org.jetbrains.bunches.reduce.ReduceCommand
 import org.jetbrains.bunches.restore.SwitchCommand
 import org.jetbrains.bunches.stats.StatCommand
+import java.nio.file.Paths
 import kotlin.system.exitProcess
 
 fun exitWithUsageError(message: String): Nothing {
@@ -64,11 +70,17 @@ class BunchCli : CliktCommand(name = "bunch") {
             SwitchCommand(),
             CheckCommand(),
             ReduceCommand(),
-            StatCommand()
+            StatCommand(),
+            InstallHookCommand(),
+            UninstallHookCommand(),
+            PrecommitHookCommand()
         )
     }
+
     val verbose by option("--verbose").flag()
+
     val config by findObject { mutableMapOf<String, Boolean>() }
+
     override fun run() {
         config["VERBOSE"] = verbose
     }
@@ -80,6 +92,11 @@ abstract class BunchSubCommand(
     val name: String? = null
 ) : CliktCommand(help, epilog, name) {
     val config by requireObject<Map<String, Boolean>>()
+
+    val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
+        .path(exists = true, fileOkay = false)
+        .default(Paths.get(".").toAbsolutePath().normalize())
+
     fun process(commandAction: () -> Unit) {
         process(config.getValue("VERBOSE"), commandAction)
     }

@@ -3,7 +3,6 @@
 package org.jetbrains.bunches.check
 
 import com.github.ajalt.clikt.parameters.arguments.argument
-import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.path
 import org.eclipse.jgit.diff.DiffEntry
@@ -14,7 +13,6 @@ import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.readCommits
 import java.io.File
-import java.nio.file.Paths
 
 data class Settings(val repoPath: String, val sinceRef: String, val untilRef: String, val extensions: String?)
 
@@ -39,12 +37,19 @@ class CheckCommand : BunchSubCommand(
     help = CHECK_DESCRIPTION,
     epilog = CHECK_EXAMPLE
 ) {
-    val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
-        .path(exists = true, fileOkay = false)
-        .default(Paths.get(".").toAbsolutePath().normalize())
-    val sinceRef by argument(name = "<$CH_SINCE>",  help = "Reference to the most recent commit that should be checked.")
-    val untilRef by argument(name = "<$CH_UNTIL>", help = "Parent of the last commit that should be checked.")
-    val extension by option("--ext", help = "Set of extensions to check with '_' separator. '$BUNCH_FILE_NAME' file will be used if the option is missing.")
+    val sinceRef by argument(
+        "<$CH_SINCE>",
+        help = "Reference to the most recent commit that should be checked."
+    )
+
+    val untilRef by argument("<$CH_UNTIL>", help = "Parent of the last commit that should be checked.")
+
+    val extension by option(
+        "--ext",
+        help = "Set of extensions to check with '_' separator. " +
+                "'$BUNCH_FILE_NAME' file will be used if the option is missing."
+    )
+
     override fun run() {
         val settings = Settings(
             repoPath = repoPath.toString(),
@@ -52,6 +57,7 @@ class CheckCommand : BunchSubCommand(
             untilRef = untilRef,
             extensions = extension
         )
+
         process { doCheck(settings) }
     }
 }

@@ -6,7 +6,6 @@ package org.jetbrains.bunches.stats
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.switch
-import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.check.isDeletedBunchFile
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.BunchSubCommand
@@ -15,7 +14,6 @@ import org.jetbrains.bunches.general.exitWithUsageError
 import org.jetbrains.bunches.git.parseGitIgnore
 import org.jetbrains.bunches.git.shouldIgnoreDir
 import java.io.File
-import java.nio.file.Paths
 
 enum class Kind {
     DIR,
@@ -33,10 +31,10 @@ const val STATS_DIR = "show information about single directory"
 const val STATS_LS = "give a quick overview for all sub-dirs"
 
 val STATS_EXAMPLE =
-        """
-        Example:
-        bunch stats C:/Projects/kotlin
-        """.trimIndent()
+    """
+    Example:
+    bunch stats C:/Projects/kotlin
+    """.trimIndent()
 
 val KIND_HELP =
     """
@@ -53,15 +51,14 @@ class StatCommand : BunchSubCommand(
     help = STATS_DESCRIPTION,
     epilog = STATS_EXAMPLE
 ) {
-    val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
-        .path(exists = true, fileOkay = false)
-        .default(Paths.get(".").toAbsolutePath().normalize())
     val kind by option(help = KIND_HELP).switch(KINDS).default(Kind.DIR)
+
     override fun run() {
         val settings = Settings(
             path = repoPath.toString(),
             kind = kind
         )
+
         process { doStats(settings) }
     }
 }

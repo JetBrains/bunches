@@ -2,33 +2,24 @@
 
 package org.jetbrains.bunches.precommit
 
+import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.general.exitWithError
-import org.jetbrains.bunches.general.exitWithUsageError
-import org.jetbrains.bunches.general.process
 import java.io.File
 
 fun main(args: Array<String>) {
-    //process(args, ::installHook)
+    InstallHookCommand().main(args)
 }
 
-fun installHook(args: Array<String>) {
-    if (args.size > 1) {
-        exitWithUsageError(
-            """
-            Usage: <git-path>
-
-            Installs git hook that checks forgotten bunch files
-
-            <git-path>   - Directory with repository (parent directory for .git).
-            """.trimIndent()
-        )
+class InstallHookCommand : BunchSubCommand(
+    name = "installHook",
+    help = "Installs git hook that checks forgotten bunch files"
+) {
+    override fun run() {
+        process { installHook(repoPath.toString()) }
     }
+}
 
-    val gitPath = if (args.isEmpty()) File("").canonicalPath else args[0]
-    if (!File(gitPath).exists()) {
-        exitWithError("Directory $gitPath doesn't exist")
-    }
-
+fun installHook(gitPath: String) {
     val dotGitPath = "$gitPath/.git"
     if (!File(dotGitPath).isDirectory) {
         exitWithError("Directory $gitPath is not a repository")

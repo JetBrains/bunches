@@ -1,5 +1,9 @@
 package org.jetbrains.bunches.precommit
 
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.arguments.multiple
+import com.github.ajalt.clikt.parameters.types.file
 import java.io.File
 import java.lang.System.exit
 import java.util.*
@@ -11,16 +15,24 @@ fun getBunchExtensions(dotBunchFile: File): Set<String>? {
     return lines.drop(1).map { it.split('_').first() }.toSet()
 }
 
-fun precommitHook(args: Array<String>) {
+class PrecommitHookCommand : CliktCommand(
+    name = "precommit",
+    help = "technical function"
+) {
+    val commitFiles by argument().file().multiple()
+
+    override fun run() {
+        precommitHook(commitFiles.toSet())
+    }
+}
+
+fun precommitHook(commitFiles: Set<File>) {
     val dotBunchFile = File(".bunch")
     if (!dotBunchFile.exists()) {
         println("Project's .bunch file wasn't found, hook is disabled")
         exit(0)
     }
     val extensions = getBunchExtensions(dotBunchFile) ?: return
-
-
-    val commitFiles = args.map { File(it) }.toSet()
 
     val forgottenFiles = HashSet<File>()
 

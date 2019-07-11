@@ -2,8 +2,10 @@ package org.jetbrains.bunches.idea.vcs
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.openapi.vcs.CheckinProjectPanel
+import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.ChangeListChange
 import com.intellij.openapi.vcs.changes.ChangeListManagerImpl
 import com.intellij.openapi.vcs.changes.LocalChangeListImpl
@@ -14,9 +16,11 @@ import com.intellij.openapi.wm.ToolWindowContentUiType
 import com.intellij.psi.PsiFile
 import com.intellij.ui.PopupHandler
 import com.intellij.ui.components.JBScrollPane
+import org.jetbrains.bunches.idea.actions.ApplyChangesAction
 import org.jetbrains.bunches.idea.actions.BunchCompareFilesAction
 import org.jetbrains.bunches.idea.util.BunchFileUtils.isBunchFile
 import java.awt.GridLayout
+import java.io.File
 import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.JToolBar
@@ -81,6 +85,7 @@ class SimpleCheckToolWindow(
             addSeparator()
             add(ActionManager.getInstance().getAction(IdeActions.ACTION_EDIT_SOURCE))
             addSeparator()
+            add(CreateAndApplyAction())
             add(DiffAction())
         }
         PopupHandler.installPopupHandler(filesTree, actionGroup, ActionPlaces.POPUP, ActionManager.getInstance())
@@ -168,6 +173,26 @@ class SimpleCheckToolWindow(
     private inner class DiffAction : BunchCompareFilesAction() {
         override fun getFile(e: AnActionEvent): VirtualFile? {
             return filesTree.psiFile?.virtualFile
+        }
+    }
+
+    inner class CreateAndApplyAction : ApplyChangesAction() {
+        override fun update(e: AnActionEvent) {
+            val file = filesTree.psiFile?.virtualFile ?: return
+            if (getChanges(file, project) == null || isBunchFile(file, project)) {
+                e.presentation.isEnabled = false
+            }
+        }
+
+        override fun getChanges(file: VirtualFile, project: Project): Change? {
+            return checkInProjectPanel.selectedChanges.firstOrNull { it.affectsFile(File(file.path)) }
+                ?: super.getChanges(file, project)
+        }
+
+        override fun actionPerformed(e: AnActionEvent) {
+            val file = filesTree.psiFile ?: return
+            val affected = applyMainToAll(file.virtualFile, project)
+            showInfoBalloon(affected, file.virtualFile, project)
         }
     }
 }

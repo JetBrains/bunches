@@ -78,6 +78,14 @@ class SimpleCheckToolWindow(
         }
     }
 
+    private fun inCommit(file: PsiFile): Boolean {
+        return file.virtualFile in allFiles
+    }
+
+    private fun isSelected(file: PsiFile): Boolean {
+        return file.virtualFile in filesTree.getSelected()
+    }
+
     private fun setPopupMenu() {
         val actionGroup = DefaultActionGroup().apply {
             add(SetCheckedAction())
@@ -93,6 +101,10 @@ class SimpleCheckToolWindow(
 
     private inner class CommitWithoutCheck :
         AnAction("Commit", "Commit previously chosen and added files", AllIcons.Actions.Commit) {
+
+        init {
+            registerCustomShortcutSet(CustomShortcutSet.fromString("ctrl shift K"), panel)
+        }
 
         override fun actionPerformed(e: AnActionEvent) {
             val changeListManager = ChangeListManagerImpl.getInstanceImpl(project)
@@ -135,14 +147,10 @@ class SimpleCheckToolWindow(
 
         override fun update(e: AnActionEvent) {
             val file = filesTree.psiFile ?: return
-            if (file.virtualFile in filesTree.getSelected() || !isBunchFile(
-                    file.virtualFile,
-                    project
-                ) || file.virtualFile in allFiles
-            ) {
-                e.presentation.isEnabled = false
-                e.presentation.isVisible = false
-            }
+            e.presentation.isEnabledAndVisible = !isSelected(file)
+                    && isBunchFile(file.virtualFile, project)
+                    && !inCommit(file)
+
         }
     }
 
@@ -159,14 +167,9 @@ class SimpleCheckToolWindow(
 
         override fun update(e: AnActionEvent) {
             val file = filesTree.psiFile ?: return
-            if (file.virtualFile !in filesTree.getSelected() || !isBunchFile(
-                    file.virtualFile,
-                    project
-                ) || file.virtualFile in allFiles
-            ) {
-                e.presentation.isEnabled = false
-                e.presentation.isVisible = false
-            }
+            e.presentation.isEnabledAndVisible = isSelected(file)
+                    && isBunchFile(file.virtualFile, project)
+                    && !inCommit(file)
         }
     }
 
@@ -179,9 +182,7 @@ class SimpleCheckToolWindow(
     inner class CreateAndApplyAction : ApplyChangesAction() {
         override fun update(e: AnActionEvent) {
             val file = filesTree.psiFile?.virtualFile ?: return
-            if (getChanges(file, project) == null || isBunchFile(file, project)) {
-                e.presentation.isEnabled = false
-            }
+            e.presentation.isEnabled = !(getChanges(file, project) == null || isBunchFile(file, project))
         }
 
         override fun getChanges(file: VirtualFile, project: Project): Change? {

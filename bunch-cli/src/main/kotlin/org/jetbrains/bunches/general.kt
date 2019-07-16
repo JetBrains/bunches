@@ -12,10 +12,7 @@ import org.jetbrains.bunches.cleanup.CLEANUP_DESCRIPTION
 import org.jetbrains.bunches.cleanup.cleanup
 import org.jetbrains.bunches.cp.CHERRY_PICK_DESCRIPTION
 import org.jetbrains.bunches.cp.cherryPick
-import org.jetbrains.bunches.hooks.checkPreRebase
-import org.jetbrains.bunches.hooks.installHook
-import org.jetbrains.bunches.hooks.precommitHook
-import org.jetbrains.bunches.hooks.uninstallHook
+import org.jetbrains.bunches.hooks.*
 import org.jetbrains.bunches.reduce.REDUCE_DESCRIPTION
 import org.jetbrains.bunches.reduce.reduce
 import org.jetbrains.bunches.restore.SWITCH_DESCRIPTION
@@ -90,6 +87,7 @@ fun doMain(args: Array<String>) {
         "installHook" -> installHook(commandArgs)
         "uninstallHook" -> uninstallHook(commandArgs)
         "checkCommit" -> precommitHook(commandArgs)
+        "checkPush" -> checkBeforePush(commandArgs)
         "checkRebase" -> checkPreRebase(commandArgs)
         "--version" -> printVersion()
 

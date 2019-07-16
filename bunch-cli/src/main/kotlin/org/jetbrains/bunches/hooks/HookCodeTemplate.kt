@@ -3,6 +3,8 @@ package org.jetbrains.bunches.hooks
 private const val BUNCH_PRE_COMMIT_HOOK_COMMENT_MARKER = "#bunch tool pre-commit hook"
 private const val BUNCH_EXECUTABLE_PATH_COMMENT_MARKER = "#executable"
 private const val BUNCH_PRE_REBASE_HOOK_COMMENT_MARKER = "#bunch tool pre-rebase hook"
+private const val BUNCH_PRE_PUSH_HOOK_COMMENT_MARKER = "#bunch tool pre-push hook"
+
 private const val OLD_HOOK_PATH_COMMENT_MARKER = "#old"
 
 fun preCommitHookCodeFromTemplate(bunchExecutablePath: String, oldHookPath: String): String {
@@ -28,6 +30,24 @@ fun preCommitHookCodeFromTemplate(bunchExecutablePath: String, oldHookPath: Stri
         else
             exit 0
         fi
+        """.trimIndent()
+}
+
+fun prePushCode(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
+    return """
+        #!/bin/bash
+
+        $BUNCH_PRE_PUSH_HOOK_COMMENT_MARKER
+        $BUNCH_EXECUTABLE_PATH_COMMENT_MARKER '$bunchExecutablePath'
+        $OLD_HOOK_PATH_COMMENT_MARKER $oldHookPath
+        
+        remote="${'$'}1"
+        url="${'$'}2"
+    
+        echo ${'$'}1" "${'$'}2
+        
+        exit $('$bunchExecutablePath' checkPush $repoPath ${'$'}1 ${'$'}2)
+        
         """.trimIndent()
 }
 
@@ -57,6 +77,7 @@ fun checkHookCode(hookCode: String, type: String): Boolean {
         it.trim() == when (type) {
             "pre-commit" -> BUNCH_PRE_COMMIT_HOOK_COMMENT_MARKER
             "pre-rebase" -> BUNCH_PRE_REBASE_HOOK_COMMENT_MARKER
+            "pre-push" -> BUNCH_PRE_PUSH_HOOK_COMMENT_MARKER
             else -> return false
         }
     }

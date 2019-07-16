@@ -26,6 +26,7 @@ fun uninstallHook(args: Array<String>) {
     val type = when (args[0]) {
         "commit" -> "pre-commit"
         "rebase" -> "pre-rebase"
+        "push" -> "pre-push"
         else -> exitWithError("Unknown hook type")
     }
 

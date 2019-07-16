@@ -30,6 +30,7 @@ fun installHook(args: Array<String>) {
     val type = when (args[0]) {
         "commit" -> "pre-commit"
         "rebase" -> "pre-rebase"
+        "push" -> "pre-push"
         else -> exitWithError("Unknown hook type")
     }
 
@@ -115,6 +116,7 @@ fun installOneHook(hookPath: String, type: String, dotGitPath: String) {
     hookFile.writeText(when(type) {
         "pre-commit" -> preCommitHookCodeFromTemplate(bunchExecutablePath, oldHookPath)
         "pre-rebase" -> preRebaseCodeWithBashCommand(bunchExecutablePath, oldHookPath)
+        "pre-push" -> prePushCode(bunchExecutablePath, oldHookPath, dotGitPath)
         else -> ""
     })
 }

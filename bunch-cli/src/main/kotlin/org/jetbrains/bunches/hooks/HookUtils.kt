@@ -13,7 +13,6 @@ fun getBunchExtensions(dotBunchFile: File): Set<String>? {
 }
 
 fun getExtensions(): Set<String> {
-
     val dotBunchFile = File(".bunch")
     if (!dotBunchFile.exists()) {
         println("Project's .bunch file wasn't found, hook is disabled")
@@ -23,22 +22,9 @@ fun getExtensions(): Set<String> {
     return getBunchExtensions(dotBunchFile) ?: emptySet()
 }
 
-fun getMainBranchFiles(extensions: Set<String>, args: List<String>): Set<String> {
-    val mainBranchFiles = mutableSetOf<String>()
-
-    for (file in args) {
-        if (File(file).extension !in extensions) {
-            mainBranchFiles.add(file)
-        }
-    }
-
-    return mainBranchFiles
-}
-
 fun fileWithoutExtension(filename: String): String {
     return filename.removeSuffix(".${File(filename).extension}")
 }
-
 
 fun checkCommitInterval(commits: List<CommitInfo>): String {
     var message = ""
@@ -53,12 +39,17 @@ fun checkCommitInterval(commits: List<CommitInfo>): String {
                     continue
                 }
                 val mainFile = fileWithoutExtension(action.newPath)
-//                System.err.println("${action.newPath} $mainFile ${commits.reversed().dropWhile { it != commit }.map { it.title }}")
                 val danger = commits.reversed().dropWhile { it != commit }
-                    .filter { it.fileActions.any { current ->
-                        current.newPath == mainFile } }
-                    .filter { it.fileActions.all { current ->
-                        current.newPath != action.newPath } }
+                    .filter {
+                        it.fileActions.any { current ->
+                            current.newPath == mainFile
+                        }
+                    }
+                    .filter {
+                        it.fileActions.all { current ->
+                            current.newPath != action.newPath
+                        }
+                    }
 
                 if (danger.isNotEmpty()) {
                     message += "Affected $mainFile, but didnt ${action.newPath}:\n${danger.joinToString(",\n") { "${it.title} ${it.hash}" }}\n"
@@ -76,26 +67,27 @@ fun checkCommitInterval(commits: List<CommitInfo>): String {
                 .filter { it.fileActions.all { current -> current.newPath != file } }
 
             if (danger.isNotEmpty()) {
-                message += "Affected existing $mainFile, but didnt $file:\n${danger.joinToString(",\n") { "${it.title} ${it.hash}" }}\n"
+                message += "Affected $mainFile, but didnt $file:\n${danger.joinToString(",\n") { "${it.title} ${it.hash}" }}\n"
             }
         }
     }
-
     return message
 }
 
-fun isCreated(filePath: String, commits: List<CommitInfo>): Boolean {
-    return commits.any {
-        it.fileActions.any { action ->
-            action.changeType == DiffEntry.ChangeType.ADD && action.newPath == filePath
-        }
+fun findCommitWithType(file: String, commits: List<CommitInfo>, type: DiffEntry.ChangeType): CommitInfo? {
+    return commits.firstOrNull {
+        it.fileActions.any { action -> action.changeType == type && action.newPath == file }
     }
 }
 
+fun findFirstCommit(file: String, commits: List<CommitInfo>): CommitInfo? {
+    return findCommitWithType(file, commits, DiffEntry.ChangeType.ADD)
+}
+
+fun isCreated(filePath: String, commits: List<CommitInfo>): Boolean {
+    return findFirstCommit(filePath, commits) != null
+}
+
 fun isDeleted(filePath: String, commits: List<CommitInfo>): Boolean {
-    return commits.any {
-        it.fileActions.any { action ->
-            action.changeType == DiffEntry.ChangeType.DELETE && action.newPath == filePath
-        }
-    }
+    return findCommitWithType(filePath, commits, DiffEntry.ChangeType.DELETE) != null
 }

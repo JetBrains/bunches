@@ -115,7 +115,7 @@ fun installOneHook(hookPath: String, type: String, dotGitPath: String) {
 
     hookFile.writeText(when(type) {
         "pre-commit" -> preCommitHookCodeFromTemplate(bunchExecutablePath, oldHookPath)
-        "pre-rebase" -> preRebaseCodeWithBashCommand(bunchExecutablePath, oldHookPath)
+        "pre-rebase" -> preRebaseCodeWithBashCommand(bunchExecutablePath, oldHookPath, dotGitPath)
         "pre-push" -> prePushCode(bunchExecutablePath, oldHookPath, dotGitPath)
         else -> ""
     })

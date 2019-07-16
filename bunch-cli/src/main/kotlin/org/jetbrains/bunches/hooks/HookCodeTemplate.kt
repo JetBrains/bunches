@@ -51,7 +51,7 @@ fun prePushCode(bunchExecutablePath: String, oldHookPath: String, repoPath: Stri
         """.trimIndent()
 }
 
-fun preRebaseCodeWithBashCommand(bunchExecutablePath: String, oldHookPath: String): String {
+fun preRebaseCodeWithBashCommand(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
     return """
         #!/bin/bash
 
@@ -65,7 +65,7 @@ fun preRebaseCodeWithBashCommand(bunchExecutablePath: String, oldHookPath: Strin
 	        two=${'$'}(git branch | grep \* | cut -d ' ' -f2)
         fi
 
-        result=$('$bunchExecutablePath' checkRebase ${'$'}1 ${'$'}two)
+        result=$('$bunchExecutablePath' checkRebase ${'$'}1 ${'$'}two $repoPath)
 
         exit "${'$'}result"
         

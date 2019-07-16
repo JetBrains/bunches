@@ -25,6 +25,18 @@ fun checkBeforePush(args: Array<String>) {
             } else {
                 readCommits(repoPath, localSha, remoteSha)
             }
+        if (commits.any { (it.message ?: "").contains(GENERATED_COMMIT_MARK) }) {
+
+            JOptionPane.showOptionDialog(
+                null, "Impossible to commit with $GENERATED_COMMIT_MARK in history",
+                "Friendly message",
+                JOptionPane.OK_OPTION, JOptionPane.WARNING_MESSAGE, null,
+                arrayOf("Ok"), "Ok"
+            )
+            println(1)
+            return
+        }
+
         val localMessage = checkCommitInterval(commits)
         if (localMessage.isNotEmpty()) {
             message += "In push $localRef to $remoteRef\n$localMessage\n"

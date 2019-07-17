@@ -66,10 +66,10 @@ fun checkPreRebase(args: Array<String>) {
         message += "Create friendly commits to remind about it?\n"
     }
 
-    val result = JOptionPane.showOptionDialog(
-        null, message, "Friendly warning",
-        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
-        arrayOf("Yes", "No"), "Yes"
+    val result = showOptionalMessage(
+        message,
+        arrayOf("Yes", "No"),
+        "Yes"
     )
 
     if (JOptionPane.YES_OPTION == result) {

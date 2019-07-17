@@ -3,6 +3,8 @@ package org.jetbrains.bunches.hooks
 import org.eclipse.jgit.diff.DiffEntry
 import org.jetbrains.bunches.git.CommitInfo
 import java.io.File
+import javax.swing.JOptionPane
+import javax.swing.JTextArea
 import kotlin.system.exitProcess
 
 fun getBunchExtensions(dotBunchFile: File): Set<String>? {
@@ -90,4 +92,17 @@ fun isCreated(filePath: String, commits: List<CommitInfo>): Boolean {
 
 fun isDeleted(filePath: String, commits: List<CommitInfo>): Boolean {
     return findCommitWithType(filePath, commits, DiffEntry.ChangeType.DELETE) != null
+}
+
+fun showOptionalMessage(message: String, options: Array<String>, initialValue: String): Int {
+    val area = JTextArea()
+    area.isEditable = false
+    area.text = message
+    area.isOpaque = false
+
+    return JOptionPane.showOptionDialog(
+        null, area, "Friendly warning",
+        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
+        options, initialValue
+    )
 }

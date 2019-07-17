@@ -3,7 +3,6 @@ package org.jetbrains.bunches.hooks
 import org.jetbrains.bunches.git.readCommit
 import org.jetbrains.bunches.git.readCommits
 import java.util.*
-import javax.swing.JOptionPane
 
 fun checkBeforePush(args: Array<String>) {
     if (args.size != 3) {
@@ -26,12 +25,10 @@ fun checkBeforePush(args: Array<String>) {
                 readCommits(repoPath, localSha, remoteSha)
             }
         if (commits.any { (it.message ?: "").contains(GENERATED_COMMIT_MARK) }) {
-
-            JOptionPane.showOptionDialog(
-                null, "Impossible to commit with $GENERATED_COMMIT_MARK in history",
-                "Friendly message",
-                JOptionPane.OK_OPTION, JOptionPane.WARNING_MESSAGE, null,
-                arrayOf("Ok"), "Ok"
+            showOptionalMessage(
+                "Impossible to commit with $GENERATED_COMMIT_MARK in history",
+                arrayOf("Ok"),
+                "Ok"
             )
             println(1)
             return
@@ -44,11 +41,7 @@ fun checkBeforePush(args: Array<String>) {
     }
 
     val result = if (message.isNotEmpty()) {
-        JOptionPane.showOptionDialog(
-            null, "$message Check it before push?\n", "Friendly warning",
-            JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
-            arrayOf("Yes", "No"), "Yes"
-        )
+        showOptionalMessage("$message Check it before push?\n", arrayOf("Yes", "No"), "Yes")
     } else {
         0
     }

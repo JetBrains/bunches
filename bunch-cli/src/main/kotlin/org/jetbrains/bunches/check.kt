@@ -114,7 +114,6 @@ fun doCheck(settings: Settings) {
 }
 
 fun isCommittedAfter(file: File, commits: List<CommitInfo>, commit: CommitInfo): Boolean {
-
     for (current in commits) {
         if (current == commit) {
             return false
@@ -129,7 +128,6 @@ fun isCommittedAfter(file: File, commits: List<CommitInfo>, commit: CommitInfo):
     }
     return true
 }
-
 
 fun isDeletedBunchFile(bunchFile: File): Boolean = bunchFile.exists() && bunchFile.readText().trim().isEmpty()
 

@@ -35,10 +35,6 @@ fun checkPreRebase(args: Array<String>) {
     val addedFiles = Runtime.getRuntime()
         .exec("git diff-tree -r --diff-filter=A --name-only $first $second")
 
-
-    firstBranchCommits.forEach { System.err.println(it) }
-    secondBranchCommits.forEach { System.err.println(it) }
-
     val added = addedFiles.inputStream.bufferedReader().readLines().filter {
         forgottenBunchFilesFilter(it, firstBranchCommits)
     }

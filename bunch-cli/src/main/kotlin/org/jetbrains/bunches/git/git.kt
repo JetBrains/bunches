@@ -159,6 +159,19 @@ fun readCommits(repositoryPath: String, untilQuery: String? = null): List<Commit
     }
 }
 
+fun RevCommit.toCommitInfo(git: Git): CommitInfo {
+    return CommitInfo(
+        hash = ObjectId.toString(id),
+        parentHashes = parents.map { ObjectId.toString(it) },
+        author = authorIdent,
+        committer = committerIdent,
+        time = commitTime,
+        title = shortMessage,
+        message = fullMessage,
+        fileActions = collectActions(git, this)
+    )
+}
+
 fun readCommits(repositoryPath: String, logCommandSetup: LogCommand.(git: Git) -> LogCommand): List<CommitInfo> {
     return readCommitsSeq(repositoryPath, logCommandSetup).toList()
 }
@@ -172,18 +185,7 @@ fun readCommitsSeq(repositoryPath: String, logCommandSetup: LogCommand.(git: Git
             .call()
             .asSequence()
             .map { commit ->
-                with(commit) {
-                    CommitInfo(
-                        hash = ObjectId.toString(id),
-                        parentHashes = parents.map { ObjectId.toString(it) },
-                        author = authorIdent,
-                        committer = committerIdent,
-                        time = commitTime,
-                        title = shortMessage,
-                        message = fullMessage,
-                        fileActions = collectActions(git, commit)
-                    )
-                }
+                commit.toCommitInfo(git)
             }
     }
 }

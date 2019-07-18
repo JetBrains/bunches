@@ -9,6 +9,8 @@ dependencies {
     compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.11.0.201803080745-r'
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.2'
     implementation 'com.github.ajalt:clikt:2.0.0'
+    testCompile('org.junit.jupiter:junit-jupiter-api:5.5.1')
+    testRuntime('org.junit.jupiter:junit-jupiter-engine:5.5.1')
 }
 
 startScripts {
@@ -18,6 +20,10 @@ startScripts {
 distZip {
     filesMatching("**/bin/*") { mode = 0b111101101 }
     filesMatching("**/bin/*.bat") { mode = 0b110100100 }
+}
+
+test {
+    useJUnitPlatform()
 }
 
 applicationDistribution.from("src/licenses") {

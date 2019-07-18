@@ -19,6 +19,11 @@ import java.io.File
 const val RESTORE_COMMIT_TITLE = "~~~~ switch {target} ~~~~"
 const val RESTORE_BACKUP_COMMIT_TITLE = "~~~~ backup files ~~~~"
 const val RESTORE_CLEANUP_COMMIT_TITLE = "~~~~ restore cleanup ~~~~"
+const val NO_GIT_EXCEPTION_TEXT = "Repository directory with branch is expected"
+const val NO_DIRECTORIES_SUPPORT = "Bunching for directories is not supported:"
+const val SAVED_VALUE_EXISTS = "Can't store copy of the origin file, because branch file is already exist:"
+
+const val STEP_ = "--step"
 const val checkingCommitCount = 50
 
 data class Settings(
@@ -135,7 +140,7 @@ fun doStepByStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: St
     val root = File(repoPath)
 
     if (!isGitRoot(root)) {
-        exitWithError("Repository directory with branch is expected")
+        exitWithError(NO_GIT_EXCEPTION_TEXT)
     }
 
     val gitIgnoreParseResult = parseGitIgnore(root)
@@ -150,12 +155,12 @@ fun doStepByStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: St
         for (originFile in affectedOriginFiles) {
             val baseCopiedFile = originFile.toBunchFile(originBranchExtension)
             if (baseCopiedFile.exists()) {
-                exitWithError("Can't store copy of the origin file, because branch file is already exist: $baseCopiedFile")
+                exitWithError("$SAVED_VALUE_EXISTS $baseCopiedFile")
             }
 
             if (originFile.exists()) {
                 if (originFile.isDirectory) {
-                    exitWithError("Bunching for directories is not supported: $originFile")
+                    exitWithError("$NO_DIRECTORIES_SUPPORT $originFile")
                 }
 
                 originFile.copyTo(baseCopiedFile)
@@ -194,7 +199,7 @@ fun doStepByStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: St
             }
 
             if (targetFile.isDirectory) {
-                exitWithError("Bunching for directories is not supported: $targetFile")
+                exitWithError("$NO_DIRECTORIES_SUPPORT $targetFile")
             }
 
             val isOriginExist = originFile.exists()
@@ -230,7 +235,7 @@ fun doOneStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: Strin
     val root = File(repoPath)
 
     if (!isGitRoot(root)) {
-        exitWithError("Repository directory with branch is expected")
+        exitWithError(NO_GIT_EXCEPTION_TEXT)
     }
 
     val gitIgnoreParseResult = parseGitIgnore(root)
@@ -247,12 +252,12 @@ fun doOneStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: Strin
 
         val baseCopiedFile = originFile.toBunchFile(originBranchExtension)
         if (baseCopiedFile.exists()) {
-            exitWithError("Can't store copy of the origin file, because branch file is already exist: $baseCopiedFile")
+            exitWithError("$SAVED_VALUE_EXISTS $baseCopiedFile")
         }
 
         if (originFile.exists()) {
             if (originFile.isDirectory) {
-                exitWithError("Patch specific directories are not supported: $originFile")
+                exitWithError("$NO_DIRECTORIES_SUPPORT $originFile")
             }
 
             originFile.copyTo(baseCopiedFile)
@@ -281,8 +286,11 @@ fun doOneStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: Strin
 
         val targetFile = donorExtensionsPrioritized
             .asSequence()
-            .map { extension -> originFile.toBunchFile(extension) }
-            .first { it.exists() }
+            .map { extension ->
+                originFile.toBunchFile(extension) }
+            .first {
+                it.exists()
+            }
 
         if (targetFile.isDirectory) {
             exitWithError("Patch specific directories are not supported: $targetFile")

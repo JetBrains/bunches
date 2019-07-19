@@ -4,8 +4,45 @@ private const val BUNCH_PRE_COMMIT_HOOK_COMMENT_MARKER = "#bunch tool pre-commit
 private const val BUNCH_EXECUTABLE_PATH_COMMENT_MARKER = "#executable"
 private const val BUNCH_PRE_REBASE_HOOK_COMMENT_MARKER = "#bunch tool pre-rebase hook"
 private const val BUNCH_PRE_PUSH_HOOK_COMMENT_MARKER = "#bunch tool pre-push hook"
-
 private const val OLD_HOOK_PATH_COMMENT_MARKER = "#old"
+
+
+internal const val BUNCH_PRE_COMMIT_CHECK_COMMAND = "checkCommit"
+internal const val BUNCH_PRE_REBASE_CHECK_COMMAND = "checkRebase"
+
+enum class HookType {
+    COMMIT {
+        override val hookName = "pre-commit"
+        override val marker = BUNCH_PRE_COMMIT_HOOK_COMMENT_MARKER
+        override fun getHookCodeTemplate(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
+            return preCommitHookCodeFromTemplate(bunchExecutablePath, oldHookPath)
+        }
+    },
+
+    REBASE {
+        override val hookName = "pre-rebase"
+        override val marker = BUNCH_PRE_REBASE_HOOK_COMMENT_MARKER
+        override fun getHookCodeTemplate(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
+            return preRebaseHookCode(bunchExecutablePath, oldHookPath, repoPath)
+        }
+    };
+
+    abstract val hookName : String
+    abstract val marker : String
+    abstract fun getHookCodeTemplate(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String
+
+    override fun toString(): String {
+        return hookName
+    }
+}
+
+fun parseType(name: String): HookType? {
+    return when (name) {
+        "pre-commit" -> HookType.COMMIT
+        "pre-rebase" -> HookType.REBASE
+        else -> null
+    }
+}
 
 fun preCommitHookCodeFromTemplate(bunchExecutablePath: String, oldHookPath: String): String {
     return """
@@ -25,7 +62,7 @@ fun preCommitHookCodeFromTemplate(bunchExecutablePath: String, oldHookPath: Stri
         if [[ -t 0 ]] || [[ -t 1 ]] || [[ -t 2 ]]
         then
             files="${'$'}(git diff --cached --name-only | while read file ; do echo -n "'${'$'}file' "; done)"
-            eval "'$bunchExecutablePath' checkCommit ${'$'}files < /dev/tty"
+            eval "'$bunchExecutablePath' $BUNCH_PRE_COMMIT_CHECK_COMMAND ${'$'}files < /dev/tty"
             exit $?
         else
             exit 0
@@ -51,7 +88,7 @@ fun prePushCode(bunchExecutablePath: String, oldHookPath: String, repoPath: Stri
         """.trimIndent()
 }
 
-fun preRebaseCodeWithBashCommand(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
+fun preRebaseHookCode(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
     return """
         #!/bin/bash
 
@@ -59,27 +96,26 @@ fun preRebaseCodeWithBashCommand(bunchExecutablePath: String, oldHookPath: Strin
         $BUNCH_EXECUTABLE_PATH_COMMENT_MARKER '$bunchExecutablePath'
         $OLD_HOOK_PATH_COMMENT_MARKER $oldHookPath
         
-        two=${'$'}2
-        if [ -z ${'$'}2 ]
+        two=$2
+        if [ -z $2 ]
         then
-	        two=${'$'}(git branch | grep \* | cut -d ' ' -f2)
+	        two=$(git branch | grep \* | cut -d ' ' -f2)
+        fi
+        
+        if [[ -t 0 ]] || [[ -t 1 ]] || [[ -t 2 ]]
+        then
+            eval "'$bunchExecutablePath' $BUNCH_PRE_REBASE_CHECK_COMMAND ${'$'}1 ${'$'}two $repoPath 0 < /dev/tty"
+            exit ${'$'}?
+        else 
+            exit $('$bunchExecutablePath' $BUNCH_PRE_REBASE_CHECK_COMMAND ${'$'}1 ${'$'}two $repoPath 1)
         fi
 
-        result=$('$bunchExecutablePath' checkRebase ${'$'}1 ${'$'}two $repoPath)
-
-        exit "${'$'}result"
-        
         """.trimIndent()
 }
 
-fun checkHookCode(hookCode: String, type: String): Boolean {
+fun checkHookCode(hookCode: String, type: HookType): Boolean {
     return hookCode.lines().any {
-        it.trim() == when (type) {
-            "pre-commit" -> BUNCH_PRE_COMMIT_HOOK_COMMENT_MARKER
-            "pre-rebase" -> BUNCH_PRE_REBASE_HOOK_COMMENT_MARKER
-            "pre-push" -> BUNCH_PRE_PUSH_HOOK_COMMENT_MARKER
-            else -> return false
-        }
+        it.trim() == type.marker
     }
 }
 

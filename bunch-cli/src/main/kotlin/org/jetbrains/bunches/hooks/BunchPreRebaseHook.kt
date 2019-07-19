@@ -1,84 +1,74 @@
 package org.jetbrains.bunches.hooks
 
 import org.eclipse.jgit.diff.DiffEntry
+import org.jetbrains.bunches.BunchException
 import org.jetbrains.bunches.git.*
 import java.io.File
+import java.lang.System.exit
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
-import javax.swing.JOptionPane
 
 const val GENERATED_COMMIT_MARK = "[POMOG CHEM SMOG]"
 
 fun checkPreRebase(args: Array<String>) {
-    if (args.size != 3) {
+    if (args.size != 4) {
         System.err.println("Invalid arguments")
         println(1)
+        exit(1)
         return
     }
+    val mode = args[3] == "1"
 
     val first = args[0]
     val second = args[1]
+    val parent = getParent(first, second, mode) ?: return
 
-    val parent = Runtime.getRuntime().exec("git merge-base $first $second")
-        .inputStream.bufferedReader().readLine()
-
+//    seems it should work like this, but I'm not sure
     val gitPath = ""
+
     val firstBranchCommits = readCommits(gitPath, first, parent)
     val secondBranchCommits = readCommits(gitPath, second, parent)
+
     val fixedFiles = secondBranchCommits.filter { (it.message ?: "").contains(GENERATED_COMMIT_MARK) }
         .map { it.fileActions }.flatten().map { it.newPath }
 
-    var message = ""
-    val deletedFiles = Runtime.getRuntime()
-        .exec("git diff-tree -r --diff-filter=D --name-only $first $second")
-    val addedFiles = Runtime.getRuntime()
-        .exec("git diff-tree -r --diff-filter=A --name-only $first $second")
 
-    val added = addedFiles.inputStream.bufferedReader().readLines().filter {
-        forgottenBunchFilesFilter(it, firstBranchCommits)
-    }
-    val deleted = deletedFiles.inputStream.bufferedReader().readLines().filter {
-        forgottenBunchFilesFilter(it, secondBranchCommits)
-    }
+    val added = readDiffFiles(first, second, firstBranchCommits, mode) ?: return
+    val deleted = readDiffFiles(second, first, secondBranchCommits, mode) ?: return
 
     fixedFiles.forEach { System.err.println("$it fixed") }
     added.forEach { System.err.println("$it added") }
     deleted.forEach { System.err.println("$it deleted") }
 
-    for (filename in added.minus(fixedFiles)) {
-        val commit = findFirstCommit(filename ?: continue, secondBranchCommits) ?: continue
-        message += "$filename presents in $second [added in ${commit.title} ${commit.hash}], but does not in $first\n"
-    }
-    for (filename in deleted) {
-        val commit = findFirstCommit(filename, firstBranchCommits) ?: continue
-        message += "$filename presents in $first [added in ${commit.title} ${commit.hash}], but does not in $second\n"
+    var message = added.minus(fixedFiles).filterNotNull().joinToString { filename ->
+        val commit = findFirstCommit(filename, secondBranchCommits) ?: return@joinToString ""
+        "$filename presents in $second [added in ${commit.title} ${commit.hash}], but does not in $first\n"
+    } + deleted.joinToString { filename ->
+        val commit = findFirstCommit(filename, firstBranchCommits) ?: return@joinToString ""
+        "$filename presents in $first [added in ${commit.title} ${commit.hash}], but does not in $second\n"
     }
 
-    if (message == "") {
-        println(0)
+    if (message.isEmpty()) {
+        exitWithCode(0, mode)
         return
     } else {
         message += "Create friendly commits to remind about it?\n"
     }
 
-    val result = showOptionalMessage(
-        message,
-        arrayOf("Yes", "No"),
-        "Yes"
-    )
+    val result = showInfo(message, mode)
 
-    if (JOptionPane.YES_OPTION == result) {
+    if (result) {
         resolveRemoved(deleted, firstBranchCommits, gitPath)
         resolveAdded(added, firstBranchCommits, gitPath)
-        println(1)
+        exitWithCode(1, mode)
     } else {
-        println(0)
+        exitWithCode(0, mode)
     }
+
 }
 
-private fun forgottenBunchFilesFilter(file: String, commits: List<CommitInfo>): Boolean {
-    val extensions = getExtensions()
+private fun forgottenBunchFilesFilter(file: String, commits: List<CommitInfo>, extensions: Set<String>): Boolean {
     if (File(file).extension !in extensions) {
         return false
     }
@@ -116,6 +106,12 @@ private fun resolveRemoved(deleted: List<String>, commits: List<CommitInfo>, git
     }
 }
 
+private fun isTextFile(file: File): Boolean {
+    val mainFile = File(file.parent ?: ".", file.nameWithoutExtension)
+    val type = Files.probeContentType(mainFile.toPath()) ?: return true
+    return type.contentEquals("text")
+}
+
 private fun resolveAdded(added: List<String>, commits: List<CommitInfo>, gitPath: String) {
     val mismatchedFiles = mutableMapOf<CommitInfo, HashSet<File>>()
     for (file in added) {
@@ -130,7 +126,9 @@ private fun resolveAdded(added: List<String>, commits: List<CommitInfo>, gitPath
     }
 
     for ((commit, files) in mismatchedFiles) {
-        files.forEach { Files.write(Paths.get(it.path), "\n".toByteArray(), StandardOpenOption.APPEND) }
+        files.filter {
+            isTextFile(it)
+        }.forEach { Files.write(Paths.get(it.path), "\n".toByteArray(), StandardOpenOption.APPEND) }
         val filesList = files.map { FileChange(ChangeType.MODIFY, it) }
         commitChanges(
             gitPath,
@@ -144,4 +142,38 @@ private fun affectingCommits(file: String, commits: List<CommitInfo>): List<Comm
     return commits.filter {
         it.fileActions.any { action -> action.newPath == file && action.changeType == DiffEntry.ChangeType.MODIFY }
     }
+}
+
+private fun readDiffFiles(
+    firstBranch: String,
+    secondBranch: String,
+    commits: List<CommitInfo>, mode: Boolean
+): List<String>? {
+    try {
+        val extensions = getExtensions()
+        return readCommandLines(
+            "git diff-tree -r --diff-filter=A" +
+                    " --name-only $firstBranch $secondBranch"
+        )
+            .filter {
+                forgottenBunchFilesFilter(it, commits, extensions)
+            }
+    } catch (exception: BunchException) {
+        System.err.println(exception.message)
+        exitWithCode(1, mode)
+    }
+    return null
+}
+
+private fun readCommandLines(command: String): List<String> {
+    return Runtime.getRuntime().exec(command).inputStream.bufferedReader().readLines()
+}
+
+private fun getParent(firstBranch: String, secondBranch: String, mode: Boolean): String? {
+    val parents = readCommandLines("git merge-base $firstBranch $secondBranch")
+    if (parents.size != 1) {
+        exitWithCode(1, mode)
+        return null
+    }
+    return parents.first()
 }

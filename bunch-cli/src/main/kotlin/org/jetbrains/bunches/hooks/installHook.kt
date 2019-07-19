@@ -8,10 +8,10 @@ import org.jetbrains.bunches.general.process
 import java.io.File
 
 fun main(args: Array<String>) {
-    process(args, ::installHook)
+    process(args, ::installHookCommand)
 }
 
-fun installHook(args: Array<String>) {
+fun installHookCommand(args: Array<String>) {
     if (args.size > 2 || args.isEmpty()) {
         exitWithUsageError(
             """
@@ -19,23 +19,16 @@ fun installHook(args: Array<String>) {
 
             Installs git hook that checks forgotten bunch files
 
-            <git-path>   -- Directory with repository (parent directory for .git).
-            <type>       -- Type of hook to install (commit or rebase) 
+            <git-path> - Directory with repository (parent directory for .git).
+            <type>     - Type of hook to install (commit or rebase) 
             
             """.trimIndent()
         )
     }
     val gitPath = if (args.size == 1) File("").canonicalPath else args[1]
 
-    val type = when (args[0]) {
-        "commit" -> "pre-commit"
-        "rebase" -> "pre-rebase"
-        "push" -> "pre-push"
-        else -> exitWithError("Unknown hook type")
-    }
+    val type = parseType(args[0]) ?: exitWithError("Unknown hook type")
 
-    File(gitPath).absoluteFile.setReadable(true)
-    println(gitPath + " " + File(gitPath).absolutePath)
     if (!File(gitPath).absoluteFile.exists()) {
         exitWithError("Directory $gitPath doesn't exist")
     }
@@ -46,12 +39,12 @@ fun installHook(args: Array<String>) {
     }
 
     val hookPath = "$dotGitPath/hooks/$type"
-    installOneHook(hookPath, type, dotGitPath)
+    installHook(hookPath, type, dotGitPath)
 
     println("Bunch $type hook has been successfully installed")
 }
 
-fun installOneHook(hookPath: String, type: String, dotGitPath: String) {
+fun installHook(hookPath: String, type: HookType, dotGitPath: String) {
     val oldHookNewName: String
     if (File(hookPath).exists()) {
         if (checkHookCode(File(hookPath).readText(), type))
@@ -67,7 +60,7 @@ fun installOneHook(hookPath: String, type: String, dotGitPath: String) {
         )
         when (readLine()) {
             "1" -> {
-                val tempFile = createTempFile(type, "", File("$dotGitPath/hooks"))
+                val tempFile = createTempFile(type.hookName, "", File("$dotGitPath/hooks"))
                 oldHookNewName = tempFile.relativeTo(File("$dotGitPath/hooks")).path
                 tempFile.delete()
             }
@@ -75,7 +68,7 @@ fun installOneHook(hookPath: String, type: String, dotGitPath: String) {
                 oldHookNewName = readLine() ?: exitWithError("New name was not provided")
             }
             else -> {
-                val tempFile = createTempFile(type, "", File("$dotGitPath/hooks"))
+                val tempFile = createTempFile(type.hookName, "", File("$dotGitPath/hooks"))
                 oldHookNewName = tempFile.relativeTo(File("$dotGitPath/hooks")).path
                 tempFile.delete()
             }
@@ -98,13 +91,18 @@ fun installOneHook(hookPath: String, type: String, dotGitPath: String) {
     }
 
 //    Directories structure: app/lib/jar
-//    val jarURI = ::installHook::class.java.protectionDomain.codeSource.location.toURI()
-//    val installationDir = File(jarURI).parentFile.parentFile
-
-    val bunchExecutableFile = File("build/install/bunch-cli/bin/", "bunch")
+    val jarURI = ::installHookCommand::class.java.protectionDomain.codeSource.location.toURI()
+    val installationDir = File(jarURI).parentFile.parentFile
+    var bunchExecutableFile = File(installationDir, "bin/bunch")
     if (!bunchExecutableFile.exists()) {
+        println("\"Can't find executable file `$bunchExecutableFile`\"")
+        println("Trying to pretend to be bunch tool project")
+    }
+//    Some crutch
+    if (!File("build/install/bunch-cli/bin/", "bunch").exists()) {
         exitWithError("Can't find executable file `$bunchExecutableFile`")
     }
+    bunchExecutableFile = File("build/install/bunch-cli/bin/", "bunch")
 
     val oldHookPath = if (oldHookNewName != "")
         "'$dotGitPath/hooks/$oldHookNewName'"
@@ -112,11 +110,5 @@ fun installOneHook(hookPath: String, type: String, dotGitPath: String) {
         ":"
 
     val bunchExecutablePath = bunchExecutableFile.canonicalPath
-
-    hookFile.writeText(when(type) {
-        "pre-commit" -> preCommitHookCodeFromTemplate(bunchExecutablePath, oldHookPath)
-        "pre-rebase" -> preRebaseCodeWithBashCommand(bunchExecutablePath, oldHookPath, dotGitPath)
-        "pre-push" -> prePushCode(bunchExecutablePath, oldHookPath, dotGitPath)
-        else -> ""
-    })
+    hookFile.writeText(type.getHookCodeTemplate(bunchExecutablePath, oldHookPath, dotGitPath))
 }

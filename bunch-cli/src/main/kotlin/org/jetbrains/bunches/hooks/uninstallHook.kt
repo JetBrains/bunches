@@ -17,18 +17,13 @@ fun uninstallHook(args: Array<String>) {
 
             Uninstalls git hook that checks forgotten bunch files
 
-            <git-path>   -- Directory with repository base (parent directory for .git directory).
-            <type>       -- Type of hook to install (commit or rebase) 
+            <git-path>   - Directory with repository base (parent directory for .git directory).
+            <type>       - Type of hook to install (commit or rebase) 
             """.trimIndent()
         )
     }
 
-    val type = when (args[0]) {
-        "commit" -> "pre-commit"
-        "rebase" -> "pre-rebase"
-        "push" -> "pre-push"
-        else -> exitWithError("Unknown hook type")
-    }
+    val type = parseType(args[0]) ?: exitWithError("Unknown hook type")
 
     val gitPath = if (args.size == 1) File("").canonicalPath else args[1]
     if (!File(gitPath).exists()) {

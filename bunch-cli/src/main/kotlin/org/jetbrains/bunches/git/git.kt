@@ -152,9 +152,9 @@ fun readCommits(repositoryPath: String, untilRevString: String?, sinceRevString:
     }
 }
 
-fun readCommit(repositoryPath: String, untilQuery: String): List<CommitInfo> {
+fun readCommits(repositoryPath: String, untilQuery: String? = null): List<CommitInfo> {
     return readCommits(repositoryPath) { git ->
-        val untilCommitObjectId = git.repository.resolveOrFail(untilQuery)
+        val untilCommitObjectId = git.repository.resolveOrFail(untilQuery ?: Constants.HEAD)
         add(untilCommitObjectId)
     }
 }

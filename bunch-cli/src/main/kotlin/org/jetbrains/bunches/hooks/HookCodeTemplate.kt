@@ -9,6 +9,7 @@ private const val OLD_HOOK_PATH_COMMENT_MARKER = "#old"
 
 internal const val BUNCH_PRE_COMMIT_CHECK_COMMAND = "checkCommit"
 internal const val BUNCH_PRE_REBASE_CHECK_COMMAND = "checkRebase"
+internal const val BUNCH_PRE_PUSH_CHECK_COMMAND = "checkPush"
 
 enum class HookType {
     COMMIT {
@@ -25,6 +26,14 @@ enum class HookType {
         override fun getHookCodeTemplate(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
             return preRebaseHookCode(bunchExecutablePath, oldHookPath, repoPath)
         }
+    },
+
+    PUSH {
+        override val hookName = "pre-push"
+        override val marker = BUNCH_PRE_PUSH_HOOK_COMMENT_MARKER
+        override fun getHookCodeTemplate(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
+            return prePushHookCode(bunchExecutablePath, oldHookPath, repoPath)
+        }
     };
 
     abstract val hookName : String
@@ -40,6 +49,7 @@ fun parseType(name: String): HookType? {
     return when (name) {
         "pre-commit" -> HookType.COMMIT
         "pre-rebase" -> HookType.REBASE
+        "pre-push" -> HookType.PUSH
         else -> null
     }
 }
@@ -70,7 +80,7 @@ fun preCommitHookCodeFromTemplate(bunchExecutablePath: String, oldHookPath: Stri
         """.trimIndent()
 }
 
-fun prePushCode(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
+fun prePushHookCode(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
     return """
         #!/bin/bash
 
@@ -80,10 +90,17 @@ fun prePushCode(bunchExecutablePath: String, oldHookPath: String, repoPath: Stri
         
         remote="${'$'}1"
         url="${'$'}2"
-    
-        echo ${'$'}1" "${'$'}2
         
-        exit $('$bunchExecutablePath' checkPush $repoPath ${'$'}1 ${'$'}2)
+        read ALL_SHAS
+        
+        echo ${'$'}1" "${'$'}2
+        if [[ -t 0 ]] || [[ -t 1 ]] || [[ -t 2 ]]
+        then
+            eval "'$bunchExecutablePath' $BUNCH_PRE_PUSH_CHECK_COMMAND $repoPath ${'$'}1 ${'$'}2 0 ${'$'}ALL_SHAS < /dev/tty"
+            exit $?
+        else
+            exit $('$bunchExecutablePath' $BUNCH_PRE_PUSH_CHECK_COMMAND $repoPath ${'$'}1 ${'$'}2 1 ${'$'}ALL_SHAS)
+        fi 
         
         """.trimIndent()
 }

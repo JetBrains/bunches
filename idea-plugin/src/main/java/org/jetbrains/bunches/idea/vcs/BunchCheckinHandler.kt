@@ -106,7 +106,7 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
             )) {
                 YES -> {
                     val window = ToolWindowManager.getInstance(project).getToolWindow("Bunch Tool")
-                    CheckToolWindowFactory.createToolWindowContent(
+                    BunchToolWindowFactory.createToolWindowContent(
                         window, forgottenFiles, allFiles,
                         checkInProjectPanel
                     )

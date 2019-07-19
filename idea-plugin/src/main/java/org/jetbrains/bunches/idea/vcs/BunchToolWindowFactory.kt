@@ -8,7 +8,7 @@ import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.psi.PsiFile
 import com.intellij.ui.content.ContentFactory
 
-class CheckToolWindowFactory : ToolWindowFactory {
+class BunchToolWindowFactory : ToolWindowFactory {
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         toolWindow.hide(null)

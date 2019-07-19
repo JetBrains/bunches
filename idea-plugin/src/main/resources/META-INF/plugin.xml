@@ -15,7 +15,7 @@
                 implementationClass="org.jetbrains.bunches.idea.highlighting.BunchLanguageSubstitutor"/>
         <checkinHandlerFactory implementation="org.jetbrains.bunches.idea.vcs.BunchFileCheckInHandlerFactory"/>
         <toolWindow id="Bunch Tool" anchor="bottom"
-                    factoryClass="org.jetbrains.bunches.idea.vcs.CheckToolWindowFactory"
+                    factoryClass="org.jetbrains.bunches.idea.vcs.BunchToolWindowFactory"
                     secondary="false"
                     canCloseContents="true"/>
     </extensions>

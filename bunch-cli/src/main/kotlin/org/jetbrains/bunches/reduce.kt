@@ -127,6 +127,11 @@ fun getReducibleFiles(repoPath: String, bunchPath: String) : ArrayList<File> {
 fun doReduce(settings: Settings) {
     val files = getReducibleFiles(settings.repoPath, settings.bunchPath)
 
+    if (files.isEmpty()) {
+        println("Nothing to reduce")
+        return
+    }
+
     if (settings.action == ReduceAction.PRINT) {
         files.sort()
         for (file in files) {

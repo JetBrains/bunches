@@ -17,7 +17,12 @@ import javax.swing.JTree
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.TreeCellRenderer
 import javax.swing.tree.TreePath
-class ForgottenFilesTree(root: DefaultMutableTreeNode, private val forgottenFiles: Set<VirtualFile>, all: Map<PsiFile, List<PsiFile>>) :
+
+internal open class ForgottenFilesTree(
+    root: DefaultMutableTreeNode,
+    private val forgottenFiles: Set<VirtualFile>,
+    all: Map<PsiFile, List<PsiFile>>
+) :
     Tree(root), DataProvider {
 
     private val selectedFiles = mutableSetOf<VirtualFile>()
@@ -76,8 +81,7 @@ class ForgottenFilesTree(root: DefaultMutableTreeNode, private val forgottenFile
         } else null
     }
 
-    private inner class FileTreeRenderer : ColoredTreeCellRenderer(), TreeCellRenderer {
-
+    protected open inner class FileTreeRenderer : ColoredTreeCellRenderer(), TreeCellRenderer {
         private val unknownColor = FileStatus.UNKNOWN.color
         private val modifiedColor = FileStatus.MODIFIED.color
         private val addedColor = FileStatus.ADDED.color
@@ -117,7 +121,7 @@ class ForgottenFilesTree(root: DefaultMutableTreeNode, private val forgottenFile
             }
         }
 
-        private fun getTextAttributes(file: PsiFile): SimpleTextAttributes {
+        open fun getTextAttributes(file: PsiFile): SimpleTextAttributes {
             return SimpleTextAttributes(
                 SimpleTextAttributes.STYLE_PLAIN,
                 when {

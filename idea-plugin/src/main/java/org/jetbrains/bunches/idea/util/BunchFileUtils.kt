@@ -7,8 +7,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vcs.VcsRoot
 import com.intellij.openapi.vcs.roots.VcsRootDetector
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiManager
 import com.intellij.util.containers.ContainerUtil
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.git.isGitRoot
@@ -102,5 +105,14 @@ object BunchFileUtils {
 
     private fun simplePath(root: VcsRoot) : String {
         return root.path.toString().removePrefix("file:")
+    }
+
+    fun toPsiFile(file: File, project: Project): PsiFile? {
+        val virtualFile = LocalFileSystem.getInstance().findFileByIoFile(file) ?: return null
+        return PsiManager.getInstance(project).findFile(virtualFile)
+    }
+
+    fun getMainFile(file: PsiFile): PsiFile? {
+        return toPsiFile(File(file.parent?.virtualFile?.path, file.virtualFile.nameWithoutExtension), file.project)
     }
 }

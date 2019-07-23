@@ -25,17 +25,18 @@ fun uninstallHook(args: Array<String>) {
 
     val type = parseType(args[0]) ?: exitWithError("Unknown hook type")
 
-    val gitPath = if (args.size == 1) File("").canonicalPath else args[1]
-    if (!File(gitPath).exists()) {
-        exitWithError("Directory `$gitPath` doesn't exist")
+    val gitPath = if (args.size == 1) File("") else File(args[1])
+    if (!gitPath.exists()) {
+        exitWithError("Directory `${gitPath.absolutePath}` doesn't exist")
     }
 
-    val dotGitPath = "$gitPath/.git"
-    if (!File(dotGitPath).isDirectory) {
+    val dotGitPath = File(gitPath, ".git")
+    if (!dotGitPath.isDirectory) {
         exitWithError("Directory `$gitPath` is not a repository.")
     }
 
-    val hookFile = File("$dotGitPath/hooks/$type")
+    val hooksPath = File(dotGitPath, "hooks")
+    val hookFile = File(hooksPath, type.hookName)
     if (!hookFile.exists()) {
         exitWithError("$type hook is not found")
     }
@@ -55,7 +56,7 @@ fun uninstallHook(args: Array<String>) {
         println("Successfully uninstalled hook")
     else {
         val oldHookFile = File(hookParams.oldHookPath)
-        if (oldHookFile.renameTo(File("$dotGitPath/hooks/$type")))
+        if (oldHookFile.renameTo(File(hooksPath, type.hookName)))
             println("Successfully uninstalled. Old $type hook was reverted.")
         else
             exitWithError("Successfully uninstalled. Old $type hook wasn't restored.")

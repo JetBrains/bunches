@@ -1,5 +1,7 @@
 package org.jetbrains.bunches.hooks
 
+import java.io.File
+
 private const val BUNCH_PRE_COMMIT_HOOK_COMMENT_MARKER = "#bunch tool pre-commit hook"
 private const val BUNCH_EXECUTABLE_PATH_COMMENT_MARKER = "#executable"
 private const val BUNCH_PRE_REBASE_HOOK_COMMENT_MARKER = "#bunch tool pre-rebase hook"
@@ -15,7 +17,7 @@ enum class HookType {
     COMMIT {
         override val hookName = "pre-commit"
         override val marker = BUNCH_PRE_COMMIT_HOOK_COMMENT_MARKER
-        override fun getHookCodeTemplate(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
+        override fun getHookCodeTemplate(bunchExecutablePath: File, oldHookPath: String, repoPath: File): String {
             return preCommitHookCodeFromTemplate(bunchExecutablePath, oldHookPath)
         }
     },
@@ -23,7 +25,7 @@ enum class HookType {
     REBASE {
         override val hookName = "pre-rebase"
         override val marker = BUNCH_PRE_REBASE_HOOK_COMMENT_MARKER
-        override fun getHookCodeTemplate(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
+        override fun getHookCodeTemplate(bunchExecutablePath: File, oldHookPath: String, repoPath: File): String {
             return preRebaseHookCode(bunchExecutablePath, oldHookPath, repoPath)
         }
     },
@@ -31,14 +33,14 @@ enum class HookType {
     PUSH {
         override val hookName = "pre-push"
         override val marker = BUNCH_PRE_PUSH_HOOK_COMMENT_MARKER
-        override fun getHookCodeTemplate(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
+        override fun getHookCodeTemplate(bunchExecutablePath: File, oldHookPath: String, repoPath: File): String {
             return prePushHookCode(bunchExecutablePath, oldHookPath, repoPath)
         }
     };
 
     abstract val hookName : String
     abstract val marker : String
-    abstract fun getHookCodeTemplate(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String
+    abstract fun getHookCodeTemplate(bunchExecutablePath: File, oldHookPath: String, repoPath: File): String
 
     override fun toString(): String {
         return hookName
@@ -54,12 +56,12 @@ fun parseType(name: String): HookType? {
     }
 }
 
-fun preCommitHookCodeFromTemplate(bunchExecutablePath: String, oldHookPath: String): String {
+fun preCommitHookCodeFromTemplate(bunchExecutablePath: File, oldHookPath: String): String {
     return """
         #!/bin/sh
 
         $BUNCH_PRE_COMMIT_HOOK_COMMENT_MARKER
-        $BUNCH_EXECUTABLE_PATH_COMMENT_MARKER '$bunchExecutablePath'
+        $BUNCH_EXECUTABLE_PATH_COMMENT_MARKER '${bunchExecutablePath.absolutePath}'
         $OLD_HOOK_PATH_COMMENT_MARKER $oldHookPath
         
         $oldHookPath
@@ -72,7 +74,7 @@ fun preCommitHookCodeFromTemplate(bunchExecutablePath: String, oldHookPath: Stri
         if [[ -t 0 ]] || [[ -t 1 ]] || [[ -t 2 ]]
         then
             files="${'$'}(git diff --cached --name-only | while read file ; do echo -n "'${'$'}file' "; done)"
-            eval "'$bunchExecutablePath' $BUNCH_PRE_COMMIT_CHECK_COMMAND ${'$'}files < /dev/tty"
+            eval "'${bunchExecutablePath.absolutePath}' $BUNCH_PRE_COMMIT_CHECK_COMMAND ${'$'}files < /dev/tty"
             exit $?
         else
             exit 0
@@ -80,37 +82,36 @@ fun preCommitHookCodeFromTemplate(bunchExecutablePath: String, oldHookPath: Stri
         """.trimIndent()
 }
 
-fun prePushHookCode(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
+fun prePushHookCode(bunchExecutablePath: File, oldHookPath: String, repoPath: File): String {
     return """
         #!/bin/bash
 
         $BUNCH_PRE_PUSH_HOOK_COMMENT_MARKER
-        $BUNCH_EXECUTABLE_PATH_COMMENT_MARKER '$bunchExecutablePath'
+        $BUNCH_EXECUTABLE_PATH_COMMENT_MARKER '${bunchExecutablePath.absolutePath}'
         $OLD_HOOK_PATH_COMMENT_MARKER $oldHookPath
         
-        remote="${'$'}1"
-        url="${'$'}2"
+        remote="$1"
+        url="$2"
         
         read ALL_SHAS
         
-        echo ${'$'}1" "${'$'}2
         if [[ -t 0 ]] || [[ -t 1 ]] || [[ -t 2 ]]
         then
-            eval "'$bunchExecutablePath' $BUNCH_PRE_PUSH_CHECK_COMMAND $repoPath ${'$'}1 ${'$'}2 0 ${'$'}ALL_SHAS < /dev/tty"
+            eval "'${bunchExecutablePath.absolutePath}' $BUNCH_PRE_PUSH_CHECK_COMMAND ${repoPath.absolutePath} ${'$'}1 ${'$'}2 0 ${'$'}ALL_SHAS < /dev/tty"
             exit $?
         else
-            exit $('$bunchExecutablePath' $BUNCH_PRE_PUSH_CHECK_COMMAND $repoPath ${'$'}1 ${'$'}2 1 ${'$'}ALL_SHAS)
+            exit $('${bunchExecutablePath.absolutePath}' $BUNCH_PRE_PUSH_CHECK_COMMAND ${repoPath.absolutePath} ${'$'}1 ${'$'}2 1 ${'$'}ALL_SHAS)
         fi 
         
         """.trimIndent()
 }
 
-fun preRebaseHookCode(bunchExecutablePath: String, oldHookPath: String, repoPath: String): String {
+fun preRebaseHookCode(bunchExecutablePath: File, oldHookPath: String, repoPath: File): String {
     return """
         #!/bin/bash
 
         $BUNCH_PRE_REBASE_HOOK_COMMENT_MARKER
-        $BUNCH_EXECUTABLE_PATH_COMMENT_MARKER '$bunchExecutablePath'
+        $BUNCH_EXECUTABLE_PATH_COMMENT_MARKER '${bunchExecutablePath.absolutePath}'
         $OLD_HOOK_PATH_COMMENT_MARKER $oldHookPath
         
         two=$2
@@ -121,10 +122,10 @@ fun preRebaseHookCode(bunchExecutablePath: String, oldHookPath: String, repoPath
         
         if [[ -t 0 ]] || [[ -t 1 ]] || [[ -t 2 ]]
         then
-            eval "'$bunchExecutablePath' $BUNCH_PRE_REBASE_CHECK_COMMAND ${'$'}1 ${'$'}two $repoPath 0 < /dev/tty"
-            exit ${'$'}?
+            eval "'${bunchExecutablePath.absolutePath}' $BUNCH_PRE_REBASE_CHECK_COMMAND $1 ${'$'}two ${repoPath.absolutePath} 0 < /dev/tty"
+            exit $?
         else 
-            exit $('$bunchExecutablePath' $BUNCH_PRE_REBASE_CHECK_COMMAND ${'$'}1 ${'$'}two $repoPath 1)
+            exit $('${bunchExecutablePath.absolutePath}' $BUNCH_PRE_REBASE_CHECK_COMMAND $1 ${'$'}two ${repoPath.absolutePath} 1)
         fi
 
         """.trimIndent()

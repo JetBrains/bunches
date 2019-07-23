@@ -33,8 +33,8 @@ fun installHookCommand(args: Array<String>) {
         exitWithError("Directory $gitPath doesn't exist")
     }
 
-    val dotGitPath = "$gitPath/.git"
-    if (!File(dotGitPath).isDirectory) {
+    val dotGitPath = File(gitPath, ".git")
+    if (!dotGitPath.isDirectory) {
         exitWithError("Directory $gitPath is not a repository")
     }
 
@@ -44,8 +44,10 @@ fun installHookCommand(args: Array<String>) {
     println("Bunch $type hook has been successfully installed")
 }
 
-fun installHook(hookPath: String, type: HookType, dotGitPath: String) {
+fun installHook(hookPath: String, type: HookType, dotGitPath: File) {
     val oldHookNewName: String
+    val hooksPath = File(dotGitPath, "hooks")
+
     if (File(hookPath).exists()) {
         if (checkHookCode(File(hookPath).readText(), type))
             exitWithError("Bunch file checking hook is already installed")
@@ -61,7 +63,7 @@ fun installHook(hookPath: String, type: HookType, dotGitPath: String) {
         when (readLine()) {
             "1" -> {
                 val tempFile = createTempFile(type.hookName, "", File("$dotGitPath/hooks"))
-                oldHookNewName = tempFile.relativeTo(File("$dotGitPath/hooks")).path
+                oldHookNewName = tempFile.relativeTo(hooksPath).path
                 tempFile.delete()
             }
             "2" -> {
@@ -69,12 +71,12 @@ fun installHook(hookPath: String, type: HookType, dotGitPath: String) {
             }
             else -> {
                 val tempFile = createTempFile(type.hookName, "", File("$dotGitPath/hooks"))
-                oldHookNewName = tempFile.relativeTo(File("$dotGitPath/hooks")).path
+                oldHookNewName = tempFile.relativeTo(hooksPath).path
                 tempFile.delete()
             }
         }
 
-        if (File(hookPath).renameTo(File("$dotGitPath/hooks/$oldHookNewName")))
+        if (File(hookPath).renameTo(File(hooksPath, oldHookNewName)))
             println("Old hook was renamed to $oldHookNewName and will still be called")
         else
             exitWithError("Couldn't rename existing hook")
@@ -95,20 +97,19 @@ fun installHook(hookPath: String, type: HookType, dotGitPath: String) {
     val installationDir = File(jarURI).parentFile.parentFile
     var bunchExecutableFile = File(installationDir, "bin/bunch")
     if (!bunchExecutableFile.exists()) {
-        println("\"Can't find executable file `$bunchExecutableFile`\"")
+        println("\"Can't find executable file `${bunchExecutableFile.absolutePath}`\"")
         println("Trying to pretend to be bunch tool project")
     }
 //    Some crutch
     if (!File("build/install/bunch-cli/bin/", "bunch").exists()) {
-        exitWithError("Can't find executable file `$bunchExecutableFile`")
+        exitWithError("Can't find executable file `${bunchExecutableFile.absolutePath}`")
     }
     bunchExecutableFile = File("build/install/bunch-cli/bin/", "bunch")
 
     val oldHookPath = if (oldHookNewName != "")
-        "'$dotGitPath/hooks/$oldHookNewName'"
+        "'${File(hooksPath, oldHookNewName).absolutePath}'"
     else
         ":"
 
-    val bunchExecutablePath = bunchExecutableFile.canonicalPath
-    hookFile.writeText(type.getHookCodeTemplate(bunchExecutablePath, oldHookPath, dotGitPath))
+    hookFile.writeText(type.getHookCodeTemplate(bunchExecutableFile, oldHookPath, dotGitPath))
 }

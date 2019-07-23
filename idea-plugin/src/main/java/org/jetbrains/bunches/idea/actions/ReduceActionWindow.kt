@@ -14,6 +14,7 @@ import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.SimpleTextAttributes.REGULAR_ATTRIBUTES
 import org.jetbrains.bunches.idea.util.BunchFileUtils.getMainFile
 import org.jetbrains.bunches.idea.util.BunchFileUtils.toPsiFile
+import org.jetbrains.bunches.idea.util.BunchFileUtils.updateGitLog
 import org.jetbrains.bunches.idea.vcs.ForgottenFilesTree
 import org.jetbrains.bunches.reduce.*
 import org.jetbrains.bunches.reduce.ReduceAction
@@ -103,6 +104,9 @@ class ReduceActionWindow(
                     }
 
                     override fun onSuccess() {
+                        if (settings.action == COMMIT) {
+                            updateGitLog(project)
+                        }
                         closeTab()
                     }
                 }

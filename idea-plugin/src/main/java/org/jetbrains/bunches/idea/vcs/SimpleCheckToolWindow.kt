@@ -18,6 +18,7 @@ import com.intellij.ui.PopupHandler
 import com.intellij.ui.components.JBScrollPane
 import org.jetbrains.bunches.idea.actions.ApplyChangesAction
 import org.jetbrains.bunches.idea.actions.BunchCompareFilesAction
+import org.jetbrains.bunches.idea.util.BunchFileUtils
 import org.jetbrains.bunches.idea.util.BunchFileUtils.isBunchFile
 import java.awt.GridLayout
 import java.io.File
@@ -129,6 +130,7 @@ class SimpleCheckToolWindow(
                 )
             ) {
                 closeTab()
+                BunchFileUtils.updateGitLog(project)
             }
             project.bunchFileCheckEnabled = true
         }

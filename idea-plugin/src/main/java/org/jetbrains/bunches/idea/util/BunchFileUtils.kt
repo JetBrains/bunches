@@ -13,6 +13,7 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.util.containers.ContainerUtil
+import com.intellij.vcs.log.impl.VcsProjectLog
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.git.isGitRoot
 import java.io.File
@@ -23,10 +24,14 @@ object BunchFileUtils {
         return baseDir.findChild(BUNCH_FILE_NAME)
     }
 
-    fun vcsRootPath(project: Project) : String? {
-        val roots = ServiceManager.getService(project, VcsRootDetector::class.java)
+    private fun getGitRoots(project: Project): List<VcsRoot> {
+        return ServiceManager.getService(project, VcsRootDetector::class.java)
             .detect()
             .filter { v -> isGitRoot(File(simplePath(v))) }
+    }
+
+    fun vcsRootPath(project: Project) : String? {
+        val roots = getGitRoots(project)
 
         if (roots.isEmpty()) {
             Messages.showMessageDialog("No vcs roots detected", "Project  error", Messages.getErrorIcon())
@@ -114,5 +119,11 @@ object BunchFileUtils {
 
     fun getMainFile(file: PsiFile): PsiFile? {
         return toPsiFile(File(file.parent?.virtualFile?.path, file.virtualFile.nameWithoutExtension), file.project)
+    }
+
+    fun updateGitLog(project: Project) {
+        val roots = getGitRoots(project)
+        val vcsLogData = VcsProjectLog.getInstance(project).dataManager ?: return
+        vcsLogData.refresh(roots.mapNotNull { it.path })
     }
 }

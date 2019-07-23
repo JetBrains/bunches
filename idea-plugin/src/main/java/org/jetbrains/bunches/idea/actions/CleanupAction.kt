@@ -65,6 +65,12 @@ class CleanupAction : AnAction() {
                     NotificationType.ERROR
                 ).notify(project)
             }
+
+            override fun onSuccess() {
+                if (!settings.isNoCommit) {
+                    BunchFileUtils.updateGitLog(project)
+                }
+            }
         })
     }
 }

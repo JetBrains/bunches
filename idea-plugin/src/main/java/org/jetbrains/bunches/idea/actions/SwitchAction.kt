@@ -69,6 +69,10 @@ class SwitchAction : AnAction() {
                         NotificationType.ERROR
                     ).notify(project)
                 }
+
+                override fun onSuccess() {
+                    BunchFileUtils.updateGitLog(project)
+                }
             }
         )
     }

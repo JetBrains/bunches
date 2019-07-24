@@ -12,9 +12,7 @@ import org.jetbrains.bunches.cleanup.CLEANUP_DESCRIPTION
 import org.jetbrains.bunches.cleanup.cleanup
 import org.jetbrains.bunches.cp.CHERRY_PICK_DESCRIPTION
 import org.jetbrains.bunches.cp.cherryPick
-import org.jetbrains.bunches.hooks.installHook
-import org.jetbrains.bunches.hooks.precommitHook
-import org.jetbrains.bunches.hooks.uninstallHook
+import org.jetbrains.bunches.hooks.*
 import org.jetbrains.bunches.reduce.REDUCE_DESCRIPTION
 import org.jetbrains.bunches.reduce.reduce
 import org.jetbrains.bunches.restore.SWITCH_DESCRIPTION
@@ -86,10 +84,10 @@ fun doMain(args: Array<String>) {
         "check" -> check(commandArgs)
         "reduce" -> reduce(commandArgs)
         "stats" -> stats(commandArgs)
-        "installHook" -> installHook(commandArgs)
+        "installHook" -> installHookCommand(commandArgs)
         "uninstallHook" -> uninstallHook(commandArgs)
-        "precommit" -> precommitHook(commandArgs)
-
+        BUNCH_PRE_COMMIT_CHECK_COMMAND -> precommitHook(commandArgs)
+        BUNCH_PRE_REBASE_CHECK_COMMAND -> checkPreRebase(commandArgs)
         "--version" -> printVersion()
 
         else -> throw BunchParametersException("Unknown command: $command")

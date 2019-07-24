@@ -87,6 +87,7 @@ fun doMain(args: Array<String>) {
         "installHook" -> installHookCommand(commandArgs)
         "uninstallHook" -> uninstallHook(commandArgs)
         BUNCH_PRE_COMMIT_CHECK_COMMAND -> precommitHook(commandArgs)
+        BUNCH_PRE_PUSH_CHECK_COMMAND -> checkBeforePush(commandArgs)
         BUNCH_PRE_REBASE_CHECK_COMMAND -> checkPreRebase(commandArgs)
         "--version" -> printVersion()
 

@@ -5,10 +5,12 @@ import java.io.File
 private const val BUNCH_PRE_COMMIT_HOOK_COMMENT_MARKER = "#bunch tool pre-commit hook"
 private const val BUNCH_EXECUTABLE_PATH_COMMENT_MARKER = "#executable"
 private const val BUNCH_PRE_REBASE_HOOK_COMMENT_MARKER = "#bunch tool pre-rebase hook"
+private const val BUNCH_PRE_PUSH_HOOK_COMMENT_MARKER = "#bunch tool pre-push hook"
 private const val OLD_HOOK_PATH_COMMENT_MARKER = "#old"
 
 internal const val BUNCH_PRE_COMMIT_CHECK_COMMAND = "checkCommit"
 internal const val BUNCH_PRE_REBASE_CHECK_COMMAND = "checkRebase"
+internal const val BUNCH_PRE_PUSH_CHECK_COMMAND = "checkPush"
 
 internal const val CONSOLE_OUTPUT_MODE = "--terminal"
 internal const val IDEA_OUTPUT_MODE = "--idea"
@@ -27,6 +29,14 @@ enum class HookType {
         override val marker = BUNCH_PRE_REBASE_HOOK_COMMENT_MARKER
         override fun getHookCodeTemplate(bunchExecutablePath: File, oldHookPath: String, repoPath: File): String {
             return preRebaseHookTemplate(bunchExecutablePath, oldHookPath, repoPath)
+        }
+    },
+
+    PUSH {
+        override val hookName = "pre-push"
+        override val marker = BUNCH_PRE_PUSH_HOOK_COMMENT_MARKER
+        override fun getHookCodeTemplate(bunchExecutablePath: File, oldHookPath: String, repoPath: File): String {
+            return prePushHookTemplate(bunchExecutablePath, oldHookPath, repoPath)
         }
     };
 
@@ -66,6 +76,24 @@ fun preCommitHookTemplate(bunchExecutablePath: File, oldHookPath: String, repoPa
         else
             exit 0
         fi
+        """.trimIndent()
+}
+
+fun prePushHookTemplate(bunchExecutablePath: File, oldHookPath: String, repoPath: File): String {
+    return """
+        #!/bin/bash
+
+        $BUNCH_PRE_PUSH_HOOK_COMMENT_MARKER
+        $BUNCH_EXECUTABLE_PATH_COMMENT_MARKER '${bunchExecutablePath.absolutePath}'
+        $OLD_HOOK_PATH_COMMENT_MARKER $oldHookPath
+        
+        remote="$1"
+        url="$2"
+        
+        read ALL_SHAS
+        
+        '${bunchExecutablePath.absolutePath}' $BUNCH_PRE_PUSH_CHECK_COMMAND ${repoPath.absolutePath} ${'$'}1 ${'$'}2 ${'$'}ALL_SHAS
+        
         """.trimIndent()
 }
 

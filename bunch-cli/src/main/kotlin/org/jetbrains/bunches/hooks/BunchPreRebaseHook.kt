@@ -21,7 +21,7 @@ fun checkPreRebase(args: Array<String>) {
     val first = args[0]
     val second = args[1]
     val repoPath = args[2]
-    val parent = getLCAHash(first, second)
+    val parent = getLowestCommonAncestorHash(first, second)
     val extensions = getExtensions(repoPath).toSet()
 
     val firstBranchCommits = readCommits(repoPath, first, parent)
@@ -148,10 +148,10 @@ private fun readCommandLines(command: String): List<String> {
     return Runtime.getRuntime().exec(command).inputStream.bufferedReader().readLines()
 }
 
-private fun getLCAHash(firstBranch: String, secondBranch: String): String {
+private fun getLowestCommonAncestorHash(firstBranch: String, secondBranch: String): String {
     val parents = readCommandLines("git merge-base $firstBranch $secondBranch")
     if (parents.size != 1) {
-        exitWithMessage(1, "Invalid result of branches LCA finding operation")
+        exitWithMessage(1, "Invalid result of branches lowest common ancestor finding operation")
     }
     return parents.first()
 }

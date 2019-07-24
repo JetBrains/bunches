@@ -79,8 +79,8 @@ fun doCheck(settings: Settings) {
                 val bunchFilePath = "$newPath.$extension"
                 val file = File(settings.repoPath, bunchFilePath)
                 if (bunchFilePath !in affectedPaths && file.exists() && !isCommittedAfter(file, commits, commit)) {
+                    // TODO:
                     forgottenFilesPaths.add(bunchFilePath)
-                    println(file.name + " didnt modified, maybe forgotten")
                 }
             }
         }
@@ -113,6 +113,7 @@ fun doCheck(settings: Settings) {
     println("${commits.size} commits have been checked. No problem commits found.")
 }
 
+// TODO: Square
 fun isCommittedAfter(file: File, commits: List<CommitInfo>, commit: CommitInfo): Boolean {
     for (current in commits) {
         if (current == commit) {
@@ -121,7 +122,9 @@ fun isCommittedAfter(file: File, commits: List<CommitInfo>, commit: CommitInfo):
         for (action in current.fileActions) {
             if (action.changeType == DiffEntry.ChangeType.ADD
                 && action.newPath != null
-                && File(action.newPath).name == file.name) {
+                // TODO:
+                && File(action.newPath).name == file.name
+            ) {
                 return true
             }
         }

@@ -9,6 +9,7 @@ import javax.swing.JOptionPane
 import javax.swing.JTextArea
 import kotlin.system.exitProcess
 
+// TODO: not specific to hooks
 fun getBunchExtensions(dotBunchFile: File): Set<String>? {
     val lines = dotBunchFile.readLines().map { it.trim() }.filter { it.isNotEmpty() }
     if (lines.size <= 1) return null
@@ -16,6 +17,7 @@ fun getBunchExtensions(dotBunchFile: File): Set<String>? {
     return lines.drop(1).map { it.split('_').first() }.toSet()
 }
 
+// TODO: It's better to have git root as parameter
 fun getExtensions(): Set<String> {
     val dotBunchFile = File(".bunch")
     if (!dotBunchFile.exists()) {
@@ -24,10 +26,13 @@ fun getExtensions(): Set<String> {
     return getBunchExtensions(dotBunchFile) ?: emptySet()
 }
 
+// TODO: Better name or remove
 fun fileWithoutExtension(filename: String): String {
     return filename.removeSuffix(".${File(filename).extension}")
 }
 
+// TODO: better name
+// TODO: better result
 fun checkCommitInterval(commits: List<CommitInfo>): String {
     var message = ""
 
@@ -40,8 +45,8 @@ fun checkCommitInterval(commits: List<CommitInfo>): String {
                 if (isDeleted(action.newPath, commits.reversed().dropWhile { it != commit })) {
                     continue
                 }
-                val mainFile = fileWithoutExtension(action.newPath)
-                val danger = commits.reversed().dropWhile { it != commit }
+                val mainFile = mainFile(action.newPath)
+                val onlyMainFileModificationCommits = commits.reversed().dropWhile { it != commit }
                     .filter {
                         it.fileActions.any { current ->
                             current.newPath == mainFile
@@ -53,28 +58,36 @@ fun checkCommitInterval(commits: List<CommitInfo>): String {
                         }
                     }
 
-                if (danger.isNotEmpty()) {
-                    message += "Affected $mainFile, but didnt ${action.newPath}:\n${danger.joinToString(",\n") { "${it.title} ${it.hash}" }}\n"
+                if (onlyMainFileModificationCommits.isNotEmpty()) {
+                    message += "Affected $mainFile, but didnt ${action.newPath}:\n${onlyMainFileModificationCommits.joinToString(",\n") { "${it.title} ${it.hash}" }}\n"
                 }
             }
         }
     }
 
-    val files = commits.map { it.fileActions.map { action -> action.newPath } }.flatten().filterNotNull()
-    for (file in files) {
-        if (!isCreated(file, commits) && !isDeleted(file, commits) && File(file).extension in extensions) {
-            val mainFile = fileWithoutExtension(file)
+    val allAffectedFiles = commits.map { it.fileActions.map { action -> action.newPath } }.flatten().filterNotNull()
+    for (bunchFile in allAffectedFiles.filter { isBunchFile(it, extensions) }) {
+        if (!isCreated(bunchFile, commits) && !isDeleted(bunchFile, commits)) {
+            val mainFile = mainFile(bunchFile)
             val danger = commits.reversed()
                 .filter { it.fileActions.any { current -> current.newPath == mainFile } }
-                .filter { it.fileActions.all { current -> current.newPath != file } }
+                .filter { it.fileActions.all { current -> current.newPath != bunchFile } }
 
             if (danger.isNotEmpty()) {
-                message += "Affected $mainFile, but didnt $file:\n${danger.joinToString(",\n") { "${it.title} ${it.hash}" }}\n"
+                message += "Affected $mainFile, but did not $bunchFile:\n${danger.joinToString(",\n") { "${it.title} ${it.hash}" }}\n"
             }
         }
     }
+
     return message
 }
+
+private fun mainFile(affectedFile: String) = fileWithoutExtension(affectedFile)
+
+private fun isBunchFile(
+    affectedFile: String,
+    extensions: Set<String>
+) = File(affectedFile).extension in extensions
 
 fun findCommitWithType(file: String, commits: List<CommitInfo>, type: DiffEntry.ChangeType): CommitInfo? {
     return commits.firstOrNull {
@@ -82,12 +95,12 @@ fun findCommitWithType(file: String, commits: List<CommitInfo>, type: DiffEntry.
     }
 }
 
-fun findFirstCommit(file: String, commits: List<CommitInfo>): CommitInfo? {
+fun findAddCommit(file: String, commits: List<CommitInfo>): CommitInfo? {
     return findCommitWithType(file, commits, DiffEntry.ChangeType.ADD)
 }
 
 fun isCreated(filePath: String, commits: List<CommitInfo>): Boolean {
-    return findFirstCommit(filePath, commits) != null
+    return findAddCommit(filePath, commits) != null
 }
 
 fun isDeleted(filePath: String, commits: List<CommitInfo>): Boolean {
@@ -101,7 +114,7 @@ fun showOptionalMessage(message: String, options: Array<String>, initialValue: S
     area.isOpaque = false
 
     return JOptionPane.showOptionDialog(
-        parent, area, "Friendly warning",
+        parent, area, "Bunch Tool Warning",
         JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
         options, initialValue
     )

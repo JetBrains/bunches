@@ -42,10 +42,10 @@ fun checkPreRebase(args: Array<String>) {
     deleted.forEach { System.err.println("$it deleted") }
 
     var message = added.minus(fixedFiles).filterNotNull().joinToString { filename ->
-        val commit = findFirstCommit(filename, secondBranchCommits) ?: return@joinToString ""
+        val commit = findAddCommit(filename, secondBranchCommits) ?: return@joinToString ""
         "$filename presents in $second [added in ${commit.title} ${commit.hash}], but does not in $first\n"
     } + deleted.joinToString { filename ->
-        val commit = findFirstCommit(filename, firstBranchCommits) ?: return@joinToString ""
+        val commit = findAddCommit(filename, firstBranchCommits) ?: return@joinToString ""
         "$filename presents in $first [added in ${commit.title} ${commit.hash}], but does not in $second\n"
     }
 
@@ -84,7 +84,7 @@ private fun resolveRemoved(deleted: List<String>, commits: List<CommitInfo>, git
     val mismatchedFiles = mutableMapOf<CommitInfo, HashSet<File>>()
     for (file in deleted) {
         val newFile = File(file)
-        val commit = findFirstCommit(file, commits) ?: continue
+        val commit = findAddCommit(file, commits) ?: continue
         if (!mismatchedFiles.containsKey(commit)) {
             mismatchedFiles[commit] = HashSet<File>()
         }

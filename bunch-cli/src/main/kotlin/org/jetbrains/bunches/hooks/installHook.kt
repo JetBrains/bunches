@@ -49,8 +49,11 @@ fun installHook(hookPath: String, type: HookType, dotGitPath: File) {
     val hooksPath = File(dotGitPath, "hooks")
 
     if (File(hookPath).exists()) {
-        if (checkHookCode(File(hookPath).readText(), type))
+        // TODO: reinstall
+
+        if (checkHookCode(File(hookPath).readText(), type)) {
             exitWithError("Bunch file checking hook is already installed")
+        }
 
         println(
             """
@@ -92,18 +95,22 @@ fun installHook(hookPath: String, type: HookType, dotGitPath: File) {
         exitWithError("Failed to make hook executable")
     }
 
-//    Directories structure: app/lib/jar
+    // Directories structure: app/lib/jar
     val jarURI = ::installHookCommand::class.java.protectionDomain.codeSource.location.toURI()
     val installationDir = File(jarURI).parentFile.parentFile
     var bunchExecutableFile = File(installationDir, "bin/bunch")
     if (!bunchExecutableFile.exists()) {
+
         println("\"Can't find executable file `${bunchExecutableFile.absolutePath}`\"")
         println("Trying to pretend to be bunch tool project")
     }
+
+    // TODO: Finish crutch
 //    Some crutch
     if (!File("build/install/bunch-cli/bin/", "bunch").exists()) {
         exitWithError("Can't find executable file `${bunchExecutableFile.absolutePath}`")
     }
+
     bunchExecutableFile = File("build/install/bunch-cli/bin/", "bunch")
 
     val oldHookPath = if (oldHookNewName != "")
@@ -112,4 +119,12 @@ fun installHook(hookPath: String, type: HookType, dotGitPath: File) {
         ":"
 
     hookFile.writeText(type.getHookCodeTemplate(bunchExecutableFile, oldHookPath, dotGitPath))
+}
+
+fun findFirst(): String? {
+    return null
+}
+
+fun findSecond(): String? {
+
 }

@@ -34,7 +34,7 @@ enum class HookType {
         override val hookName = "pre-push"
         override val marker = BUNCH_PRE_PUSH_HOOK_COMMENT_MARKER
         override fun getHookCodeTemplate(bunchExecutablePath: File, oldHookPath: String, repoPath: File): String {
-            return prePushHookCode(bunchExecutablePath, oldHookPath, repoPath)
+            return prePushHookTemplate(bunchExecutablePath, oldHookPath, repoPath)
         }
     };
 
@@ -82,7 +82,7 @@ fun preCommitHookCodeFromTemplate(bunchExecutablePath: File, oldHookPath: String
         """.trimIndent()
 }
 
-fun prePushHookCode(bunchExecutablePath: File, oldHookPath: String, repoPath: File): String {
+fun prePushHookTemplate(bunchExecutablePath: File, oldHookPath: String, repoPath: File): String {
     return """
         #!/bin/bash
 

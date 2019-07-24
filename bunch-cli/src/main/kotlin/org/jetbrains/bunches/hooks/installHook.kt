@@ -1,6 +1,6 @@
 @file:JvmName("InstallHook")
 
-package org.jetbrains.bunches.precommit
+package org.jetbrains.bunches.hooks
 
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError

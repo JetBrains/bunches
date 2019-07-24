@@ -1,4 +1,4 @@
-package org.jetbrains.bunches.precommit
+package org.jetbrains.bunches.hooks
 
 import java.io.File
 import java.lang.System.exit

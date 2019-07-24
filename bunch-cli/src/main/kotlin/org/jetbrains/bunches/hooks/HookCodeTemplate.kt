@@ -1,4 +1,4 @@
-package org.jetbrains.bunches.precommit
+package org.jetbrains.bunches.hooks
 
 private const val BUNCH_HOOK_COMMENT_MARKER = "#bunch tool pre-commit hook"
 private const val BUNCH_EXECUTABLE_PATH_COMMENT_MARKER = "#executable"

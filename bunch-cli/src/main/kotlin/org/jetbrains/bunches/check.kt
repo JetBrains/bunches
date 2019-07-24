@@ -2,6 +2,7 @@
 
 package org.jetbrains.bunches.check
 
+import org.eclipse.jgit.diff.DiffEntry
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.exitWithError
@@ -53,7 +54,9 @@ fun check(args: Array<String>) {
 }
 
 fun doCheck(settings: Settings) {
-    val extensions = settings.extensions?.split('_') ?: readExtensionsFromFile(settings.repoPath) ?: exitWithError()
+    val extensions = settings.extensions?.split('_')
+        ?: readExtensionsFromFile(settings.repoPath)
+        ?: exitWithError()
 
     val commits = readCommits(settings.repoPath, settings.sinceRef, settings.untilRef)
     var problemCommitsFound = false
@@ -65,7 +68,11 @@ fun doCheck(settings: Settings) {
     println()
 
     println("Result:")
-    for (commit in commits) {
+
+    val createFileCommitIndex = getCreateFileCommitIndexMap(commits, extensions)
+
+    for (commitIndex in commits.indices) {
+        val commit = commits[commitIndex]
         val affectedPaths = commit.fileActions.mapNotNullTo(HashSet()) { it.newPath }
 
         val forgottenFilesPaths = ArrayList<String>()
@@ -75,7 +82,11 @@ fun doCheck(settings: Settings) {
 
             for (extension in extensions) {
                 val bunchFilePath = "$newPath.$extension"
-                if (bunchFilePath !in affectedPaths && File(settings.repoPath, bunchFilePath).exists()) {
+                val file = File(settings.repoPath, bunchFilePath)
+                if (bunchFilePath !in affectedPaths
+                    && file.exists()
+                    && isCreatedBefore(createFileCommitIndex[bunchFilePath], commitIndex)
+                ) {
                     forgottenFilesPaths.add(bunchFilePath)
                 }
             }
@@ -89,7 +100,7 @@ fun doCheck(settings: Settings) {
             }
         }
 
-        if (!forgottenFilesPaths.isEmpty()) {
+        if (forgottenFilesPaths.isNotEmpty()) {
             problemCommitsFound = true
 
             println("${commit.hash} ${commitAuthorString(commit)} ${commit.title}")
@@ -105,6 +116,24 @@ fun doCheck(settings: Settings) {
     }
 
     println("${commits.size} commits have been checked. No problem commits found.")
+}
+
+private fun getCreateFileCommitIndexMap(commits: List<CommitInfo>, extensions: List<String>): Map<String, Int> {
+    val creationIndex = mutableMapOf<String, Int>()
+    for (commitIndex in commits.indices) {
+        val commit = commits[commitIndex]
+        for (action in commit.fileActions) {
+            val filePath = action.newPath ?: continue
+            if (action.changeType == DiffEntry.ChangeType.ADD && File(filePath).extension in extensions) {
+                creationIndex[filePath] = commitIndex
+            }
+        }
+    }
+    return creationIndex
+}
+
+private fun isCreatedBefore(firstCommitIndex: Int?, secondCommitIndex: Int): Boolean {
+    return firstCommitIndex == null || secondCommitIndex < firstCommitIndex
 }
 
 fun isDeletedBunchFile(bunchFile: File): Boolean = bunchFile.exists() && bunchFile.readText().trim().isEmpty()

@@ -10,7 +10,7 @@ import org.jetbrains.bunches.git.readCommits
 
 data class Settings(
     val gitPath: String,
-    val branch: String,
+    val sinceHash: String,
     val untilHash: String,
     val suffix: String
 )
@@ -51,7 +51,7 @@ class CherryPickCommand : BunchSubCommand(
     override fun run() {
         val settings = Settings(
             gitPath = repoPath.toString(),
-            branch = sinceRef,
+            sinceHash = sinceRef,
             untilHash = untilRef,
             suffix = extension
         )
@@ -62,7 +62,7 @@ class CherryPickCommand : BunchSubCommand(
 
 fun cherryPick(settings: Settings) {
     with(settings) {
-        val commits = readCommits(gitPath, branch, untilHash)
+        val commits = readCommits(gitPath, sinceHash, untilHash)
 
         for (commit in commits.reversed()) {
             println("Apply: ${commit.hash} ${commit.title}")

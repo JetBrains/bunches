@@ -190,6 +190,11 @@ fun readCommitsSeq(repositoryPath: String, logCommandSetup: LogCommand.(git: Git
     }
 }
 
+
+internal fun generatePickedCommitMessage(commit : CommitInfo, bunch: String): String {
+    return "$bunch: ${commit.message}"
+}
+
 fun reCommitPatched(repositoryPath: String, commitInfo: CommitInfo, suffix: String) {
     val repository = configureRepository(repositoryPath)
     val git = Git(repository)
@@ -206,7 +211,7 @@ fun reCommitPatched(repositoryPath: String, commitInfo: CommitInfo, suffix: Stri
 
     git.commitEx()
         .setAuthor(commitInfo.author)
-        .setMessage("$suffix: ${commitInfo.message}")
+        .setMessage(generatePickedCommitMessage(commitInfo, suffix))
         .callEx()
 }
 

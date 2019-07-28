@@ -1,8 +1,6 @@
 package org.jetbrains.bunches.hooks
 
-import org.jetbrains.bunches.general.exitWithError
 import java.awt.Component
-import java.lang.System.exit
 import javax.swing.JOptionPane
 import javax.swing.JTextArea
 import kotlin.system.exitProcess

@@ -18,6 +18,9 @@ import org.jetbrains.bunches.ManifestReader
 import org.jetbrains.bunches.check.CheckCommand
 import org.jetbrains.bunches.cleanup.CleanUpCommand
 import org.jetbrains.bunches.cp.CherryPickCommand
+import org.jetbrains.bunches.hooks.HOOK_LAUNCH_COMMAND
+import org.jetbrains.bunches.hooks.HooksCommand
+import org.jetbrains.bunches.hooks.InternalHooks
 import org.jetbrains.bunches.reduce.ReduceCommand
 import org.jetbrains.bunches.restore.SwitchCommand
 import org.jetbrains.bunches.stats.StatCommand
@@ -30,6 +33,10 @@ fun exitWithUsageError(message: String): Nothing {
 
 fun exitWithError(message: String? = null): Nothing {
     throw BunchException(message)
+}
+
+inline fun process(args: Array<String>, f: () -> Unit) {
+    process(args.contains("--verbose"), f)
 }
 
 inline fun process(verbose: Boolean, f: () -> Unit) {
@@ -55,6 +62,10 @@ fun printExceptionToSystemError(errorCode: Int, verbose: Boolean, e: Throwable):
 }
 
 fun main(args: Array<String>) {
+    if (args.firstOrNull() == HOOK_LAUNCH_COMMAND) {
+        InternalHooks.main(args.drop(1).toTypedArray())
+    }
+
     BunchCli().main(args)
 }
 
@@ -67,10 +78,8 @@ class BunchCli : CliktCommand(name = "bunch") {
             SwitchCommand(),
             CheckCommand(),
             ReduceCommand(),
-            StatCommand()
-//            InstallHookCommand(),
-//            UninstallHookCommand(),
-//            PrecommitHookCommand()
+            StatCommand(),
+            HooksCommand()
         )
     }
 
@@ -99,6 +108,8 @@ abstract class BunchSubCommand(
             option("-C", help = "Directory with repository (parent directory for .git).")
             .path(exists = true, fileOkay = false)
             .default(Paths.get(".").toAbsolutePath().normalize())
+
+        fun toOptionName(name: String) = "-$name"
     }
 }
 

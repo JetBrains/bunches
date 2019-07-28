@@ -8,6 +8,8 @@ private const val BUNCH_PRE_REBASE_HOOK_COMMENT_MARKER = "#bunch tool pre-rebase
 private const val BUNCH_PRE_PUSH_HOOK_COMMENT_MARKER = "#bunch tool pre-push hook"
 private const val OLD_HOOK_PATH_COMMENT_MARKER = "#old"
 
+internal const val HOOK_LAUNCH_COMMAND = "hook-launch"
+
 internal const val BUNCH_PRE_COMMIT_CHECK_COMMAND = "checkCommit"
 internal const val BUNCH_PRE_REBASE_CHECK_COMMAND = "checkRebase"
 internal const val BUNCH_PRE_PUSH_CHECK_COMMAND = "checkPush"
@@ -15,6 +17,7 @@ internal const val BUNCH_PRE_PUSH_CHECK_COMMAND = "checkPush"
 internal const val CONSOLE_OUTPUT_MODE = "--terminal"
 internal const val IDEA_OUTPUT_MODE = "--idea"
 
+@Suppress("unused")
 enum class HookType {
     COMMIT {
         override val hookName = "pre-commit"
@@ -49,10 +52,6 @@ enum class HookType {
     }
 }
 
-fun parseType(name: String): HookType? {
-    return HookType.values().firstOrNull { it.hookName == name }
-}
-
 fun preCommitHookTemplate(bunchExecutablePath: File, oldHookPath: String, repoPath: File): String {
     return """
         #!/bin/sh
@@ -71,7 +70,7 @@ fun preCommitHookTemplate(bunchExecutablePath: File, oldHookPath: String, repoPa
         if [[ -t 0 ]] || [[ -t 1 ]] || [[ -t 2 ]]
         then
             files="${'$'}(git diff --cached --name-only | while read file ; do echo -n "'${'$'}file' "; done)"
-            eval "'${bunchExecutablePath.absolutePath}' $BUNCH_PRE_COMMIT_CHECK_COMMAND ${repoPath.absolutePath} ${'$'}files < /dev/tty"
+            eval "'${bunchExecutablePath.absolutePath}' $HOOK_LAUNCH_COMMAND $BUNCH_PRE_COMMIT_CHECK_COMMAND ${repoPath.absolutePath} ${'$'}files < /dev/tty"
             exit $?
         else
             exit 0
@@ -92,7 +91,7 @@ fun prePushHookTemplate(bunchExecutablePath: File, oldHookPath: String, repoPath
         
         read ALL_SHAS
         
-        '${bunchExecutablePath.absolutePath}' $BUNCH_PRE_PUSH_CHECK_COMMAND ${repoPath.absolutePath} ${'$'}1 ${'$'}2 ${'$'}ALL_SHAS
+        '${bunchExecutablePath.absolutePath}' $HOOK_LAUNCH_COMMAND $BUNCH_PRE_PUSH_CHECK_COMMAND ${repoPath.absolutePath} ${'$'}1 ${'$'}2 ${'$'}ALL_SHAS
         
         """.trimIndent()
 }
@@ -113,9 +112,9 @@ fun preRebaseHookTemplate(bunchExecutablePath: File, oldHookPath: String, repoPa
         
         if [[ -t 0 ]] || [[ -t 1 ]] || [[ -t 2 ]]
         then
-            eval "'${bunchExecutablePath.absolutePath}' $BUNCH_PRE_REBASE_CHECK_COMMAND ${'$'}1 ${'$'}two ${repoPath.absolutePath} $CONSOLE_OUTPUT_MODE < /dev/tty"
+            eval "'${bunchExecutablePath.absolutePath}' $HOOK_LAUNCH_COMMAND $BUNCH_PRE_REBASE_CHECK_COMMAND ${'$'}1 ${'$'}two ${repoPath.absolutePath} $CONSOLE_OUTPUT_MODE < /dev/tty"
         else 
-            eval "'${bunchExecutablePath.absolutePath}' $BUNCH_PRE_REBASE_CHECK_COMMAND ${'$'}1 ${'$'}two ${repoPath.absolutePath} $IDEA_OUTPUT_MODE"
+            eval "'${bunchExecutablePath.absolutePath}' $HOOK_LAUNCH_COMMAND $BUNCH_PRE_REBASE_CHECK_COMMAND ${'$'}1 ${'$'}two ${repoPath.absolutePath} $IDEA_OUTPUT_MODE"
         fi
         exit $?
         """.trimIndent()

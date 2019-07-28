@@ -88,14 +88,17 @@ abstract class BunchSubCommand(
     val epilog: String = "",
     val name: String? = null
 ) : CliktCommand(help, epilog, name) {
-    val config by requireObject<Map<String, Boolean>>()
-
-    val repoPath by option("-C", help = "Directory with repository (parent directory for .git).")
-        .path(exists = true, fileOkay = false)
-        .default(Paths.get(".").toAbsolutePath().normalize())
+    private val config by requireObject<Map<String, Boolean>>()
 
     fun process(commandAction: () -> Unit) {
         process(config.getValue("VERBOSE"), commandAction)
+    }
+
+    companion object {
+        fun BunchSubCommand.repoPathOption() =
+            option("-C", help = "Directory with repository (parent directory for .git).")
+            .path(exists = true, fileOkay = false)
+            .default(Paths.get(".").toAbsolutePath().normalize())
     }
 }
 

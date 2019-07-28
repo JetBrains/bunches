@@ -47,6 +47,7 @@ class ReduceCommand : BunchSubCommand(
     help = REDUCE_DESCRIPTION,
     epilog = REDUCE_EXAMPLE
 ) {
+    val repoPath by repoPathOption()
     val action by option(help = ACTION_HELP).switch(ACTIONS).default(ReduceAction.COMMIT)
 
     val commitTitle by option(

@@ -37,6 +37,7 @@ class CheckCommand : BunchSubCommand(
     help = CHECK_DESCRIPTION,
     epilog = CHECK_EXAMPLE
 ) {
+    val repoPath by repoPathOption()
     val sinceRef by argument(
         "<$CH_SINCE>",
         help = "Reference to the most recent commit that should be checked."

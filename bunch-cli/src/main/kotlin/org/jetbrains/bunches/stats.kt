@@ -51,6 +51,7 @@ class StatCommand : BunchSubCommand(
     help = STATS_DESCRIPTION,
     epilog = STATS_EXAMPLE
 ) {
+    val repoPath by repoPathOption()
     val kind by option(help = KIND_HELP).switch(KINDS).default(Kind.DIR)
 
     override fun run() {

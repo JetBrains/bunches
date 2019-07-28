@@ -29,6 +29,7 @@ class CleanUpCommand : BunchSubCommand(
     name = "cleanup",
     help = CLEANUP_DESCRIPTION
 ) {
+    val repoPath by repoPathOption()
     val extension by option(
         "--ext",
         help = "Particular extension for remove. " +

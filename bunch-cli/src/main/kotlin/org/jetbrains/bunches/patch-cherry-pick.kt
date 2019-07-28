@@ -37,6 +37,7 @@ class CherryPickCommand : BunchSubCommand(
     help = CHERRY_PICK_DESCRIPTION,
     epilog = CHERRY_PICK_EXAMPLE
 ) {
+    val repoPath by repoPathOption()
     val sinceRef by argument("<$CP_SINCE>",  help = "Reference to most recent commit that should be ported.")
 
     val untilRef by argument(

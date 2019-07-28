@@ -51,6 +51,7 @@ class SwitchCommand : BunchSubCommand(
     help = SWITCH_DESCRIPTION,
     epilog = SWITCH_EXAMPLE
 ) {
+    val repoPath by repoPathOption()
     val rule by argument(
         name = "<$SW_BRANCHES_>",
         help = """Set of file suffixes separated with `_` showing what files should be affected and priority

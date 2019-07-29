@@ -4,19 +4,12 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.util.GradleVersion
-import org.jetbrains.bunches.general.doMain
 
 class BunchGradlePlugin : Plugin<Project> {
     override fun apply(project: Project) {
         checkGradleVersion()
 
-        val tasks = getTasks(ProjectPropertyProvider(project)) { x ->
-            try {
-                doMain(x)
-            } catch (e: Throwable) {
-                throw GradleException("Bunch file exit with error", e)
-            }
-        }
+        val tasks = getTasks(ProjectPropertyProvider(project))
 
         @Suppress("UnstableApiUsage")
         project.tasks.register("bunch") {

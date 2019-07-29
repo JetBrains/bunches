@@ -143,8 +143,9 @@ fun doReduce(settings: Settings) {
     if (settings.action == ReduceAction.PRINT) {
         files.sort()
         for (file in files) {
-            println(file)
+            println(File(settings.repoPath).absoluteFile.toPath().relativize(file.absoluteFile.toPath()))
         }
+        return
     }
 
     assert(settings.action == ReduceAction.DELETE || settings.action == ReduceAction.COMMIT)

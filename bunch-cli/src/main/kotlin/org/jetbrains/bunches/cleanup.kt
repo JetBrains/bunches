@@ -101,7 +101,7 @@ fun cleanup(settings: Settings) {
         return
     }
 
-    val extValue = if (settings.extension != null) " ${settings.extension}" else ""
+    val extValue = settings.extension ?: ""
     val commitTitle = settings.commitTitle!!.replace(EXT_PATTERN, extValue)
     commitChanges(settings.repoPath, changedFiles, commitTitle)
 }

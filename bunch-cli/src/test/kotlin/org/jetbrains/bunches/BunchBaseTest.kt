@@ -60,13 +60,13 @@ open class BunchBaseTest {
         return gitManager.gitCommit(message ?: "commit${Random().nextInt()}")
     }
 
-    private fun assertCommitHistoryEquals(commits: List<CommitInfo>) {
+    protected fun assertCommitHistoryEquals(commits: List<CommitInfo>) {
         assertEquals(commits, getAllCommits())
     }
 
 
     protected fun assertDirectoryFiles(files: List<File>) {
-        assertEquals(files.toSet(), directory.listFiles()?.filterNot { it.isHidden }?.toSet())
+        assertEquals(files.toSet(), directory.listFiles()?.filterNot { it.isHidden || it.name == ".bunch" }?.toSet())
     }
 
     protected fun assertCommitHistoryEquals(vararg commits: CommitInfo) {
@@ -98,6 +98,17 @@ open class BunchBaseTest {
 
     protected fun gitLog() {
         gitManager.gitLog()
+    }
+    private fun configureBunchFile(extensions: List<String>) {
+        val bunch = File(directory, ".bunch")
+        if (!bunch.createNewFile()) {
+            throw BunchException("Failed to create .bunch")
+        }
+        bunch.writeText(extensions.joinToString(separator = System.lineSeparator(), postfix = System.lineSeparator()))
+    }
+
+    protected fun configureBunchFile(vararg extensions: String) {
+        configureBunchFile(extensions.toList())
     }
 
     class MyTestWatcher : TestWatcher {

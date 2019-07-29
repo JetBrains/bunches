@@ -16,7 +16,7 @@ class PrecommitHookCommand : CliktCommand(
     val commitFiles by argument().file().multiple()
 
     override fun run() {
-        precommitHook(commitFiles.toSet())
+//        precommitHook(commitFiles.toSet())
     }
 }
 

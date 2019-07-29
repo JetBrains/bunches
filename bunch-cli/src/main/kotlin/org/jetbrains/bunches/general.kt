@@ -18,9 +18,6 @@ import org.jetbrains.bunches.ManifestReader
 import org.jetbrains.bunches.check.CheckCommand
 import org.jetbrains.bunches.cleanup.CleanUpCommand
 import org.jetbrains.bunches.cp.CherryPickCommand
-import org.jetbrains.bunches.precommit.InstallHookCommand
-import org.jetbrains.bunches.precommit.PrecommitHookCommand
-import org.jetbrains.bunches.precommit.UninstallHookCommand
 import org.jetbrains.bunches.reduce.ReduceCommand
 import org.jetbrains.bunches.restore.SwitchCommand
 import org.jetbrains.bunches.stats.StatCommand
@@ -70,10 +67,10 @@ class BunchCli : CliktCommand(name = "bunch") {
             SwitchCommand(),
             CheckCommand(),
             ReduceCommand(),
-            StatCommand(),
-            InstallHookCommand(),
-            UninstallHookCommand(),
-            PrecommitHookCommand()
+            StatCommand()
+//            InstallHookCommand(),
+//            UninstallHookCommand(),
+//            PrecommitHookCommand()
         )
     }
 

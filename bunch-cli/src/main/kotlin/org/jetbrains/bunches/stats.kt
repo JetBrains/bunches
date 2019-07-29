@@ -3,9 +3,12 @@
 
 package org.jetbrains.bunches.stats
 
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.arguments.optional
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.switch
+import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.check.isDeletedBunchFile
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.BunchSubCommand
@@ -14,6 +17,8 @@ import org.jetbrains.bunches.general.exitWithUsageError
 import org.jetbrains.bunches.git.parseGitIgnore
 import org.jetbrains.bunches.git.shouldIgnoreDir
 import java.io.File
+import java.nio.file.Path
+import java.nio.file.Paths
 
 enum class Kind {
     DIR,
@@ -26,41 +31,45 @@ fun main(args: Array<String>) {
     StatCommand().main(args)
 }
 
-const val STATS_DESCRIPTION = "Show statistics about bunch files in repository."
-const val STATS_DIR = "show information about single directory"
-const val STATS_LS = "give a quick overview for all sub-dirs"
-
-val STATS_EXAMPLE =
-    """
-    Example:
-    bunch stats C:/Projects/kotlin
-    """.trimIndent()
-
-val KIND_HELP =
-    """
-    Kind of statistics. `dir` is used by default.
-        `dir` value will $STATS_DIR.
-         `ls` will $STATS_LS.
-    """.trimIndent()
-
-val KINDS = mapOf("--dir" to Kind.DIR, "--ls" to Kind.LS)
-
-
 class StatCommand : BunchSubCommand(
     name = "stats",
-    help = STATS_DESCRIPTION,
-    epilog = STATS_EXAMPLE
+    help = "Show statistics about bunch files in repository.",
+    epilog =
+        """
+        Example:
+        bunch stats C:/Projects/kotlin
+        """.trimIndent()
 ) {
-    val repoPath by repoPathOption()
-    val kind by option(help = KIND_HELP).switch(KINDS).default(Kind.DIR)
+    val repoPath: Path by option("-C", help = PATH_DESCRIPTION)
+        .path(exists = true, fileOkay = false)
+        .default(Paths.get(".").toAbsolutePath().normalize())
+
+    private val kind by option(
+        help = """
+            Kind of statistics. `dir` is used by default.
+            `dir` shows information about single directory.
+            `ls` gets an overview for all sub-directories.
+        """.trimIndent())
+        .switch(mapOf("--dir" to Kind.DIR, "--ls" to Kind.LS))
+        .default(Kind.DIR)
+
+    private val path: Path? by argument(
+        name = "path",
+        help = PATH_DESCRIPTION)
+        .path(exists = true, fileOkay = false)
+        .optional()
 
     override fun run() {
         val settings = Settings(
-            path = repoPath.toString(),
+            path = (path ?: repoPath).toString(),
             kind = kind
         )
 
         process { doStats(settings) }
+    }
+
+    companion object {
+        const val PATH_DESCRIPTION = "Subdirectory of the the repository where statistics should be evaluated."
     }
 }
 
@@ -128,7 +137,7 @@ fun doLsStats(path: String) {
                 count++
                 total++
             }
-        }.forEach { }
+        }.forEach { _ -> }
 
     println()
     println("Total: $total")

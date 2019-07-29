@@ -28,6 +28,8 @@ data class Settings(
     val doCleanup: Boolean
 )
 
+typealias SwitchSettings = Settings
+
 fun main(args: Array<String>) {
     SwitchCommand().main(args)
 }

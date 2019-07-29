@@ -1,21 +1,12 @@
 package org.jetbrains.bunches.gradle
 
+import org.gradle.api.GradleException
 import org.gradle.api.Task
-import org.jetbrains.bunches.check.CHECK_DESCRIPTION
-import org.jetbrains.bunches.check.CH_SINCE
-import org.jetbrains.bunches.check.CH_UNTIL
-import org.jetbrains.bunches.cleanup.CLEANUP_DESCRIPTION
-import org.jetbrains.bunches.cp.*
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.exitWithUsageError
-import org.jetbrains.bunches.reduce.REDUCE_DESCRIPTION
-import org.jetbrains.bunches.reduce.RE_A_
-import org.jetbrains.bunches.restore.SWITCH_DESCRIPTION
-import org.jetbrains.bunches.restore.SW_BRANCHES_
-import org.jetbrains.bunches.restore.SW_COMMIT_T
-import org.jetbrains.bunches.stats.STATS_DESCRIPTION
-import org.jetbrains.bunches.stats.STATS_DIR
-import org.jetbrains.bunches.stats.STATS_LS
+import org.jetbrains.bunches.restore.RESTORE_COMMIT_TITLE
+import org.jetbrains.bunches.restore.SwitchSettings
+import org.jetbrains.bunches.restore.doSwitch
 import java.io.File
 
 private fun getProperty(propertyName: String, p: PropertyProvider): String? {
@@ -26,6 +17,7 @@ private fun getProperty(propertyName: String, p: PropertyProvider): String? {
     return p.getProperty(propertyName)
 }
 
+@Suppress("unused")
 private fun getMandatoryProperty(propertyName: String, p: PropertyProvider): String {
     return getProperty(propertyName, p)
             ?: exitWithUsageError("Could not find required parameter $propertyName. Add parameter '-P$propertyName'")
@@ -40,80 +32,36 @@ class TaskDescription(
     }
 }
 
-fun getTasks(
-        p: PropertyProvider,
-        launcher: (Array<String>) -> Unit
-): List<TaskDescription> {
+private fun gradleExecute(f: () -> Unit) {
+    try {
+        f()
+    } catch (e: Throwable) {
+        throw GradleException("Bunch file exit with error", e)
+    }
+}
+
+fun getTasks(p: PropertyProvider): List<TaskDescription> {
     val path = File(".").absolutePath
 
     val tasks = ArrayList<TaskDescription>()
     fun addTask(name: String,
                 description: String = name,
                 launch: (Task) -> Unit) {
-        tasks.add(TaskDescription(name, description, launch))
-    }
-
-    addTask("bunch-stats", STATS_DESCRIPTION) {
-        arrayOf("stats", path)
-    }
-
-    addTask("bunch-stats-dir", "$STATS_DESCRIPTION ($STATS_DIR)") {
-        launcher(arrayOf("stats", "dir", path))
-    }
-
-    addTask("bunch-stats-ls", "$STATS_DESCRIPTION ($STATS_LS)") {
-        launcher(arrayOf("stats", "ls", path))
-    }
-
-    addTask("bunch-cp", CHERRY_PICK_DESCRIPTION) {
-        cherryPick(arrayOf(
-                path,
-                getMandatoryProperty(CP_SINCE, p),
-                getMandatoryProperty(CP_UNTIL, p),
-                getMandatoryProperty(CP_SX, p)
-        ))
-    }
-
-    addTask("bunch-switch", SWITCH_DESCRIPTION) {
-        // TODO support clean option
-        // TODO support step option
-        val commitTitle = getProperty(SW_COMMIT_T, p)
-        var params = arrayOf("switch", path, getMandatoryProperty(SW_BRANCHES_, p))
-        if (commitTitle != null) {
-            params += commitTitle
-        }
-        launcher(params)
+        tasks.add(TaskDescription(name, description) { task ->  gradleExecute { launch(task) } })
     }
 
     // List available bunches and add task for each bunch
     readExtensionsFromFile(path)?.forEach { bunch ->
         addTask("switch-$bunch", "Switch to bunch $bunch") {
-            launcher(arrayOf("switch", path, bunch))
+            doSwitch(SwitchSettings(
+                repoPath = path,
+                bunchPath = path,
+                rule = bunch,
+                commitTitle = RESTORE_COMMIT_TITLE,
+                step = false,
+                doCleanup = false
+            ))
         }
-    }
-
-    // TODO support args
-    addTask("bunch-cleanup", CLEANUP_DESCRIPTION) {
-        launcher(arrayOf("cleanup", path))
-    }
-
-    // TODO support more args
-    addTask("bunch-check", CHECK_DESCRIPTION) {
-        org.jetbrains.bunches.check.check(arrayOf(
-                path,
-                getMandatoryProperty(CH_SINCE, p),
-                getMandatoryProperty(CH_UNTIL, p)
-        ))
-    }
-
-    // TODO support more args
-    addTask("reduce", REDUCE_DESCRIPTION) {
-        var params = arrayOf("reduce", path)
-        val action = getProperty(RE_A_, p)
-        if (action != null) {
-            params += action
-        }
-        launcher(params)
     }
 
     return tasks

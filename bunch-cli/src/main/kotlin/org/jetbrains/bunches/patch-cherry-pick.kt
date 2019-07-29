@@ -20,7 +20,8 @@ fun main(args: Array<String>) {
 }
 
 const val CHERRY_PICK_DESCRIPTION =
-    "cherry-picks commit to the current branch with auto-creating bunch files with given suffix."
+    "Cherry-picks commit to the current branch with auto-creating bunch files with given suffix." +
+            " If bunch files already exist commits will override previous content to make files equals after applying."
 
 val CHERRY_PICK_EXAMPLE =
     """
@@ -38,7 +39,7 @@ class CherryPickCommand : BunchSubCommand(
     epilog = CHERRY_PICK_EXAMPLE
 ) {
     val repoPath by repoPathOption()
-    private val sinceRef by argument("<$CP_SINCE>",  help = "Reference to most recent commit that should be ported.")
+    private val sinceRef by argument("<$CP_SINCE>", help = "Reference to most recent commit that should be ported.")
 
     private val untilRef by argument(
         "<$CP_UNTIL>",

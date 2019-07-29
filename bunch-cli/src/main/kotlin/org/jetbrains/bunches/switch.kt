@@ -37,7 +37,8 @@ fun main(args: Array<String>) {
 }
 
 const val SWITCH_DESCRIPTION =
-    "Restores state of files for the particular branch by replacing base files with bunch counterparts."
+    "Restores state of files for the particular branch by replacing base files with bunch counterparts. " +
+            "Old files will be saved to main bunch (according to $BUNCH_FILE_NAME) files."
 
 val SWITCH_EXAMPLE =
     """
@@ -332,7 +333,7 @@ private fun checkLastCommitsNotContainSwitches(repoPath: String) {
     for (commit in lastCommits) {
         val title = commit.title ?: continue
         if (title.contains(switchCommitsRegex)) {
-            exitWithError("Can not switch with other switch in history: $title ${commit.hash}")
+            exitWithError("Can not do switch with other switch in history: $title ${commit.hash}")
         }
     }
 }

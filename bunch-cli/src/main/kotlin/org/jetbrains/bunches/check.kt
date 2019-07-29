@@ -20,7 +20,7 @@ fun main(args: Array<String>) {
 }
 
 const val CHECK_DESCRIPTION =
-    "Check if commits have forgotten bunch files according to the HEAD of the given directory."
+    "Check if commits at this interval have forgotten bunch files."
 
 val CHECK_EXAMPLE =
     """

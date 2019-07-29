@@ -1,13 +1,8 @@
 package org.jetbrains.bunches.hooks
 
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.parameters.arguments.argument
-import com.github.ajalt.clikt.parameters.arguments.multiple
-import com.github.ajalt.clikt.parameters.types.file
 import org.jetbrains.bunches.getExtensions
 import java.io.File
 import java.lang.System.exit
-import java.nio.file.Path
 
 fun precommitLostFiles(args: Array<String>): HashSet<File>? {
     val extensions = getExtensions(args[0])
@@ -33,11 +28,13 @@ fun precommitHook(args: Array<String>) {
         exit(0)
     }
 
-    println("""
+    println(
+        """
         |Some bunch files were not included in commit:
         |${forgottenFiles.joinToString("\n|")}
         |Do you want to continue? (Y/N)
-    """.trimMargin())
+    """.trimMargin()
+    )
     when (readLine()) {
         "Y", "y", "Yes", "yes", "" -> exit(0)
         "N", "n", "No", "no" -> exit(1)

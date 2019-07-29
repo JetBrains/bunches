@@ -36,9 +36,9 @@ class CleanUpCommand : BunchSubCommand(
                 "All files with extensions found in '$BUNCH_FILE_NAME' file will be removed if not set."
     )
 
-    val isNoCommit by option("--no-commit", help = "Do not commit changes. -m option will be ignored").flag()
+    private val isNoCommit by option("--no-commit", help = "Do not commit changes. -m option will be ignored").flag()
 
-    val commitTitle by option(
+    private val commitTitle by option(
         "-m",
         help = "Title for the cleanup commit. " +
                 "\"$DEFAULT_CLEANUP_COMMIT_TITLE\" is used by default."
@@ -98,9 +98,11 @@ fun cleanup(settings: Settings) {
         changedFiles.add(FileChange(ChangeType.REMOVE, cleanupFile))
     }
 
-    if (!settings.isNoCommit) {
-        val extValue = if (settings.extension != null) " ${settings.extension}" else ""
-        val commitTitle = settings.commitTitle!!.replace(EXT_PATTERN, extValue)
-        commitChanges(settings.repoPath, changedFiles, commitTitle)
+    if (settings.isNoCommit) {
+        return
     }
+
+    val extValue = if (settings.extension != null) " ${settings.extension}" else ""
+    val commitTitle = settings.commitTitle!!.replace(EXT_PATTERN, extValue)
+    commitChanges(settings.repoPath, changedFiles, commitTitle)
 }

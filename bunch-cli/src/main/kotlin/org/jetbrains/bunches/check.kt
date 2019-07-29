@@ -4,7 +4,6 @@ package org.jetbrains.bunches.check
 
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.types.path
 import org.eclipse.jgit.diff.DiffEntry
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readExtensionsFromFile
@@ -26,7 +25,7 @@ const val CHECK_DESCRIPTION =
 val CHECK_EXAMPLE =
     """
     Example:
-    bunch check C:/Projects/kotlin HEAD 377572896b7dc09a5e2aa6af29825ffe07f71e58
+    bunch check -C C:/Projects/kotlin HEAD 377572896b7dc09a5e2aa6af29825ffe07f71e58
     """.trimIndent()
 
 const val CH_SINCE = "since-ref"
@@ -38,16 +37,16 @@ class CheckCommand : BunchSubCommand(
     epilog = CHECK_EXAMPLE
 ) {
     val repoPath by repoPathOption()
-    val sinceRef by argument(
+    private val sinceRef by argument(
         "<$CH_SINCE>",
         help = "Reference to the most recent commit that should be checked."
     )
 
-    val untilRef by argument("<$CH_UNTIL>", help = "Parent of the last commit that should be checked.")
+    private val untilRef by argument("<$CH_UNTIL>", help = "Parent of the last commit that should be checked.")
 
     val extension by option(
         "--ext",
-        help = "Set of extensions to check with '_' separator. " +
+        help = "Set of extensions to check with ',' separator. " +
                 "'$BUNCH_FILE_NAME' file will be used if the option is missing."
     )
 
@@ -64,7 +63,7 @@ class CheckCommand : BunchSubCommand(
 }
 
 fun doCheck(settings: Settings) {
-    val extensions = settings.extensions?.split('_')
+    val extensions = settings.extensions?.split(',')
         ?: readExtensionsFromFile(settings.repoPath)
         ?: exitWithError()
 

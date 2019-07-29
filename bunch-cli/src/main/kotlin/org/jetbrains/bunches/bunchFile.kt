@@ -75,7 +75,7 @@ private fun readExtensionsFromFileImpl(file: File): List<String>? {
         return null
     }
 
-    val lines = file.readLines().map { it.trim() }.filter { !it.isEmpty() }
+    val lines = file.readLines().map { it.trim() }.filter { it.isNotEmpty() }
     val extensions = lines.map { it.split('_').first() }
 
     if (extensions.isEmpty()) {

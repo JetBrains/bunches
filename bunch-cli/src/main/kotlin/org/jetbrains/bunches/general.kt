@@ -83,9 +83,9 @@ class BunchCli : CliktCommand(name = "bunch") {
         )
     }
 
-    val verbose by option("--verbose").flag()
+    private val verbose by option("--verbose").flag()
 
-    val config by findObject { mutableMapOf<String, Boolean>() }
+    private val config by findObject { mutableMapOf<String, Boolean>() }
 
     override fun run() {
         config["VERBOSE"] = verbose
@@ -105,53 +105,16 @@ abstract class BunchSubCommand(
 
     companion object {
         fun BunchSubCommand.repoPathOption() =
-            option("-C", help = "Directory with repository (parent directory for .git).")
-            .path(exists = true, fileOkay = false)
-            .default(Paths.get(".").toAbsolutePath().normalize())
+            option(
+                "-C",
+                help = "Directory with repository (parent directory for .git). Default is the current directory"
+            )
+                .path(exists = true, fileOkay = false)
+                .default(Paths.get(".").toAbsolutePath().normalize())
 
         fun toOptionName(name: String) = "-$name"
     }
 }
-
-//fun doMain(args: Array<String>) {
-//    if (args.isEmpty()) {
-//        exitWithUsageError(
-//            """
-//            Usage: switch|cp|cleanup|check|reduce|stats|--version <args>
-//
-//            switch  - $SWITCH_DESCRIPTION
-//            cp      - $CHERRY_PICK_DESCRIPTION
-//            cleanup - $CLEANUP_DESCRIPTION
-//            check   - $CHECK_DESCRIPTION
-//            reduce  - $REDUCE_DESCRIPTION
-//            stats   - $STATS_DESCRIPTION
-//
-//            Example:
-//            bunch switch . as32
-//            """.trimIndent()
-//        )
-//    }
-//
-//    val command = args[0]
-//    val commandArgs = args.toList().drop(1).toTypedArray()
-//    when (command) {
-//        "cp" -> cherryPick(commandArgs)
-//        "restore" -> restore(commandArgs)
-//        "switch" -> restore(commandArgs)
-//        "cleanup" -> cleanup(commandArgs)
-//        "check" -> check(commandArgs)
-//        "reduce" -> reduce(commandArgs)
-//        "stats" -> stats(commandArgs)
-//        "installHook" -> installHookCommand(commandArgs)
-//        "uninstallHook" -> uninstallHook(commandArgs)
-//        BUNCH_PRE_COMMIT_CHECK_COMMAND -> precommitHook(commandArgs)
-//        BUNCH_PRE_PUSH_CHECK_COMMAND -> checkBeforePush(commandArgs)
-//        BUNCH_PRE_REBASE_CHECK_COMMAND -> checkPreRebase(commandArgs)
-//        "--version" -> printVersion()
-//
-//        else -> throw BunchParametersException("Unknown command: $command")
-//    }
-//}
 
 private fun getVersion() = ManifestReader.readAttribute("Bundle-Version") ?: "unknown"
 

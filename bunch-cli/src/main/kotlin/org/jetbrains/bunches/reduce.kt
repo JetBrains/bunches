@@ -29,7 +29,7 @@ const val DEFAULT_REDUCE_COMMIT_TITLE = "~~~~ reduce ~~~~"
 val REDUCE_EXAMPLE =
     """
     Example:
-    bunch reduce C:/Projects/kotlin
+    bunch reduce -C C:/Projects/kotlin
     """.trimIndent()
 
 val ACTION_HELP =
@@ -48,9 +48,9 @@ class ReduceCommand : BunchSubCommand(
     epilog = REDUCE_EXAMPLE
 ) {
     val repoPath by repoPathOption()
-    val action by option(help = ACTION_HELP).switch(ACTIONS).default(ReduceAction.COMMIT)
+    private val action by option(help = ACTION_HELP).switch(ACTIONS).default(ReduceAction.COMMIT)
 
-    val commitTitle by option(
+    private val commitTitle by option(
         "-m",
         help = "Commit message for \"commit\" action. " +
                 "$DEFAULT_REDUCE_COMMIT_TITLE is used by default."

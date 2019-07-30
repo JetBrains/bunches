@@ -186,7 +186,7 @@ class SimpleCheckToolWindow(
         }
 
         override fun getChanges(file: VirtualFile, project: Project): Change? {
-            return checkInProjectPanel.selectedChanges.firstOrNull { it.affectsFile(File(file.path)) }
+            return mainChanges.firstOrNull { it.affectsFile(File(file.path)) }
                 ?: super.getChanges(file, project)
         }
 

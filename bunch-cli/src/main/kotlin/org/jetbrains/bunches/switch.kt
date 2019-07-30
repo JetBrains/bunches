@@ -14,6 +14,7 @@ import java.io.File
 const val RESTORE_COMMIT_TITLE = "~~~~ switch {target} ~~~~"
 const val RESTORE_BACKUP_COMMIT_TITLE = "~~~~ backup files ~~~~"
 const val RESTORE_CLEANUP_COMMIT_TITLE = "~~~~ restore cleanup ~~~~"
+const val checkingCommitCount = 50
 
 const val STEP_ = "--step"
 
@@ -117,6 +118,9 @@ fun doSwitch(settings: Settings) {
     if (hasUncommittedChanges(settings.repoPath)) {
         exitWithError("Can not do switch with uncommitted changes.")
     }
+
+    checkLastCommitsNotContainSwitches(settings.repoPath)
+
     val parameterRuleStr = settings.rule
     val rule = if (parameterRuleStr.contains('_')) {
         parameterRuleStr
@@ -347,3 +351,14 @@ fun doOneStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: Strin
 }
 
 fun File.toBunchFile(extension: String) = File(parentFile, "$name.$extension")
+
+private fun checkLastCommitsNotContainSwitches(repoPath: String) {
+    val lastCommits = readCommits(repoPath).take(checkingCommitCount)
+    val switchCommitsRegex = Regex(RESTORE_COMMIT_TITLE.replace("{target}", ".+"))
+    for (commit in lastCommits) {
+        val title = commit.title ?: continue
+        if (title.contains(switchCommitsRegex)) {
+            exitWithError("Can not switch with other switch in history: $title ${commit.hash}")
+        }
+    }
+}

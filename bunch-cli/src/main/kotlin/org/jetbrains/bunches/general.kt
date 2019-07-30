@@ -96,7 +96,7 @@ abstract class BunchSubCommand(
     val help: String = "",
     val epilog: String = "",
     val name: String? = null
-) : CliktCommand(help, epilog, name) {
+): CliCommandWithNewLines(help, epilog, name)  {
     private val config by requireObject<Map<String, Boolean>>()
 
     fun process(commandAction: () -> Unit) {
@@ -118,3 +118,29 @@ abstract class BunchSubCommand(
 
 private fun getVersion() = ManifestReader.readAttribute("Bundle-Version") ?: "unknown"
 
+abstract class CliCommandWithNewLines(help: String, epilog: String, name: String?): CliktCommand(help, epilog, name) {
+    companion object {
+        // clikt help formatter ignore all new lines
+        // therefore added long enough string to forcibly add a new line
+        private val lineSimulator = "a".repeat(80)
+        private val lineSimulatorWithSpaces = " $lineSimulator "
+    }
+
+    override fun getFormattedUsage(): String {
+        return replaceWithRealLines(super.getFormattedUsage())
+    }
+
+    override fun getFormattedHelp(): String {
+        return replaceWithRealLines(super.getFormattedHelp())
+    }
+
+    private fun replaceWithRealLines(text: String): String {
+        val helpLines = text.split(System.lineSeparator())
+            .filterNot { it.contains(lineSimulator) }
+        return helpLines.joinToString(System.lineSeparator())
+    }
+
+    protected fun String.replaceNewLinesWithForcedMarker(): String {
+        return this.replace(System.lineSeparator(), lineSimulatorWithSpaces)
+    }
+}

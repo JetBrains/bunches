@@ -58,6 +58,7 @@ class HooksCommand : BunchSubCommand(
     private val action: HookAction by argument(
         "action",
         help = "Action:\n${HookAction.values().joinToString("\n") { "${it.action} -  ${it.help}" }}."
+            .replaceNewLinesWithForcedMarker()
     )
         .choice(HookAction.values().map { it.action to it }.toMap())
 

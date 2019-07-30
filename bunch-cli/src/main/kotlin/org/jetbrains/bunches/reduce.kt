@@ -48,7 +48,7 @@ class ReduceCommand : BunchSubCommand(
     epilog = REDUCE_EXAMPLE
 ) {
     val repoPath by repoPathOption()
-    private val action by option(help = ACTION_HELP).switch(ACTIONS).default(ReduceAction.COMMIT)
+    private val action by option(help = ACTION_HELP.replaceNewLinesWithForcedMarker()).switch(ACTIONS).default(ReduceAction.COMMIT)
 
     private val commitTitle by option(
         "-m",

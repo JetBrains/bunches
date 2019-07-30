@@ -111,15 +111,13 @@ fun preRebaseHookTemplate(bunchExecutablePath: File, oldHookPath: String, repoPa
 	        two=$(git branch | grep \* | cut -d ' ' -f2)
         fi
         
-        mode="$IDEA_OUTPUT_MODE"
-        
         if [[ -t 0 ]] || [[ -t 1 ]] || [[ -t 2 ]]
         then
-            mode="$CONSOLE_OUTPUT_MODE"    
+            eval "'${bunchExecutablePath.absolutePath}' $BUNCH_PRE_REBASE_CHECK_COMMAND ${'$'}1 ${'$'}two ${repoPath.absolutePath} $CONSOLE_OUTPUT_MODE < /dev/tty"
+        else 
+            eval "'${bunchExecutablePath.absolutePath}' $BUNCH_PRE_REBASE_CHECK_COMMAND ${'$'}1 ${'$'}two ${repoPath.absolutePath} $IDEA_OUTPUT_MODE"
         fi
-        
-        '${bunchExecutablePath.absolutePath}' $BUNCH_PRE_REBASE_CHECK_COMMAND ${'$'}1 ${'$'}two ${repoPath.absolutePath} ${'$'}mode
-        
+        exit $?
         """.trimIndent()
 }
 

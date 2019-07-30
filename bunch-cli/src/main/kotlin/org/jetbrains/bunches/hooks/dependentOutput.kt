@@ -1,8 +1,6 @@
 package org.jetbrains.bunches.hooks
 
-import org.jetbrains.bunches.general.exitWithError
 import java.awt.Component
-import java.lang.System.exit
 import javax.swing.JOptionPane
 import javax.swing.JTextArea
 import kotlin.system.exitProcess
@@ -33,8 +31,8 @@ fun exitWithMessage(code: Int, message: String? = null): Nothing {
 }
 
 fun showAndGet(message: String, mode: Boolean): Boolean {
-    if (mode) {
-        return showOptionalMessage(
+    return if (mode) {
+        showOptionalMessage(
             message,
             arrayOf("Yes", "No"),
             "Yes"
@@ -42,6 +40,6 @@ fun showAndGet(message: String, mode: Boolean): Boolean {
     } else {
         print("\n$message(y or n):")
         val answer = readLine() ?: return false
-        return answer.contains("y")
+        answer.contains("y")
     }
 }

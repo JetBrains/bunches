@@ -51,7 +51,7 @@ fun checkPreRebase(args: Array<String>) {
     if (result) {
         resolveRemoved(deleted, firstBranchCommits, repoPath)
         resolveAdded(added, firstBranchCommits, repoPath)
-        exitWithMessage(1)
+        exitWithMessage(1, "Commits created")
     } else {
         exitWithMessage(0)
     }
@@ -84,7 +84,7 @@ private fun resolveRemoved(deletedFilesPaths: List<String>, commits: List<Commit
             file.createNewFile()
             file.writeText(main.readText())
         }
-        val filesList = files.map { FileChange(ChangeType.ADD, it) }
+        val filesList = files.map { FileChange(ChangeType.ADD, it.absoluteFile) }
         commitChanges(
             gitPath,
             filesList,
@@ -117,7 +117,7 @@ private fun resolveAdded(addedFilesPaths: List<String>, commits: List<CommitInfo
         files.filter {
             isTextFile(it)
         }.forEach { Files.write(Paths.get(it.path), "\n".toByteArray(), StandardOpenOption.APPEND) }
-        val filesList = files.map { FileChange(ChangeType.MODIFY, it) }
+        val filesList = files.map { FileChange(ChangeType.MODIFY, it.absoluteFile) }
         commitChanges(
             gitPath,
             filesList,

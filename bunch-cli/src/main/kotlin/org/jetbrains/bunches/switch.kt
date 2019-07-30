@@ -114,6 +114,9 @@ fun restore(args: Array<String>) {
 }
 
 fun doSwitch(settings: Settings) {
+    if (hasUncommittedChanges(settings.repoPath)) {
+        exitWithError("Can not do switch with uncommitted changes.")
+    }
     val parameterRuleStr = settings.rule
     val rule = if (parameterRuleStr.contains('_')) {
         parameterRuleStr

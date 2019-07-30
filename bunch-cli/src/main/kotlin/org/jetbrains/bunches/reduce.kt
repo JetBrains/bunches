@@ -75,6 +75,9 @@ fun reduce(args: Array<String>) {
         commitMessage = commitMessageFromParam ?: DEFAULT_REDUCE_COMMIT_TITLE
     )
 
+    if (hasUncommittedChanges(settings.repoPath) && settings.action == ReduceAction.COMMIT) {
+        exitWithError("Can not commit changes for reduce with uncommitted changes.")
+    }
     doReduce(settings)
 }
 

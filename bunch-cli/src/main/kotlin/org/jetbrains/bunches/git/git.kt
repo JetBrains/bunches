@@ -290,6 +290,15 @@ fun collectActions(git: Git, commit: RevCommit): List<FileAction> {
     }
 }
 
+fun hasUncommittedChanges(repositoryPath: String): Boolean {
+    val repository = configureRepository(repositoryPath)
+    val git = Git(repository)
+
+    val statusCommand = git.status()
+    val status = statusCommand.call()
+    return status.hasUncommittedChanges()
+}
+
 fun DiffEntry.readNewContent(git: Git): String {
     val loader = git.repository.open(newId.toObjectId())
     return String(loader.bytes)

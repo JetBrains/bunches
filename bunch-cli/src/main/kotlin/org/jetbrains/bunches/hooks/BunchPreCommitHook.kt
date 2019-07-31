@@ -6,7 +6,7 @@ import java.lang.System.exit
 
 fun precommitLostFiles(args: Array<String>): HashSet<File>? {
     val extensions = getExtensions(args[0])
-    val commitFiles = args.drop(1).map { File(it) }.toSet()
+    val commitFiles = args.drop(1).map { File(it).absoluteFile }.toSet()
     val forgottenFiles = HashSet<File>()
 
     for (file in commitFiles) {

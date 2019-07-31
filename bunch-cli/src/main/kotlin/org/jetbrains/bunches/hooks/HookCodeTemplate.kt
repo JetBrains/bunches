@@ -70,7 +70,7 @@ fun preCommitHookTemplate(bunchExecutablePath: File, oldHookPath: String, repoPa
         if [[ -t 0 ]] || [[ -t 1 ]] || [[ -t 2 ]]
         then
             files="${'$'}(git diff --cached --name-only | while read file ; do echo -n "'${'$'}file' "; done)"
-            eval "'${bunchExecutablePath.absolutePath}' $HOOK_LAUNCH_COMMAND $BUNCH_PRE_COMMIT_CHECK_COMMAND ${repoPath.absolutePath} ${'$'}files < /dev/tty"
+            eval "'${bunchExecutablePath.absolutePath}' $HOOK_LAUNCH_COMMAND $BUNCH_PRE_COMMIT_CHECK_COMMAND ${repoPath.absolutePath} "${'$'}files" < /dev/tty"
             exit $?
         else
             exit 0

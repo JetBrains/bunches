@@ -14,7 +14,7 @@ enum class HookAction {
     INSTALL {
         override val action = "install"
         override val help = "install hooks and save old hook if necessary." +
-                " It such hook already exits it will be replaced with current version.\n"
+                " If such hook already exists it will be replaced with current version.\n"
     },
     UNINSTALL {
         override val action = "uninstall"
@@ -63,7 +63,7 @@ class HooksCommand : BunchSubCommand(
         .choice(HookAction.values().map { it.action to it }.toMap())
 
     private val hookType: HookTypeOption by argument(
-        "hook-type", help = "Type: ${HookType.values().joinToString { it.hookName }}. All used by default."
+        "hook-type", help = "Type: ${HookType.values().joinToString { it.hookName }} or all. All hooks will be processed if type is omitted."
     ).choice(HookType.values()
         .associate { it.hookName to HookTypeOption(it) }.plus("all" to HookTypeOption.allType)
     )
@@ -139,7 +139,7 @@ fun installHook(type: HookType, dotGitPath: File) {
         } else {
             println(
                 """
-                Other hook was found
+                Other ${type.hookName} hook was found
                 Do you want the new name to be generated (1) or rename it by yourself? (2)
                 Type 1 or 2
                 To cancel installation press ctrl+c
@@ -158,7 +158,7 @@ fun installHook(type: HookType, dotGitPath: File) {
             }
 
             if (File(hookPath).renameTo(File(hooksPath, oldHookNewName)))
-                println("Old hook was renamed to $oldHookNewName and will still be called")
+                println("Old ${type.hookName} hook was renamed to $oldHookNewName and will still be called")
             else
                 exitWithLocalError("Couldn't rename existing ${type.hookName} hook")
         }

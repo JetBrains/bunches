@@ -1,8 +1,8 @@
 package org.jetbrains.bunches.hooks
 
 import org.eclipse.jgit.diff.DiffEntry
+import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.findAddCommit
-import org.jetbrains.bunches.getExtensions
 import org.jetbrains.bunches.git.*
 import org.jetbrains.bunches.pathToMainFile
 import java.io.File
@@ -22,7 +22,7 @@ fun checkPreRebase(args: Array<String>) {
     val second = args[1]
     val repoPath = args[2]
     val parent = getLowestCommonAncestorHash(first, second)
-    val extensions = getExtensions(repoPath).toSet()
+    val extensions = readExtensionsFromFile(repoPath).resultIfSuccess?.toSet() ?: emptySet()
 
     val firstBranchCommits = readCommits(repoPath, first, parent)
     val secondBranchCommits = readCommits(repoPath, second, parent)

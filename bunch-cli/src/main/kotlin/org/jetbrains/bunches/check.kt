@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import org.eclipse.jgit.diff.DiffEntry
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readExtensionsFromFile
+import org.jetbrains.bunches.file.resultWithExit
 import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.git.CommitInfo
@@ -64,8 +65,7 @@ class CheckCommand : BunchSubCommand(
 
 fun doCheck(settings: Settings) {
     val extensions = settings.extensions?.split(',')
-        ?: readExtensionsFromFile(settings.repoPath)
-        ?: exitWithError()
+        ?: readExtensionsFromFile(settings.repoPath).resultWithExit()
 
     val commits = readCommits(settings.repoPath, settings.sinceRef, settings.untilRef)
     var problemCommitsFound = false

@@ -6,6 +6,7 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.switch
 import org.jetbrains.bunches.file.readUpdatePairsFromFile
+import org.jetbrains.bunches.file.resultWithExit
 import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.git.*
@@ -77,7 +78,7 @@ fun getReducibleFiles(repoPath: String, bunchPath: String) : ArrayList<File> {
     }
 
 	val gitignoreParseResult = parseGitIgnore(root)
-    val (base, rules) = readUpdatePairsFromFile(bunchPath) ?: exitWithError()
+    val (base, rules) = readUpdatePairsFromFile(bunchPath).resultWithExit()
 
     if (rules.isEmpty()) {
         exitWithError()

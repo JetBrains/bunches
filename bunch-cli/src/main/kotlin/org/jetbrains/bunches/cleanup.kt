@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import org.jetbrains.bunches.file.BUNCH_FILE_NAME
 import org.jetbrains.bunches.file.readExtensionsFromFile
+import org.jetbrains.bunches.file.resultWithExit
 import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.git.*
@@ -69,10 +70,8 @@ fun cleanup(settings: Settings) {
     val extensions = if (settings.extension != null) {
         setOf(settings.extension)
     } else {
-        readExtensionsFromFile(settings.bunchPath)?.toSet()
-    }?.map { ".$it" }
-
-    if (extensions == null) exitWithError()
+        readExtensionsFromFile(settings.bunchPath).resultWithExit().toSet()
+    }.map { ".$it" }
 
     val root = File(settings.repoPath)
 

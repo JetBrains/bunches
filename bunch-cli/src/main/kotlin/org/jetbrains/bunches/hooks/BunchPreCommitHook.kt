@@ -1,11 +1,11 @@
 package org.jetbrains.bunches.hooks
 
-import org.jetbrains.bunches.getExtensions
+import org.jetbrains.bunches.file.readExtensionsFromFile
 import java.io.File
 import java.lang.System.exit
 
 fun precommitLostFiles(args: Array<String>): HashSet<File>? {
-    val extensions = getExtensions(args[0])
+    val extensions = readExtensionsFromFile(args[0]).resultIfSuccess?.toSet() ?: emptySet()
     val commitFiles = args.drop(1).map { File(it).absoluteFile }.toSet()
     val forgottenFiles = HashSet<File>()
 

@@ -11,8 +11,8 @@ import com.github.ajalt.clikt.parameters.options.switch
 import com.github.ajalt.clikt.parameters.types.path
 import org.jetbrains.bunches.check.isDeletedBunchFile
 import org.jetbrains.bunches.file.readExtensionsFromFile
+import org.jetbrains.bunches.file.resultWithExit
 import org.jetbrains.bunches.general.BunchSubCommand
-import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.general.exitWithUsageError
 import org.jetbrains.bunches.git.parseGitIgnore
 import org.jetbrains.bunches.git.shouldIgnoreDir
@@ -85,7 +85,7 @@ fun doStats(settings: Settings) {
 
 fun doDirStats(path: String) {
     val (statsDir, gitRoot) = fetchStatsDirs(path)
-    val extensions = readExtensionsFromFile(gitRoot) ?: exitWithError()
+    val extensions = readExtensionsFromFile(gitRoot).resultWithExit()
 
     val gitignoreParseResult = parseGitIgnore(gitRoot)
 
@@ -105,7 +105,7 @@ fun doDirStats(path: String) {
 
 fun doLsStats(path: String) {
     val (statsDir, gitRoot) = fetchStatsDirs(path)
-    val extensions = readExtensionsFromFile(gitRoot) ?: exitWithError()
+    val extensions = readExtensionsFromFile(gitRoot).resultWithExit()
 
     val gitignoreParseResult = parseGitIgnore(gitRoot)
 

@@ -40,7 +40,7 @@ private fun gradleExecute(f: () -> Unit) {
     }
 }
 
-fun getTasks(p: PropertyProvider): List<TaskDescription> {
+fun getTasks(@Suppress("UNUSED_PARAMETER") p: PropertyProvider): List<TaskDescription> {
     val path = File(".").absolutePath
 
     val tasks = ArrayList<TaskDescription>()
@@ -51,7 +51,7 @@ fun getTasks(p: PropertyProvider): List<TaskDescription> {
     }
 
     // List available bunches and add task for each bunch
-    readExtensionsFromFile(path)?.forEach { bunch ->
+    readExtensionsFromFile(path).resultIfSuccess?.forEach { bunch ->
         addTask("switch-$bunch", "Switch to bunch $bunch") {
             doSwitch(SwitchSettings(
                 repoPath = path,

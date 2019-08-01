@@ -5,7 +5,7 @@ package org.jetbrains.bunches.cp
 
 import com.github.ajalt.clikt.parameters.arguments.argument
 import org.jetbrains.bunches.general.BunchSubCommand
-import org.jetbrains.bunches.git.reCommitPatched
+import org.jetbrains.bunches.git.reCommitChanges
 import org.jetbrains.bunches.git.readCommits
 
 data class Settings(
@@ -66,8 +66,7 @@ fun cherryPick(settings: Settings) {
 
         for (commit in commits.reversed()) {
             println("Apply: ${commit.hash} ${commit.title}")
-
-            reCommitPatched(gitPath, commit, suffix)
+            reCommitChanges(gitPath, commit.fileActions, commit, suffix)
         }
     }
 }

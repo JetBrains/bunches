@@ -10,7 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestWatcher
 import strikt.api.expectThat
-import strikt.assertions.*
+import strikt.assertions.containsExactlyInAnyOrder
+import strikt.assertions.isEqualTo
 import java.io.File
 import java.io.InvalidObjectException
 import java.nio.file.Files
@@ -88,10 +89,13 @@ open class BunchBaseTest {
         expectThat(getAllCommits()).isEqualTo(commits)
     }
 
+    internal fun getDirectoryFilesList(): List<File> {
+        return (directory.listFiles() ?: throw InvalidObjectException("Failed to load files in directory")) .toList()
+            .filterNot { it.isHidden || it.name == ".bunch" }
+    }
 
     protected fun assertDirectoryFiles(files: List<File>) {
-        expectThat(directory.listFiles()).isNotNull().toList()
-            .filterNot { it.isHidden || it.name == ".bunch" }.containsExactlyInAnyOrder(files)
+        expectThat(getDirectoryFilesList()).containsExactlyInAnyOrder(files)
     }
 
     protected fun assertCommitHistoryEquals(vararg commits: CommitInfo) {

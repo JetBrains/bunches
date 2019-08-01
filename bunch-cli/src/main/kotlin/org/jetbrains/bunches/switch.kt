@@ -337,13 +337,19 @@ private fun getFilesWithExtensions(root: File, gitIgnoreParseResult: IgnoreNode?
     .filter { child -> child.extension in extensions }
     .toList()
 
-private fun checkLastCommitsNotContainSwitches(repoPath: String) {
+fun findLastSwitchCommit(repoPath: String): CommitInfo? {
     val lastCommits = readCommits(repoPath) { this.setMaxCount(checkingCommitCount) }
     val switchCommitsRegex = Regex(RESTORE_COMMIT_TITLE.replace("{target}", ".+"))
     for (commit in lastCommits) {
         val title = commit.title ?: continue
         if (title.contains(switchCommitsRegex)) {
-            exitWithError("Can not do switch with other switch in history: $title ${commit.hash}")
+            return commit
         }
     }
+    return null
+}
+
+private fun checkLastCommitsNotContainSwitches(repoPath: String) {
+    val lastCommit = findLastSwitchCommit(repoPath) ?: return
+    exitWithError("Can not do switch with other switch in history: ${lastCommit.title} ${lastCommit.hash}")
 }

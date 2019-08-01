@@ -186,18 +186,20 @@ fun readCommitsSeq(repositoryPath: String, logCommandSetup: LogCommand.(git: Git
     }
 }
 
-
-internal fun generatePickedCommitMessage(commit: CommitInfo, bunch: String): String {
-    return "$bunch: ${commit.message}"
+internal fun generatePickedCommitMessage(commit: CommitInfo, suffix: String?, prefix: String? = null): String {
+    return "${prefix ?: suffix}: ${commit.message}"
 }
 
-fun reCommitPatched(repositoryPath: String, commitInfo: CommitInfo, suffix: String) {
+fun reCommitChanges(
+    repositoryPath: String, changes: List<FileAction>,
+    commitInfo: CommitInfo, suffix: String? = null, prefix: String? = null
+) {
     val repository = configureRepository(repositoryPath)
     val git = Git(repository)
 
     val addCommand = git.add()
-    for (fileAction in commitInfo.fileActions) {
-        val path = fileAction.newPath + ".$suffix"
+    for (fileAction in changes) {
+        val path = if (suffix != null) "${fileAction.newPath}.$suffix" else fileAction.newPath ?: continue
         val newFile = File(repositoryPath, path)
         newFile.parentFile.mkdirs()
         newFile.writeText(fileAction.content)
@@ -206,8 +208,9 @@ fun reCommitPatched(repositoryPath: String, commitInfo: CommitInfo, suffix: Stri
     addCommand.call()
 
     git.commitEx()
+        .setNoVerify(true)
         .setAuthor(commitInfo.author)
-        .setMessage(generatePickedCommitMessage(commitInfo, suffix))
+        .setMessage(generatePickedCommitMessage(commitInfo, suffix, prefix))
         .callEx()
 }
 

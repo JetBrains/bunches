@@ -22,6 +22,7 @@ import org.jetbrains.bunches.hooks.HOOK_LAUNCH_COMMAND
 import org.jetbrains.bunches.hooks.HooksCommand
 import org.jetbrains.bunches.hooks.InternalHooks
 import org.jetbrains.bunches.reduce.ReduceCommand
+import org.jetbrains.bunches.restore.RestoreCommand
 import org.jetbrains.bunches.stats.StatCommand
 import org.jetbrains.bunches.stats.log.LogCommand
 import org.jetbrains.bunches.switch.SwitchCommand
@@ -87,7 +88,8 @@ class BunchCli : CliktCommand(name = "bunch") {
             ReduceCommand(),
             StatCommand(),
             HooksCommand(),
-            LogCommand()
+            LogCommand(),
+            RestoreCommand()
         )
     }
 

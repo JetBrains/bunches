@@ -97,4 +97,8 @@ class GitCommandManager(private val directory: File, private val output: StringB
     internal fun gitDelete(filePath: String) {
         git.rm().addFilepattern(filePath).call()
     }
+
+    internal fun branchExist(branch: String): Boolean {
+        return git.branchList().call().map { it.name }.contains(branch)
+    }
 }

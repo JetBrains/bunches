@@ -18,6 +18,14 @@ fun pathToMainFile(filePath: String): String {
     return filePath.removeSuffix(".${File(filePath).extension}")
 }
 
+fun withoutBunchFiles(filePath: String, extensions: List<String>, repoPath: String? = "."): Boolean {
+    return extensions.all { !File(repoPath,"$filePath.$it").exists() }
+}
+
+fun isBunchFile(filePath: String, extensions: List<String>): Boolean {
+    return File(filePath).extension in extensions
+}
+
 fun <T> Sequence<T>.processWithConsoleProgressBar(progressChar: Char = '=', itemsInProgress: Int = 50): List<T> {
     var count = 0
     val result = this.mapTo(ArrayList()) {

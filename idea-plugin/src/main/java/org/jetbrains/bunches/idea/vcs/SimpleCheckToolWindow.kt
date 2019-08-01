@@ -182,6 +182,10 @@ class SimpleCheckToolWindow(
     }
 
     inner class CreateAndApplyAction : ApplyChangesAction() {
+        init {
+            registerCustomShortcutSet(CommonShortcuts.ALT_ENTER, panel)
+        }
+
         override fun update(e: AnActionEvent) {
             val file = filesTree.psiFile?.virtualFile ?: return
             e.presentation.isEnabled = !(getChanges(file, project) == null || isBunchFile(file, project))
@@ -195,7 +199,8 @@ class SimpleCheckToolWindow(
         override fun actionPerformed(e: AnActionEvent) {
             val file = filesTree.psiFile ?: return
             val affected = applyMainToAll(file.virtualFile, project)
-            showInfoBalloon(affected, file.virtualFile, project)
+            affected.forEach { filesTree.addSelected(it) }
+            showInfoBalloon(affected.mapNotNull { it.extension }, file.virtualFile, project)
         }
     }
 }

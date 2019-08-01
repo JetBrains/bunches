@@ -27,7 +27,7 @@ open class ApplyChangesAction : AnAction(
     "Applying file changes to all unmodified bunch files",
     AllIcons.Vcs.Patch
 ) {
-    protected fun applyMainToAll(file: VirtualFile, project: Project): List<String> {
+    protected fun applyMainToAll(file: VirtualFile, project: Project): List<VirtualFile> {
         val change = getChanges(file, project) ?: return listOf()
         return getAllBunchFiles(file, project).filter {
             getChanges(it, project) == null && applyPatch(
@@ -35,7 +35,7 @@ open class ApplyChangesAction : AnAction(
                 it,
                 project
             )
-        }.mapNotNull { it.extension }
+        }
     }
 
     protected fun showInfoBalloon(list: List<String>, file: VirtualFile, project: Project) {
@@ -95,7 +95,7 @@ open class ApplyChangesAction : AnAction(
         } ?: return
 
         if (!isBunchFile(file, project)) {
-            val list = applyMainToAll(file, project)
+            val list = applyMainToAll(file, project).mapNotNull { it.extension }
             showInfoBalloon(list, file, project)
         }
     }

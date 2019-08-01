@@ -126,4 +126,8 @@ object BunchFileUtils {
         val vcsLogData = VcsProjectLog.getInstance(project).dataManager ?: return
         vcsLogData.refresh(roots.mapNotNull { it.path })
     }
+
+    fun refreshFileSystem(files: List<VirtualFile>) {
+        LocalFileSystem.getInstance().refreshFiles(files)
+    }
 }

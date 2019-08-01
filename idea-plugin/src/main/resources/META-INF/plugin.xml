@@ -42,6 +42,7 @@
             <action id="org.jetbrains.bunches.idea.actions.ReduceAction"
                     class="org.jetbrains.bunches.idea.actions.ReduceAction"
                     text="Reduce">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt E"/>
             </action>
             <action id="BunchCompareFilesActions" class="org.jetbrains.bunches.idea.actions.BunchCompareFilesAction"
                     text="BunchCompareFilesActions">

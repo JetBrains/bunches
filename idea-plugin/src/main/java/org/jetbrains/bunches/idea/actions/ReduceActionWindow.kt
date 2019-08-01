@@ -13,6 +13,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.SimpleTextAttributes.REGULAR_ATTRIBUTES
 import org.jetbrains.bunches.idea.util.BunchFileUtils.getMainFile
+import org.jetbrains.bunches.idea.util.BunchFileUtils.refreshFileSystem
 import org.jetbrains.bunches.idea.util.BunchFileUtils.toPsiFile
 import org.jetbrains.bunches.idea.util.BunchFileUtils.updateGitLog
 import org.jetbrains.bunches.idea.vcs.ForgottenFilesTree
@@ -49,7 +50,7 @@ class ReduceActionWindow(
                 ActionForReduce(
                     "Reduce",
                     "Remove all unnecessary bunch files",
-                    AllIcons.Actions.Close,
+                    AllIcons.General.Remove,
                     DELETE
                 )
             )
@@ -57,7 +58,7 @@ class ReduceActionWindow(
                 ActionForReduce(
                     "Reduce with commit",
                     "Remove all unnecessary files and commit these changes",
-                    AllIcons.Actions.Clear,
+                    AllIcons.Actions.Cancel,
                     COMMIT
                 )
             )
@@ -94,16 +95,19 @@ class ReduceActionWindow(
             action,
             DEFAULT_REDUCE_COMMIT_TITLE
         )
+        private var filesToReduce = emptyList<File>()
 
         override fun actionPerformed(e: AnActionEvent) {
             FileDocumentManager.getInstance().saveAllDocuments()
             ProgressManager.getInstance().run(
                 object : Task.Backgroundable(project, "Bunch Reduce", false) {
                     override fun run(indicator: ProgressIndicator) {
-                        doReduce(settings)
+                        filesToReduce = getReducibleFiles(settings.repoPath, settings.bunchPath)
+                        deleteReducibleFiles(settings, filesToReduce)
                     }
 
                     override fun onSuccess() {
+                        refreshFileSystem(filesToReduce.mapNotNull { toPsiFile(it, project)?.virtualFile })
                         if (settings.action == COMMIT) {
                             updateGitLog(project)
                         }

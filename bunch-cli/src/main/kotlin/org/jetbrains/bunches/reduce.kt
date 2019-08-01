@@ -125,6 +125,10 @@ fun getReducibleFiles(repoPath: String, bunchPath: String) : ArrayList<File> {
 }
 
 fun doReduce(settings: Settings) {
+    if (hasUncommittedChanges(settings.repoPath) && settings.action == ReduceAction.COMMIT) {
+        exitWithError("Can not commit changes for reduce with uncommitted changes.")
+    }
+
     val files = getReducibleFiles(settings.repoPath, settings.bunchPath)
 
     if (files.isEmpty()) {
@@ -142,6 +146,10 @@ fun doReduce(settings: Settings) {
 
     assert(settings.action == ReduceAction.DELETE || settings.action == ReduceAction.COMMIT)
 
+    deleteReducibleFiles(settings, files)
+}
+
+fun deleteReducibleFiles(settings: Settings, files: List<File>) {
     val changedFiles = ArrayList<FileChange>()
     for (file in files) {
         file.delete()

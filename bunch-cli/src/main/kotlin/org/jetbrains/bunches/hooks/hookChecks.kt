@@ -8,7 +8,7 @@ object InternalHooks {
     @JvmStatic
     fun main(args: Array<String>) {
         process(args) {
-            doMain(args)
+            doMain(it)
         }
     }
 }

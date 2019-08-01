@@ -35,8 +35,14 @@ fun exitWithError(message: String? = null): Nothing {
     throw BunchException(message)
 }
 
-inline fun process(args: Array<String>, f: () -> Unit) {
-    process(args.contains("--verbose"), f)
+inline fun process(args: Array<String>, f: (args: Array<String>) -> Unit) {
+    val isVerbose = args.contains("--verbose")
+    process(isVerbose) {
+        if (isVerbose) {
+            println("Args: ${args.toList()}")
+        }
+        f(args.filter { it != "--verbose" }.toTypedArray())
+    }
 }
 
 inline fun process(verbose: Boolean, f: () -> Unit) {

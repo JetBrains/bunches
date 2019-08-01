@@ -138,44 +138,54 @@ class SimpleCheckToolWindow(
 
     private inner class SetCheckedAction :
         AnAction("Add to commit", "Add all current changes to commit", AllIcons.Actions.Redo) {
-
         init {
             registerCustomShortcutSet(CommonShortcuts.ENTER, panel)
         }
 
         override fun actionPerformed(e: AnActionEvent) {
-            filesTree.addSelected(filesTree.psiFile?.virtualFile)
+            filesTree.getAllChosenFiles().forEach { filesTree.addSelected(it.virtualFile) }
+        }
+
+        private fun isAvailable(file: PsiFile): Boolean {
+            return !isSelected(file)
+                    && isBunchFile(file.virtualFile, project)
+                    && !inCommit(file)
         }
 
         override fun update(e: AnActionEvent) {
-            val file = filesTree.psiFile ?: return
-            e.presentation.isEnabledAndVisible = !isSelected(file)
-                    && isBunchFile(file.virtualFile, project)
-                    && !inCommit(file)
+            e.presentation.isEnabledAndVisible = filesTree.getAllChosenFiles().all { isAvailable(it) }
 
         }
     }
 
     private inner class SetUncheckedAction :
         AnAction("Remove from commit", "Remove all current changes from commit", AllIcons.Actions.Undo) {
-
         init {
             registerCustomShortcutSet(CommonShortcuts.ENTER, panel)
         }
 
         override fun actionPerformed(e: AnActionEvent) {
-            filesTree.removeSelected(filesTree.psiFile?.virtualFile)
+            filesTree.getAllChosenFiles().forEach { filesTree.removeSelected(it.virtualFile) }
+        }
+
+        private fun isAvailable(file: PsiFile): Boolean {
+            return isSelected(file)
+                    && isBunchFile(file.virtualFile, project)
+                    && !inCommit(file)
         }
 
         override fun update(e: AnActionEvent) {
-            val file = filesTree.psiFile ?: return
-            e.presentation.isEnabledAndVisible = isSelected(file)
-                    && isBunchFile(file.virtualFile, project)
-                    && !inCommit(file)
+            e.presentation.isEnabledAndVisible = filesTree.getAllChosenFiles().all { isAvailable(it) }
         }
     }
 
     private inner class DiffAction : BunchCompareFilesAction() {
+        init {
+            val diffShortcutSet = ActionManager.getInstance()
+                .getAction("BunchCompareFilesActions").shortcutSet
+            registerCustomShortcutSet(diffShortcutSet, panel)
+        }
+
         override fun getFile(e: AnActionEvent): VirtualFile? {
             return filesTree.psiFile?.virtualFile
         }

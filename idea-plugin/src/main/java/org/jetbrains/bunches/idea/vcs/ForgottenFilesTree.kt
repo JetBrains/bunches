@@ -74,6 +74,11 @@ internal open class ForgottenFilesTree(
         return selectedFiles.toList()
     }
 
+    internal fun getAllChosenFiles(): List<PsiFile> {
+        return selectionPaths?.mapNotNull {
+            (it.lastPathComponent as? DefaultMutableTreeNode)?.userObject as? PsiFile
+        } ?: emptyList()
+    }
 
     override fun getData(dataId: String): Any? {
         return if (CommonDataKeys.NAVIGATABLE.`is`(dataId)) {

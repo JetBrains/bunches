@@ -3,12 +3,13 @@ package org.jetbrains.bunches
 import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.FileAction
 import org.jetbrains.bunches.git.readCommits
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestWatcher
+import strikt.api.expectThat
+import strikt.assertions.*
 import java.io.File
 import java.io.InvalidObjectException
 import java.nio.file.Files
@@ -17,7 +18,7 @@ import java.util.*
 @ExtendWith(BunchBaseTest.MyTestWatcher::class)
 open class BunchBaseTest {
     val directory = Files.createTempDirectory("directory").toFile()
-        ?: throw InvalidObjectException("failed to create temp directory")
+        ?: throw InvalidObjectException("Failed to create temp directory")
 
     protected val testOutput = StringBuilder()
     protected val gitManager = GitCommandManager(directory, testOutput)
@@ -40,6 +41,7 @@ open class BunchBaseTest {
     protected fun addAndCommitChanges(file: File, text: String, message: String? = null): CommitInfo {
         return writeTextAndCommitChanges(file, file.readText() + text, message)
     }
+
     protected open fun createAndAddFile(filename: String, text: String? = null): File {
         val newFile = File(directory, filename)
         if (!newFile.createNewFile()) {
@@ -53,8 +55,10 @@ open class BunchBaseTest {
     }
 
     protected fun assertFileContent(file: File, content: String) {
-        assertTrue(file.exists())
-        assertEquals(content, file.readText())
+        expectThat(file) {
+            isExists()
+            isContentEqualsTo(content)
+        }
     }
 
     protected fun getCommitHash(commit: CommitInfo): String {
@@ -75,12 +79,13 @@ open class BunchBaseTest {
     }
 
     protected fun assertCommitHistoryEquals(commits: List<CommitInfo>) {
-        assertEquals(commits, getAllCommits())
+        expectThat(getAllCommits()).isEqualTo(commits)
     }
 
 
     protected fun assertDirectoryFiles(files: List<File>) {
-        assertEquals(files.toSet(), directory.listFiles()?.filterNot { it.isHidden || it.name == ".bunch" }?.toSet())
+        expectThat(directory.listFiles()).isNotNull().toList()
+            .filterNot { it.isHidden || it.name == ".bunch" }.containsExactlyInAnyOrder(files)
     }
 
     protected fun assertCommitHistoryEquals(vararg commits: CommitInfo) {
@@ -96,7 +101,7 @@ open class BunchBaseTest {
     }
 
     protected fun checkCommitActions(commit: CommitInfo, fileActions: List<FileAction>) {
-        assertEquals(fileActions.toSet(), commit.fileActions.toSet())
+        expectThat(commit.fileActions).containsExactlyInAnyOrder(fileActions)
     }
 
     protected fun checkCommitActions(commit: CommitInfo, vararg fileActions: FileAction) {

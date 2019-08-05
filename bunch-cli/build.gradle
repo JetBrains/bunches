@@ -3,6 +3,7 @@ mainClassName = "org.jetbrains.bunches.general.Bunch"
 
 repositories {
     maven { url 'https://jitpack.io' }
+    jcenter()
 }
 
 dependencies {
@@ -11,6 +12,7 @@ dependencies {
     implementation 'com.github.ajalt:clikt:2.0.0'
     testCompile('org.junit.jupiter:junit-jupiter-api:5.5.1')
     testRuntime('org.junit.jupiter:junit-jupiter-engine:5.5.1')
+    testImplementation("io.strikt:strikt-core:0.21.1")
 }
 
 startScripts {

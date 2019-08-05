@@ -6,9 +6,9 @@ import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.generatePickedCommitMessage
 import org.jetbrains.bunches.restore.doOneStepSwitch
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
+import strikt.api.expect
+import strikt.api.expectThat
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
@@ -35,32 +35,37 @@ class BunchCPTest : BunchBaseTest() {
     }
 
     private fun assertContentEquals(file: File, text: String) {
-        assertTrue(file.exists())
-        assertEquals(text, file.readText())
+        expectThat(file).isExists()
+        expectThat(file).isContentEqualsTo(text)
     }
 
     private fun assertContentEquals(first: File, second: File) {
-        assertTrue(first.exists())
-        assertTrue(second.exists())
-        assertEquals(first.readLines(), second.readLines())
+        expectThat(first).isExists()
+        expectThat(second).isExists()
+        expectThat(first).isContentEqualsTo(second)
     }
 
-    private fun compareCommitsWithoutHashAndTime(first: CommitInfo, second: CommitInfo, extension: String) {
-        assertEquals(generatePickedCommitMessage(first, extension), second.title)
-        assertEquals(first.author?.emailAddress, second.author?.emailAddress)
-        assertEquals(first.author?.name, second.author?.name)
-        assertEquals(first.fileActions.map { it.content }, second.fileActions.map { it.content })
-        assertEquals(first.fileActions.map { it.newPath + ".$extension" }, second.fileActions.map { it.newPath })
-
+    private fun compareCommitsWithoutHashAndTime(
+        copiedCommit: CommitInfo,
+        initialCommit: CommitInfo,
+        extension: String
+    ) {
+        expectThat(copiedCommit) {
+            hasModifiedFieldWith(initialCommit, CommitInfo::title, { generatePickedCommitMessage(it, extension) })
+            hasEqualFieldWith(initialCommit) { commitInfo -> commitInfo.author?.name }
+            hasEqualFieldWith(initialCommit) { commitInfo -> commitInfo.author?.emailAddress }
+            hasEqualFieldWith(initialCommit) { commitInfo -> commitInfo.fileActions.map { it.content } }
+        }
+        expectThat(copiedCommit.fileActions).hasModifiedFieldsFrom(
+            initialCommit.fileActions,
+            { it.newPath },
+            { "${it.newPath}.$extension" })
     }
 
     private fun checkCommitsAfterCP(lastCommitBefore: CommitInfo, branch: String, commits: List<CommitInfo>) {
         val realCommits = getCommitsAfter(lastCommitBefore)
-
-        assertEquals(commits.size, realCommits.size)
-        for ((first, second) in realCommits.zip(commits)) {
-            compareCommitsWithoutHashAndTime(second, first, branch)
-        }
+        expectThat(realCommits).equalsBy(commits)
+        { first, second -> compareCommitsWithoutHashAndTime(first, second, branch) }
     }
 
     private fun checkCommitsAfterCP(branch: String, commits: List<CommitInfo>) {
@@ -108,8 +113,10 @@ class BunchCPTest : BunchBaseTest() {
     @Test
     fun notApplicableCommitCPTest() {
         val mainFile = createAndAddFile("otherFile")
-        val bunchFile = createAndAddFile("otherFile.346",
-            mainFile.readText().dropLast(5) + " additional info")
+        val bunchFile = createAndAddFile(
+            "otherFile.346",
+            mainFile.readText().dropLast(5) + " additional info"
+        )
 
         val initCommit = commitCurrentChanges()
 
@@ -164,7 +171,9 @@ class BunchCPTest : BunchBaseTest() {
 
         runCPWithRedirectedOutput(bunchFileChangeCommit, switchCommit, "394")
         mainFile.writeText(getFile("file.300").readText())
-        assertTrue(getFile("file.300").delete())
+        expect {
+            getFile("file.300").delete()
+        }
 
         assertContentEquals(mainFile, mainFileText)
         assertContentEquals(bunchFile, bunchFileText)
@@ -186,8 +195,8 @@ class BunchCPTest : BunchBaseTest() {
         runCPWithRedirectedOutput(changesCommit, initCommit, "42")
 
         for ((text, file) in texts.zip(files)) {
-            assertContentEquals(file, text)
-            assertContentEquals(getFile(file.name, "42"), text)
+            expectThat(file).isContentEqualsTo(text)
+            expectThat(getFile(file.name, "42")).isContentEqualsTo(text)
         }
 
         checkCommitsAfterCP("42", changesCommit)
@@ -202,16 +211,18 @@ class BunchCPTest : BunchBaseTest() {
         val modCommit = addAndCommitChanges(file, "info")
 
         val firstCPCommit = runCPWithRedirectedOutput(modCommit, initCommit, "42")
-        compareCommitsWithoutHashAndTime(modCommit, firstCPCommit, "42")
+        compareCommitsWithoutHashAndTime(copiedCommit = firstCPCommit, initialCommit = modCommit, extension = "42")
 
-        val secondCPCommit = runCPWithRedirectedOutput(modCommit, initCommit,"43")
-        compareCommitsWithoutHashAndTime(modCommit, secondCPCommit, "43")
+        val secondCPCommit = runCPWithRedirectedOutput(modCommit, initCommit, "43")
+        compareCommitsWithoutHashAndTime(secondCPCommit, modCommit, "43")
 
         val firstBunchFile = getFile(file.name, "42")
         val secondBunchFile = getFile(file.name, "43")
 
-        assertContentEquals(file, firstBunchFile)
-        assertContentEquals(file, secondBunchFile)
+        expectThat(file) {
+            isContentEqualsTo(firstBunchFile)
+            isContentEqualsTo(secondBunchFile)
+        }
         assertDirectoryFiles(file, firstBunchFile, secondBunchFile)
 
         assertCommitHistoryEquals(secondCPCommit, firstCPCommit, modCommit, initCommit)
@@ -234,15 +245,17 @@ class BunchCPTest : BunchBaseTest() {
         val firstCommitBunchFile = getFile(mainFile.name, "32")
         val secondCommitBunchFile = getFile(mainFile.name, "33")
 
-        compareCommitsWithoutHashAndTime(firstModCommit, firstCPCommit, "32")
-        compareCommitsWithoutHashAndTime(thirdModCommit, secondCPCommit, "33")
+        compareCommitsWithoutHashAndTime(firstCPCommit, firstModCommit, "32")
+        compareCommitsWithoutHashAndTime(secondCPCommit, thirdModCommit, "33")
 
         assertContentEquals(firstCommitBunchFile, firstText)
         assertContentEquals(secondCommitBunchFile, thirdText)
         assertContentEquals(mainFile, thirdText)
 
-        assertCommitHistoryEquals(secondCPCommit, firstCPCommit, thirdModCommit,
-            secondModCommit, firstModCommit, initCommit)
+        assertCommitHistoryEquals(
+            secondCPCommit, firstCPCommit, thirdModCommit,
+            secondModCommit, firstModCommit, initCommit
+        )
         assertDirectoryFiles(mainFile, firstCommitBunchFile, secondCommitBunchFile)
     }
 }

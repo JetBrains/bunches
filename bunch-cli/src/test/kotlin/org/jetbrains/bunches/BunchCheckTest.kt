@@ -4,8 +4,11 @@ import org.jetbrains.bunches.check.checkOneCommit
 import org.jetbrains.bunches.check.getCreateFileCommitIndexMap
 import org.jetbrains.bunches.git.CommitInfo
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.jupiter.api.Test
+import strikt.api.expectThat
+import strikt.assertions.containsExactly
+import strikt.assertions.containsExactlyInAnyOrder
+import strikt.assertions.isEmpty
 
 class BunchCheckTest : BunchBaseTest() {
     private fun checkCommit(commit: CommitInfo, extensions: List<String>, vararg commits: CommitInfo): List<String> {
@@ -24,15 +27,9 @@ class BunchCheckTest : BunchBaseTest() {
         val bunchFile = createAndAddFile("file.a")
 
         val commit = commitCurrentChanges("init")
-        val problemFiles = checkOneCommit(
-            commit,
-            listOf("b", "a"),
-            directory.absolutePath,
-            mutableMapOf("file" to 0, "file.a" to 0),
-            0
-        )
+        val problemFiles = checkCommit(commit, listOf("b", "a"), commit)
 
-        assertTrue(problemFiles.isEmpty())
+        expectThat(problemFiles).isEmpty()
         assertDirectoryFiles(file, bunchFile)
         assertCommitHistoryEquals(commit)
     }
@@ -43,15 +40,9 @@ class BunchCheckTest : BunchBaseTest() {
         val bunchFile = createAndAddFile("file.a")
 
         val commit = commitCurrentChanges("init")
-        val problemFiles = checkOneCommit(
-            commit,
-            listOf("b", "c"),
-            directory.absolutePath,
-            mutableMapOf("file" to 0, "file.a" to 0),
-            0
-        )
+        val problemFiles = checkCommit(commit, listOf("a", "b"), commit)
 
-        assertTrue(problemFiles.isEmpty())
+        expectThat(problemFiles).isEmpty()
         assertDirectoryFiles(file, bunchFile)
         assertCommitHistoryEquals(commit)
     }
@@ -67,7 +58,7 @@ class BunchCheckTest : BunchBaseTest() {
 
         val problemFiles = checkCommit(modCommit, listOf("a"), bunchInitCommit, modCommit, initCommit)
 
-        assertTrue(problemFiles.isEmpty())
+        expectThat(problemFiles).isEmpty()
         assertCommitHistoryEquals(bunchInitCommit, modCommit, initCommit)
         assertDirectoryFiles(file, bunchFile)
     }
@@ -81,7 +72,7 @@ class BunchCheckTest : BunchBaseTest() {
         val modCommit = writeTextAndCommitChanges(main, "new_text")
         val problemFiles = checkCommit(modCommit, listOf("a", "b"), modCommit, initCommit)
 
-        assertEquals(listOf(bunch.relativePath()), problemFiles)
+        expectThat(problemFiles).containsExactly(bunch.relativePath())
         assertCommitHistoryEquals(modCommit, initCommit)
         assertDirectoryFiles(
             main, bunch
@@ -100,7 +91,7 @@ class BunchCheckTest : BunchBaseTest() {
         val modCommit = writeTextAndCommitChanges(main, "new_text")
         val problemFiles = checkCommit(modCommit, listOf("a", "b"), modCommit, deleteCommit, initCommit)
 
-        assertEquals(listOf<String>(), problemFiles)
+        expectThat(problemFiles).isEmpty()
         assertCommitHistoryEquals(modCommit, deleteCommit, initCommit)
         assertDirectoryFiles(main)
     }
@@ -121,10 +112,12 @@ class BunchCheckTest : BunchBaseTest() {
         bunchFile = createAndAddFile("file.aa")
         val bunchAddCommit = commitCurrentChanges()
 
-        val problemFiles = checkCommit(secondModCommit, listOf("aa"),
-            bunchAddCommit, secondModCommit, deleteCommit, firstModCommit, initCommit)
+        val problemFiles = checkCommit(
+            secondModCommit, listOf("aa"),
+            bunchAddCommit, secondModCommit, deleteCommit, firstModCommit, initCommit
+        )
 
-        assertEquals(emptyList<String>(), problemFiles)
+        expectThat(problemFiles).isEmpty()
         assertDirectoryFiles(mainFile, bunchFile)
     }
 
@@ -154,8 +147,8 @@ class BunchCheckTest : BunchBaseTest() {
         val modCommit = commitCurrentChanges()
 
         val problemFiles = checkCommit(modCommit, listOf("bunch"), modCommit, initCommit)
-        assertEquals(bunchFiles.filter { bunchFiles.indexOf(it) % 2 != 0 }.map { it.relativePath() }.sorted(),
-            problemFiles.sorted())
+        expectThat(problemFiles)
+            .containsExactlyInAnyOrder(bunchFiles.filter { bunchFiles.indexOf(it) % 2 != 0 }.map { it.relativePath() })
         assertCommitHistoryEquals(modCommit, initCommit)
         assertDirectoryFiles(bunchFiles.plus(mainFiles))
     }

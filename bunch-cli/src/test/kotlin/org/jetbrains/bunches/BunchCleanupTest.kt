@@ -9,11 +9,11 @@ import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.FileAction
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
+import strikt.api.expectThat
+import strikt.assertions.containsExactlyInAnyOrder
 import java.io.File
 
 class BunchCleanupTest : BunchBaseTest() {
-
     private fun doCleanup(
         extension: String?,
         title: String = DEFAULT_CLEANUP_COMMIT_TITLE
@@ -29,16 +29,14 @@ class BunchCleanupTest : BunchBaseTest() {
     ) {
         val extensions = files.map { it.extension }.toSet()
         val commitsMessage = message.replace(EXT_PATTERN, extensions.singleOrNull() ?: "")
-        assertEquals(
-            files.map {
-                FileAction(
-                    DiffEntry.ChangeType.DELETE,
-                    it.relativePath(),
-                    ""
-                )
-            }.toSet(),
-            commit.fileActions.toSet()
-        )
+        val fileActions = files.map {
+            FileAction(
+                DiffEntry.ChangeType.DELETE,
+                it.relativePath(),
+                ""
+            )
+        }
+        expectThat(fileActions).containsExactlyInAnyOrder(commit.fileActions)
         assertEquals(commit.title, commitsMessage)
     }
 

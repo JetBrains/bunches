@@ -4,10 +4,14 @@ import org.eclipse.jgit.diff.DiffEntry
 import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.FileAction
 import org.jetbrains.bunches.reduce.*
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import strikt.api.expectThat
+import strikt.assertions.containsExactly
+import strikt.assertions.containsExactlyInAnyOrder
+import strikt.assertions.isEmpty
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
@@ -43,7 +47,7 @@ class BunchReduceTest : BunchBaseTest() {
 
     private fun checkDeletedFiles(commit: CommitInfo, files: List<File>) {
         val changes = files.map { FileAction(DiffEntry.ChangeType.DELETE, it.relativePath(), "") }
-        assertEquals(changes.toSet(), commit.fileActions.toSet())
+        expectThat(commit.fileActions).containsExactlyInAnyOrder(changes)
     }
 
     private fun checkDeletedFiles(commit: CommitInfo, vararg files: File) {
@@ -71,7 +75,7 @@ class BunchReduceTest : BunchBaseTest() {
 
         val files = reducibleFiles()
 
-        assertEquals(listOf(bunchFile), files)
+        expectThat(files).containsExactly(bunchFile)
     }
 
     @Test
@@ -82,7 +86,7 @@ class BunchReduceTest : BunchBaseTest() {
 
         val files = reducibleFiles()
 
-        assertTrue(files.isEmpty())
+        expectThat(files).isEmpty()
     }
 
     @Test
@@ -93,7 +97,7 @@ class BunchReduceTest : BunchBaseTest() {
 
         val files = reducibleFiles()
 
-        assertTrue(files.isEmpty())
+        expectThat(files).isEmpty()
     }
 
     @Test
@@ -104,7 +108,7 @@ class BunchReduceTest : BunchBaseTest() {
             file.writeText(it.readText())
             file
         }
-        assertEquals(bunchFiles.toSet(), reducibleFiles().toSet())
+        expectThat(reducibleFiles()).containsExactlyInAnyOrder(bunchFiles)
     }
 
     @Test
@@ -116,7 +120,7 @@ class BunchReduceTest : BunchBaseTest() {
             file.writeText(getFile("file$it").readText())
             file
         }
-        assertEquals(bunchFiles.sorted(), reducibleFiles().sorted())
+        expectThat(reducibleFiles()).containsExactlyInAnyOrder(bunchFiles)
     }
 
     @Test
@@ -125,7 +129,6 @@ class BunchReduceTest : BunchBaseTest() {
         val bunchFile = createAndAddFile("file.123")
         bunchFile.writeText(file.readText())
         reduce(ReduceAction.DELETE)
-        assertFalse(bunchFile.exists())
         assertDirectoryFiles(file)
     }
 
@@ -138,7 +141,6 @@ class BunchReduceTest : BunchBaseTest() {
         gitManager.gitAdd(bunchFile)
         val modCommit = commitCurrentChanges()
         reduce(ReduceAction.DELETE)
-        assertFalse(bunchFile.exists())
         assertDirectoryFiles(file)
         assertCommitHistoryEquals(modCommit, initCommit)
     }
@@ -152,7 +154,7 @@ class BunchReduceTest : BunchBaseTest() {
         gitManager.gitAdd(bunchFile)
         val modCommit = commitCurrentChanges()
         val reduceCommit = commitReduce()
-        assertFalse(bunchFile.exists())
+
         assertDirectoryFiles(file)
         assertCommitHistoryEquals(reduceCommit, modCommit, initCommit)
         checkDeletedFiles(reduceCommit, bunchFile)
@@ -167,7 +169,7 @@ class BunchReduceTest : BunchBaseTest() {
         gitManager.gitAdd(bunchFile)
         val modCommit = commitCurrentChanges()
         commitReduce()
-        assertTrue(bunchFile.exists())
+
         assertDirectoryFiles(file, bunchFile)
         assertCommitHistoryEquals(modCommit, initCommit)
     }
@@ -182,7 +184,7 @@ class BunchReduceTest : BunchBaseTest() {
         val modCommit = commitCurrentChanges()
         val outputStream = ByteArrayOutputStream()
         reduce(ReduceAction.PRINT, outputStream)
-        assertTrue(bunchFile.exists())
+
         assertDirectoryFiles(file, bunchFile)
         assertCommitHistoryEquals(modCommit, initCommit)
         assertEquals(EMPTY_REDUCE_MESSAGE, outputStream.toString())
@@ -195,11 +197,11 @@ class BunchReduceTest : BunchBaseTest() {
         bunchFile.writeText(file.readText())
 
         val outputStream = ByteArrayOutputStream()
-
         reduce(ReduceAction.PRINT, outputStream)
-        assertTrue(bunchFile.exists())
+
         assertDirectoryFiles(file, bunchFile)
-        assertEquals(listOf(bunchFile.relativePath()), outputStream.toString().split(Regex("\\s")).filter { it.isNotBlank() })
+        expectThat(outputStream.toString().split(Regex("\\s")).filter { it.isNotBlank() })
+            .containsExactly(bunchFile.relativePath())
     }
 
     @Test
@@ -207,7 +209,7 @@ class BunchReduceTest : BunchBaseTest() {
         val file = createAndAddFile("file")
         assertThrows<BunchException>(UNCOMMITTED_CHANGES_MESSAGE) { commitReduce() }
         val added = gitManager.gitStatus().added
-        assertEquals(setOf(file.relativePath()), added)
+        expectThat(added).containsExactly(file.relativePath())
         assertDirectoryFiles(file)
     }
 }

@@ -25,6 +25,8 @@ fun main(args: Array<String>) {
     ReduceCommand().main(args)
 }
 
+const val UNCOMMITTED_CHANGES_MESSAGE = "Can not commit changes for reduce with uncommitted changes."
+const val EMPTY_REDUCE_MESSAGE = "Nothing to reduce\n"
 const val REDUCE_DESCRIPTION = "Check repository for unneeded files with the same content."
 const val DEFAULT_REDUCE_COMMIT_TITLE = "~~~~ reduce ~~~~"
 val REDUCE_EXAMPLE =
@@ -41,7 +43,8 @@ val ACTION_HELP =
         commit - delete files and commit them
     """.trimIndent()
 
-val ACTIONS = mapOf("--print" to ReduceAction.PRINT, "--delete" to ReduceAction.DELETE, "--commit" to ReduceAction.COMMIT)
+val ACTIONS =
+    mapOf("--print" to ReduceAction.PRINT, "--delete" to ReduceAction.DELETE, "--commit" to ReduceAction.COMMIT)
 
 class ReduceCommand : BunchSubCommand(
     name = "reduce",
@@ -49,7 +52,9 @@ class ReduceCommand : BunchSubCommand(
     epilog = REDUCE_EXAMPLE
 ) {
     val repoPath by repoPathOption()
-    private val action by option(help = ACTION_HELP.replaceNewLinesWithForcedMarker()).switch(ACTIONS).default(ReduceAction.COMMIT)
+    private val action by option(help = ACTION_HELP.replaceNewLinesWithForcedMarker()).switch(ACTIONS).default(
+        ReduceAction.COMMIT
+    )
 
     private val commitTitle by option(
         "-m",
@@ -71,13 +76,13 @@ class ReduceCommand : BunchSubCommand(
 
 private data class UpdatePair(val from: String, val to: String)
 
-fun getReducibleFiles(repoPath: String, bunchPath: String) : ArrayList<File> {
+fun getReducibleFiles(repoPath: String, bunchPath: String): ArrayList<File> {
     val root = File(repoPath)
     if (!isGitRoot(root)) {
         exitWithError("Repository directory with branch is expected")
     }
 
-	val gitignoreParseResult = parseGitIgnore(root)
+    val gitignoreParseResult = parseGitIgnore(root)
     val (base, rules) = readUpdatePairsFromFile(bunchPath).resultWithExit()
 
     if (rules.isEmpty()) {
@@ -127,13 +132,13 @@ fun getReducibleFiles(repoPath: String, bunchPath: String) : ArrayList<File> {
 
 fun doReduce(settings: Settings) {
     if (hasUncommittedChanges(settings.repoPath) && settings.action == ReduceAction.COMMIT) {
-        exitWithError("Can not commit changes for reduce with uncommitted changes.")
+        exitWithError(UNCOMMITTED_CHANGES_MESSAGE)
     }
 
     val files = getReducibleFiles(settings.repoPath, settings.bunchPath)
 
     if (files.isEmpty()) {
-        println("Nothing to reduce")
+        print(EMPTY_REDUCE_MESSAGE)
         return
     }
 

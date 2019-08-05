@@ -99,6 +99,7 @@ open class BunchBaseTest {
     protected fun gitLog() {
         gitManager.gitLog()
     }
+
     private fun configureBunchFile(extensions: List<String>) {
         val bunch = File(directory, ".bunch")
         if (!bunch.createNewFile()) {

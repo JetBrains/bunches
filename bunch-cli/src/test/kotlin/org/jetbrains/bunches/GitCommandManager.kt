@@ -1,6 +1,7 @@
 package org.jetbrains.bunches
 
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.api.Status
 import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.readCommits
 import java.io.File
@@ -59,6 +60,10 @@ class GitCommandManager(private val directory: File, private val output: StringB
         if (processErrorStream.isNotEmpty()) {
             output.append("Error:\n$processErrorStream\n")
         }
+    }
+
+    internal fun gitStatus(): Status {
+        return git.status().call()
     }
 
     private fun getProcessForCommand(command: String): Process {

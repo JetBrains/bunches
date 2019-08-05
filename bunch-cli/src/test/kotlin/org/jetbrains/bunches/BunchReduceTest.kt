@@ -14,17 +14,6 @@ import java.io.PrintStream
 
 
 class BunchReduceTest : BunchBaseTest() {
-    private fun createFile(filename: String, extension: String = ""): File {
-        val file =
-            if (extension.isNotEmpty()) {
-                "$filename.$extension"
-            } else
-                filename
-        val result = File(directory, file)
-        assertTrue(result.createNewFile())
-        return result
-    }
-
     private fun reduce(
         action: ReduceAction,
         tempOutputStream: ByteArrayOutputStream = ByteArrayOutputStream()

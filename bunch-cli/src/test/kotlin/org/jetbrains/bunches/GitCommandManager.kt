@@ -69,4 +69,8 @@ class GitCommandManager(private val directory: File, private val output: StringB
     private fun getProcessForCommand(command: String): Process {
         return Runtime.getRuntime().exec(command, null, directory)
     }
+
+    internal fun gitDelete(filePath: String) {
+        git.rm().addFilepattern(filePath).call()
+    }
 }

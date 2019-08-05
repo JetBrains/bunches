@@ -22,10 +22,24 @@ open class BunchBaseTest {
     protected val testOutput = StringBuilder()
     protected val gitManager = GitCommandManager(directory, testOutput)
 
+    protected fun delete(file: File) {
+        assertTrue(file.delete())
+        gitManager.gitDelete(file.relativePath())
+    }
+
     protected fun File.relativePath(): String {
         return directory.absoluteFile.toPath().relativize(this.absoluteFile.toPath()).toString()
     }
 
+    protected fun writeTextAndCommitChanges(file: File, text: String, message: String? = null): CommitInfo {
+        file.writeText(text)
+        gitManager.gitAdd(file)
+        return commitCurrentChanges(message)
+    }
+
+    protected fun addAndCommitChanges(file: File, text: String, message: String? = null): CommitInfo {
+        return writeTextAndCommitChanges(file, file.readText() + text, message)
+    }
     protected open fun createAndAddFile(filename: String, text: String? = null): File {
         val newFile = File(directory, filename)
         if (!newFile.createNewFile()) {
@@ -94,6 +108,16 @@ open class BunchBaseTest {
             return File(directory, "$filename.$extension")
         }
         return File(directory, filename)
+    }
+
+    protected fun createFile(filename: String, extension: String = ""): File {
+        val file = getFile(filename, extension)
+        assertTrue(file.createNewFile())
+        return file
+    }
+
+    protected fun createAndAddBunchFile(file: File, extension: String, text: String? = null): File {
+        return createAndAddFile(file.relativePath() + ".$extension", text)
     }
 
     protected fun gitLog() {

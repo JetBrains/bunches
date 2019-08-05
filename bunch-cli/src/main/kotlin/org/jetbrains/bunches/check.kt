@@ -82,24 +82,8 @@ fun doCheck(settings: Settings) {
 
     for (commitIndex in commits.indices) {
         val commit = commits[commitIndex]
-        val affectedPaths = commit.fileActions.mapNotNullTo(HashSet()) { it.newPath }
-
-        val forgottenFilesPaths = ArrayList<String>()
-        for (fileAction in commit.fileActions) {
-            val newPath = fileAction.newPath ?: continue
-            if (File(newPath).extension in extensions) continue
-
-            for (extension in extensions) {
-                val bunchFilePath = "$newPath.$extension"
-                val file = File(settings.repoPath, bunchFilePath)
-                if (bunchFilePath !in affectedPaths
-                    && file.exists()
-                    && isCreatedBefore(createFileCommitIndex[bunchFilePath], commitIndex)
-                ) {
-                    forgottenFilesPaths.add(bunchFilePath)
-                }
-            }
-        }
+        val forgottenFilesPaths =
+            checkOneCommit(commit, extensions, settings.repoPath, createFileCommitIndex, commitIndex)
 
         val deletedCache: MutableMap<String, Boolean> = HashMap()
         fun isDeletedWithCache(bunchFilePath: String): Boolean {
@@ -127,13 +111,44 @@ fun doCheck(settings: Settings) {
     println("${commits.size} commits have been checked. No problem commits found.")
 }
 
-private fun getCreateFileCommitIndexMap(commits: List<CommitInfo>, extensions: List<String>): Map<String, Int> {
+fun checkOneCommit(
+    commit: CommitInfo,
+    extensions: List<String>,
+    directory: String,
+    createFileCommitIndex: Map<String, Int>,
+    commitIndex: Int
+): List<String> {
+    val affectedPaths = commit.fileActions.mapNotNullTo(HashSet()) { it.newPath }
+
+    val forgottenFilesPaths = mutableListOf<String>()
+    for (fileAction in commit.fileActions) {
+        val newPath = fileAction.newPath ?: continue
+        if (File(newPath).extension in extensions) continue
+
+        for (extension in extensions) {
+            val bunchFilePath = "$newPath.$extension"
+            val file = File(directory, bunchFilePath)
+            if (bunchFilePath !in affectedPaths
+                && file.exists()
+                && isCreatedBefore(createFileCommitIndex[bunchFilePath], commitIndex)
+            ) {
+                forgottenFilesPaths.add(bunchFilePath)
+            }
+        }
+    }
+    return forgottenFilesPaths
+}
+
+internal fun getCreateFileCommitIndexMap(commits: List<CommitInfo>, extensions: List<String>): Map<String, Int> {
     val creationIndex = mutableMapOf<String, Int>()
     for (commitIndex in commits.indices) {
         val commit = commits[commitIndex]
         for (action in commit.fileActions) {
             val filePath = action.newPath ?: continue
-            if (action.changeType == DiffEntry.ChangeType.ADD && File(filePath).extension in extensions) {
+            if (action.changeType == DiffEntry.ChangeType.ADD
+                && File(filePath).extension in extensions
+                && filePath !in creationIndex.keys
+            ) {
                 creationIndex[filePath] = commitIndex
             }
         }

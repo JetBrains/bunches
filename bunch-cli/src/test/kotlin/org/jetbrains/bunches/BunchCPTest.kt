@@ -45,16 +45,6 @@ class BunchCPTest : BunchBaseTest() {
         assertEquals(first.readLines(), second.readLines())
     }
 
-    private fun writeTextAndCommitChanges(file: File, text: String, message: String? = null): CommitInfo {
-        file.writeText(text)
-        gitManager.gitAdd(file)
-        return commitCurrentChanges(message)
-    }
-
-    private fun addAndCommitChanges(file: File, text: String, message: String? = null): CommitInfo {
-        return writeTextAndCommitChanges(file, file.readText() + text, message)
-    }
-
     private fun compareCommitsWithoutHashAndTime(first: CommitInfo, second: CommitInfo, extension: String) {
         assertEquals(generatePickedCommitMessage(first, extension), second.title)
         assertEquals(first.author?.emailAddress, second.author?.emailAddress)

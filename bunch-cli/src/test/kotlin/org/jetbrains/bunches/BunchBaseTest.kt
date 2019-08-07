@@ -28,6 +28,10 @@ open class BunchBaseTest {
         gitManager.gitDelete(file.relativePath())
     }
 
+    protected fun writeToOutput(text: String = "") {
+        testOutput.append("$text\n")
+    }
+
     protected fun File.relativePath(): String {
         return directory.absoluteFile.toPath().relativize(this.absoluteFile.toPath()).toString()
     }
@@ -70,12 +74,13 @@ open class BunchBaseTest {
             .firstOrNull() ?: throw InvalidObjectException("no last commit")
     }
 
-    private fun getAllCommits(): List<CommitInfo> {
-        return readCommits(directory.absolutePath)
+    protected fun getAllCommits(branch: String? = null): List<CommitInfo> {
+        return readCommits(directory.absolutePath, branch)
     }
 
     protected fun commitCurrentChanges(message: String? = null): CommitInfo {
-        return gitManager.gitCommit(message ?: "commit${Random().nextInt()}")
+        gitManager.gitCommit(message ?: "commit${Random().nextInt()}")
+        return getLastCommit()
     }
 
     protected fun assertCommitHistoryEquals(commits: List<CommitInfo>) {
@@ -129,12 +134,17 @@ open class BunchBaseTest {
         gitManager.gitLog()
     }
 
-    private fun configureBunchFile(extensions: List<String>) {
+    protected fun configureBunchFile(extensions: List<String>) {
         val bunch = File(directory, ".bunch")
-        if (!bunch.createNewFile()) {
+        if (!bunch.exists() && !bunch.createNewFile()) {
             throw BunchException("Failed to create .bunch")
         }
         bunch.writeText(extensions.joinToString(separator = System.lineSeparator(), postfix = System.lineSeparator()))
+    }
+
+    protected fun touch(file: File) {
+        file.writeText("new unique text ${Random().nextDouble()}")
+        gitManager.gitAdd(file)
     }
 
     protected fun configureBunchFile(vararg extensions: String) {

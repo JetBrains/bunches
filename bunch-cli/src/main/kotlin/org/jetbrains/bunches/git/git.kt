@@ -216,7 +216,15 @@ fun reCommitPatched(repositoryPath: String, commitInfo: CommitInfo, suffix: Stri
 }
 
 enum class ChangeType { ADD, REMOVE, MODIFY }
-class FileChange(val type: ChangeType, val file: File)
+class FileChange(val type: ChangeType, val file: File) {
+    override fun equals(other: Any?): Boolean {
+        return (other is FileChange) && (other.type == type && other.file == file)
+    }
+
+    override fun toString(): String {
+        return "$type $file"
+    }
+}
 
 fun commitChanges(repositoryPath: String, changeFiles: Collection<FileChange>, title: String) {
     val repoPath = File(repositoryPath)

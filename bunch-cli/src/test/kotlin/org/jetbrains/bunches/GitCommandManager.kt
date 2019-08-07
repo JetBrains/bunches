@@ -2,6 +2,7 @@ package org.jetbrains.bunches
 
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.Status
+import org.eclipse.jgit.revwalk.RevCommit
 import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.readCommits
 import java.io.File
@@ -68,6 +69,18 @@ class GitCommandManager(private val directory: File, private val output: StringB
 
     private fun getProcessForCommand(command: String): Process {
         return Runtime.getRuntime().exec(command, null, directory)
+    }
+
+    internal fun gitDiff(): List<File> {
+        return git.diff().setCached(true).call().map { File(directory, it.oldPath) }
+    }
+
+    internal fun crateBranch(branch: String, startPoint: RevCommit? = null) {
+        git.branchCreate().setName(branch).setStartPoint(startPoint).call()
+    }
+
+    internal fun checkout(branch: String) {
+        git.checkout().setName(branch).call()
     }
 
     internal fun gitDelete(filePath: String) {

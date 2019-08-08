@@ -3,7 +3,17 @@
     <name>Bunch Tool</name>
 
     <description><![CDATA[
-    Support for bunch files in the project. <a href="https://github.com/JetBrains/bunches">Bunch Tool</a>
+    Support for bunch files when <a href="https://github.com/JetBrains/bunches">Bunch Tool</a> is used in the project.
+    <br/>
+    <ul>
+        <li>Switch action from the UI</li>
+        <li>Basic highlighting for bunch files (Kotlin files are unsupported for now)</li>
+        <li>Shortcut for comparing bunch file with the main file (no need to select two files anymore)</li>
+        <li>A special view for forgotten bunch files with navigation to problem files</li>
+        <li>Auto-apply non-conflicting changes to all bunch files</li>
+        <li>UI for reduce command</li>
+        <li>UI for cleanup command</li>
+    </ul>
     ]]></description>
 
     <vendor url="http://www.jetbrains.com">JetBrains</vendor>

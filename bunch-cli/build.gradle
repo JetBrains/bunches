@@ -7,7 +7,7 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.11.0.201803080745-r'
+    compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.4.0.201906121030-r'
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.2'
     implementation 'com.github.ajalt:clikt:2.0.0'
     testCompile('org.junit.jupiter:junit-jupiter-api:5.5.1')

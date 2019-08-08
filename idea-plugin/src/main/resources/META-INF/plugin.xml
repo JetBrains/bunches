@@ -6,13 +6,16 @@
     Support for bunch files when <a href="https://github.com/JetBrains/bunches">Bunch Tool</a> is used in the project.
     <br/>
     <ul>
-        <li>Switch action from the UI</li>
+        <li>Switch action from the UI <i>(Tools -> Bunch Tool -> Switch)</i></li>
         <li>Basic highlighting for bunch files (Kotlin files are unsupported for now)</li>
-        <li>Shortcut for comparing bunch file with the main file (no need to select two files anymore)</li>
-        <li>A special view for forgotten bunch files with navigation to problem files</li>
-        <li>Auto-apply non-conflicting changes to all bunch files</li>
-        <li>UI for reduce command</li>
-        <li>UI for cleanup command</li>
+        <li>
+          Action <i>(Tools -> Bunch Tool -> Compare with main file)</i> and shortcut for comparing bunch file with
+          the main file (no need to select two files anymore)
+        </li>
+        <li>A special view for forgotten bunch files with navigation to problem files in pre-commit check</li>
+        <li>Apply non-conflicting changes to all bunch files <i>(Tools -> Bunch Tool -> Apply changes to all)</i></li>
+        <li>UI for reduce command <i>(Tools -> Bunch Tool -> Reduce)</i></li>
+        <li>UI for cleanup command <i>(Tools -> Bunch Tool -> Cleanup)</i></li>
     </ul>
     ]]></description>
 

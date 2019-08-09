@@ -86,6 +86,13 @@ fun prePushHookTemplate(bunchExecutablePath: File, oldHookPath: String, repoPath
         $BUNCH_EXECUTABLE_PATH_COMMENT_MARKER '${bunchExecutablePath.absolutePath}'
         $OLD_HOOK_PATH_COMMENT_MARKER $oldHookPath
         
+        $oldHookPath
+        exitCode=${'$'}?
+        if [[ "${'$'}exitCode" -ne 0 ]]
+        then
+            exit ${'$'}exitCode
+        fi
+        
         remote="$1"
         url="$2"
         
@@ -103,6 +110,13 @@ fun preRebaseHookTemplate(bunchExecutablePath: File, oldHookPath: String, repoPa
         $BUNCH_PRE_REBASE_HOOK_COMMENT_MARKER
         $BUNCH_EXECUTABLE_PATH_COMMENT_MARKER '${bunchExecutablePath.absolutePath}'
         $OLD_HOOK_PATH_COMMENT_MARKER $oldHookPath
+        
+        $oldHookPath
+        exitCode=${'$'}?
+        if [[ "${'$'}exitCode" -ne 0 ]]
+        then
+            exit ${'$'}exitCode
+        fi
         
         two=$2
         if [ -z $2 ]

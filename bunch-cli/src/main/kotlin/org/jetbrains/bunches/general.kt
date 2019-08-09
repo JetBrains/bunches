@@ -24,6 +24,7 @@ import org.jetbrains.bunches.hooks.InternalHooks
 import org.jetbrains.bunches.reduce.ReduceCommand
 import org.jetbrains.bunches.restore.SwitchCommand
 import org.jetbrains.bunches.stats.StatCommand
+import org.jetbrains.bunches.stats.log.LogCommand
 import java.nio.file.Paths
 import kotlin.system.exitProcess
 
@@ -85,7 +86,8 @@ class BunchCli : CliktCommand(name = "bunch") {
             CheckCommand(),
             ReduceCommand(),
             StatCommand(),
-            HooksCommand()
+            HooksCommand(),
+            LogCommand()
         )
     }
 

@@ -10,7 +10,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 
-const val GENERATED_COMMIT_MARK = "[POMOG CHEM SMOG]"
+const val GENERATED_COMMIT_MARK = "[BUNCH_TOOL_REBASE]"
 
 fun checkPreRebase(args: Array<String>) {
     if (args.size != 4) {

@@ -9,28 +9,26 @@ import com.github.ajalt.clikt.parameters.types.restrictTo
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.LogCommand
 import org.eclipse.jgit.diff.DiffEntry
+import org.eclipse.jgit.revwalk.filter.AndRevFilter
 import org.eclipse.jgit.revwalk.filter.CommitTimeRevFilter
+import org.eclipse.jgit.revwalk.filter.MaxCountRevFilter
+import org.eclipse.jgit.revwalk.filter.RevFilter
+import org.eclipse.jgit.util.GitDateParser
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.file.resultWithExit
 import org.jetbrains.bunches.general.BunchSubCommand
-import org.jetbrains.bunches.general.exitWithError
+import org.jetbrains.bunches.general.exitWithUsageError
 import org.jetbrains.bunches.git.readCommits
+import java.text.ParseException
 import java.util.*
-import java.util.Calendar
 
-enum class LogType {
-    DAY,
-    WEEK,
-    MONTH,
-    YEAR,
-    LASTCOMMITS
-}
-
-data class Settings(val repoPath: String, val kind: LogType, val amount: Int)
+data class Settings(val repoPath: String, val startDate: Date?, val amount: Int?)
 
 fun main(args: Array<String>) {
     LogCommand().main(args)
 }
+
+private const val DEFAULT_PROCESSED_COMMITS_NUMBER = 5
 
 class LogCommand : BunchSubCommand(
     name = "log",
@@ -38,73 +36,53 @@ class LogCommand : BunchSubCommand(
     epilog =
     """
             Example:
-            bunch log --week --amount 2
+            bunch log --since 1.day.2.weeks.ago
             """.trimIndent()
 ) {
-    val repoPath by repoPathOption()
+    private val repoPath by repoPathOption()
 
-    private val kind by option(
-        help = """
-            Kind of log. `week` is used by default.
-            `day` shows log for 'amount' of last days.
-            `week` shows log for 'amount' of last weeks.
-            `month` shows log for 'amount' of last months.
-            `year` shows log for 'amount' of last years.
-            `last` shows log for last 'amount' commits
-        """.trimIndent())
-        .switch(mapOf(
-            "--day" to LogType.DAY,
-            "--week" to LogType.WEEK,
-            "--month" to LogType.MONTH,
-            "--year" to LogType.YEAR,
-            "--last" to LogType.LASTCOMMITS))
-        .default(LogType.WEEK)
+    private val startDate by option(
+        "--since",
+        "--after",
+        help = "Show commits from a period of time"
+    ).convert {
+        try {
+            GitDateParser.parse(it, null)
+        } catch (parseException: ParseException) {
+            exitWithUsageError("Date should be in git --since format. Use spaces only inside \"\"")
+        }
+    }
 
-    private val amount by option(help = "Amount value for chosen kind of log. Default value value is 1.")
+    private val amount by option(
+        "--last",
+        help = "Shows log for last n commits"
+    )
         .int()
         .restrictTo(1)
-        .default(1)
 
 
     override fun run() {
         val settings = Settings(
             repoPath = repoPath.toString(),
-            kind = kind,
-            amount = amount
+            startDate = startDate,
+            amount = amount ?: if (startDate == null) DEFAULT_PROCESSED_COMMITS_NUMBER else null
         )
 
         process { doLogStats(settings) }
     }
 }
 
-private fun getStartDate(calendarPeriod: Int, amount: Int): Date {
-    val calendar = Calendar.getInstance()
-    calendar.time = Date()
-    calendar.add(calendarPeriod, -amount)
-    return calendar.time
+private fun getGitLogFilter(settings: Settings): LogCommand.(Git) -> LogCommand {
+    val filterList: MutableList<RevFilter> = mutableListOf(RevFilter.ALL)
+    if (settings.startDate != null) {
+        filterList.add(CommitTimeRevFilter.after(settings.startDate))
+    }
+    if (settings.amount != null) {
+        filterList.add(MaxCountRevFilter.create(settings.amount))
+    }
+    val filter = AndRevFilter.create(filterList)
+    return { this.setRevFilter(filter) }
 }
-
-private fun typeLogToCalendar(type: LogType): Int =
-    when(type) {
-        LogType.DAY -> Calendar.DAY_OF_YEAR
-        LogType.WEEK -> Calendar.WEEK_OF_YEAR
-        LogType.MONTH -> Calendar.MONTH
-        LogType.YEAR -> Calendar.YEAR
-        else -> exitWithError("Can't convert LASTCOMMITS log type to Calendar type.")
-    }
-
-private fun getGitLogFilter(settings: Settings): LogCommand.(Git) -> LogCommand =
-    when (settings.kind) {
-        LogType.LASTCOMMITS -> {
-            { this.setMaxCount(settings.amount) }
-        }
-        else -> {
-            val typeOfPeriod = typeLogToCalendar(settings.kind)
-            val startDate = getStartDate(typeOfPeriod, settings.amount)
-            val revFilter = CommitTimeRevFilter.after(startDate);
-            { this.setRevFilter(revFilter)}
-        }
-    }
 
 private fun doLogStats(settings: Settings) {
     val extensions = readExtensionsFromFile(settings.repoPath)

@@ -160,12 +160,17 @@ fun readCommits(repositoryPath: String, untilQuery: String? = null): List<Commit
 }
 
 fun readCommits(repositoryPath: String, logCommandSetup: LogCommand.(git: Git) -> LogCommand): List<CommitInfo> {
+    return readCommitsSeq(repositoryPath, logCommandSetup).toList()
+}
+
+fun readCommitsSeq(repositoryPath: String, logCommandSetup: LogCommand.(git: Git) -> LogCommand): Sequence<CommitInfo> {
     val repository = configureRepository(repositoryPath)
 
     Git(repository).use { git ->
         return git.log()
             .logCommandSetup(git)
             .call()
+            .asSequence()
             .map { commit ->
                 with(commit) {
                     CommitInfo(

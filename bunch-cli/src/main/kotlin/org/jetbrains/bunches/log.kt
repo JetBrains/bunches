@@ -3,7 +3,8 @@
 
 package org.jetbrains.bunches.stats.log
 
-import com.github.ajalt.clikt.parameters.options.*
+import com.github.ajalt.clikt.parameters.options.convert
+import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.restrictTo
 import org.eclipse.jgit.api.Git
@@ -18,7 +19,8 @@ import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.file.resultWithExit
 import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.general.exitWithUsageError
-import org.jetbrains.bunches.git.readCommits
+import org.jetbrains.bunches.git.readCommitsSeq
+import org.jetbrains.bunches.processWithConsoleProgressBar
 import java.text.ParseException
 import java.util.*
 
@@ -95,9 +97,9 @@ private fun doLogStats(settings: Settings) {
 
     val gitLogFilter = getGitLogFilter(settings)
 
-    val commits = readCommits(settings.repoPath, gitLogFilter)
-
+    val commits = readCommitsSeq(settings.repoPath, gitLogFilter).processWithConsoleProgressBar()
     println("%d commits processed".format(commits.size))
+
     for (commit in commits) {
         val addedCount = commit.fileActions.count {
             it.changeType == DiffEntry.ChangeType.ADD

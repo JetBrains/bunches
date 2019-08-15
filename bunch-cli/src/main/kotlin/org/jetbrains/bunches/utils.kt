@@ -17,3 +17,17 @@ fun findAddCommit(file: String, commits: List<CommitInfo>): CommitInfo? {
 fun pathToMainFile(filePath: String): String {
     return filePath.removeSuffix(".${File(filePath).extension}")
 }
+
+fun <T> Sequence<T>.processWithConsoleProgressBar(progressChar: Char = '=', itemsInProgress: Int = 50): List<T> {
+    var count = 0
+    val result = this.mapTo(ArrayList()) {
+        count++
+        if (count % itemsInProgress == 0) {
+            print(progressChar)
+        }
+        it
+    }
+    println()
+
+    return result
+}

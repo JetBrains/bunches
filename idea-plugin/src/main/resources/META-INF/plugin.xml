@@ -31,8 +31,6 @@
                     factoryClass="org.jetbrains.bunches.idea.vcs.BunchToolWindowFactory"
                     secondary="false"
                     canCloseContents="true"/>
-        <openapi.vcs.history.actions.ShowDiffAfterWithLocalAction.ExtensionProvider
-                implementation="org.jetbrains.bunches.idea.vcs.DiffWithMainForDeletedActionProvider"/>
         <projectService serviceImplementation="org.jetbrains.bunches.idea.vcs.BunchToolWindowFactory"/>
     </extensions>
 
@@ -70,7 +68,12 @@
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift P"/>
             </action>
             <action id="BunchCompareFilesWithLocalMainFile"
-                    class="org.jetbrains.bunches.idea.vcs.DiffWithMainForDeletedActionProvider"/>
+                    class="org.jetbrains.bunches.idea.vcs.DiffWithMainForDeletedActionProvider">
+                <add-to-group group-id="Vcs.RepositoryChangesBrowserMenu"
+                              anchor="after"
+                              relative-to-action="Vcs.ShowDiffWithLocal"/>
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift D"/>
+            </action>
         </group>
     </actions>
 </idea-plugin>

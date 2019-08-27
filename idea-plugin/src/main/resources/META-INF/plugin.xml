@@ -31,6 +31,7 @@
                     factoryClass="org.jetbrains.bunches.idea.vcs.BunchToolWindowFactory"
                     secondary="false"
                     canCloseContents="true"/>
+        <projectService serviceImplementation="org.jetbrains.bunches.idea.vcs.BunchToolWindowFactory"/>
     </extensions>
 
     <project-components>

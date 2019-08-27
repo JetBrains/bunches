@@ -2,6 +2,7 @@ package org.jetbrains.bunches.idea.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.wm.ToolWindowManager
 import org.jetbrains.bunches.idea.util.BunchFileUtils
@@ -22,6 +23,7 @@ class ReduceAction : AnAction() {
             Messages.showMessageDialog("No .bunch file found", "Reduce error", Messages.getErrorIcon())
             return
         }
-        BunchToolWindowFactory.createReduceActionWindow(window, project, repoPath, bunchPath.parentFile.absolutePath)
+        ServiceManager.getService(project, BunchToolWindowFactory::class.java)
+            .createReduceActionWindow(window, project, repoPath, bunchPath.parentFile.absolutePath)
     }
 }

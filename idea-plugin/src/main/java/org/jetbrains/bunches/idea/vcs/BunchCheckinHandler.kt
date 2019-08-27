@@ -2,6 +2,7 @@ package org.jetbrains.bunches.idea.vcs
 
 import com.intellij.BundleBase.replaceMnemonicAmpersand
 import com.intellij.CommonBundle
+import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.Key
@@ -106,7 +107,8 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
             )) {
                 YES -> {
                     val window = ToolWindowManager.getInstance(project).getToolWindow("Bunch Tool")
-                    BunchToolWindowFactory.createCommitCheckToolWindowContent(
+                    ServiceManager.getService(project, BunchToolWindowFactory::class.java)
+                        .createCommitCheckToolWindowContent(
                         window, forgottenFiles, allFiles,
                         checkInProjectPanel
                     )

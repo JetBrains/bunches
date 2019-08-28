@@ -10,8 +10,8 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.ui.Messages
 import org.jetbrains.bunches.idea.util.BunchFileUtils
 import org.jetbrains.bunches.idea.util.BunchFileUtils.vcsRootPath
-import org.jetbrains.bunches.restore.Settings
-import org.jetbrains.bunches.restore.doSwitch
+import org.jetbrains.bunches.switch.Settings
+import org.jetbrains.bunches.switch.doSwitch
 
 class SwitchAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {

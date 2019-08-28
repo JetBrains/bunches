@@ -1,7 +1,7 @@
 @file:Suppress("PackageDirectoryMismatch")
 @file:JvmName("BunchSwitch")
 
-package org.jetbrains.bunches.restore
+package org.jetbrains.bunches.switch
 
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default

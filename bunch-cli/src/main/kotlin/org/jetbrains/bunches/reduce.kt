@@ -10,7 +10,7 @@ import org.jetbrains.bunches.file.resultWithExit
 import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.general.exitWithError
 import org.jetbrains.bunches.git.*
-import org.jetbrains.bunches.restore.toBunchFile
+import org.jetbrains.bunches.switch.toBunchFile
 import java.io.File
 
 enum class ReduceAction {

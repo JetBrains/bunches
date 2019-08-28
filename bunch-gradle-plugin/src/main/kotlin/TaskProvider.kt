@@ -4,9 +4,9 @@ import org.gradle.api.GradleException
 import org.gradle.api.Task
 import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.general.exitWithUsageError
-import org.jetbrains.bunches.restore.RESTORE_COMMIT_TITLE
-import org.jetbrains.bunches.restore.SwitchSettings
-import org.jetbrains.bunches.restore.doSwitch
+import org.jetbrains.bunches.switch.RESTORE_COMMIT_TITLE
+import org.jetbrains.bunches.switch.SwitchSettings
+import org.jetbrains.bunches.switch.doSwitch
 import java.io.File
 
 private fun getProperty(propertyName: String, p: PropertyProvider): String? {

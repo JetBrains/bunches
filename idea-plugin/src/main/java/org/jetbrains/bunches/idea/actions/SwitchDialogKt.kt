@@ -1,7 +1,7 @@
 package org.jetbrains.bunches.idea.actions
 
 import com.intellij.openapi.project.Project
-import org.jetbrains.bunches.restore.RESTORE_COMMIT_TITLE
+import org.jetbrains.bunches.switch.RESTORE_COMMIT_TITLE
 import javax.swing.JComponent
 
 class SwitchDialogKt(project: Project, bunches: Collection<String>) : SwitchDialog(project) {

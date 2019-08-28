@@ -4,7 +4,7 @@ import org.jetbrains.bunches.cp.Settings
 import org.jetbrains.bunches.cp.cherryPick
 import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.generatePickedCommitMessage
-import org.jetbrains.bunches.restore.doOneStepSwitch
+import org.jetbrains.bunches.switch.doOneStepSwitch
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Test
 import strikt.api.expect

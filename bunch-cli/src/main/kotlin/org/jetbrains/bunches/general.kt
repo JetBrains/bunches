@@ -22,9 +22,9 @@ import org.jetbrains.bunches.hooks.HOOK_LAUNCH_COMMAND
 import org.jetbrains.bunches.hooks.HooksCommand
 import org.jetbrains.bunches.hooks.InternalHooks
 import org.jetbrains.bunches.reduce.ReduceCommand
-import org.jetbrains.bunches.restore.SwitchCommand
 import org.jetbrains.bunches.stats.StatCommand
 import org.jetbrains.bunches.stats.log.LogCommand
+import org.jetbrains.bunches.switch.SwitchCommand
 import java.nio.file.Paths
 import kotlin.system.exitProcess
 

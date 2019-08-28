@@ -68,7 +68,7 @@
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift P"/>
             </action>
             <action id="BunchCompareFilesWithLocalMainFile"
-                    class="org.jetbrains.bunches.idea.vcs.DiffWithMainForDeletedActionProvider">
+                    class="org.jetbrains.bunches.idea.vcs.DiffWithMainAction">
                 <add-to-group group-id="Vcs.RepositoryChangesBrowserMenu"
                               anchor="after"
                               relative-to-action="Vcs.ShowDiffWithLocal"/>

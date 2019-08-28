@@ -19,7 +19,7 @@ import org.jetbrains.bunches.idea.util.BunchFileUtils
 import java.io.File
 
 @Suppress("UnstableApiUsage")
-class DiffWithMainForDeletedActionProvider : AnAction(
+class DiffWithMainAction : AnAction(
     "Compare with main file",
     "Compare bunch file with the local main file",
     AllIcons.Vcs.Branch

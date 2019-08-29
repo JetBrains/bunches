@@ -10,12 +10,12 @@ import com.intellij.icons.AllIcons
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.util.Pair
 import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.bunches.idea.util.BunchFileUtils.getMainFile
 import org.jetbrains.bunches.idea.util.BunchFileUtils.isBunchFile
+import org.jetbrains.bunches.idea.util.getVirtualFile
 
 open class BunchCompareFilesAction : CompareFileWithEditorAction() {
 
@@ -27,8 +27,7 @@ open class BunchCompareFilesAction : CompareFileWithEditorAction() {
     }
 
     open fun getFile(e: AnActionEvent): VirtualFile? {
-        val files = e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY) ?: return null
-        return files.singleOrNull { it.isValid }
+        return e.getVirtualFile()
     }
 
     override fun getDiffRequestChain(e: AnActionEvent): DiffRequestChain? {

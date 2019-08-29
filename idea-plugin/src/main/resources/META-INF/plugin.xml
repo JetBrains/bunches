@@ -73,6 +73,10 @@
                               relative-to-action="Vcs.ShowDiffWithLocal"/>
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift D"/>
             </action>
+            <action id="BunchNavigateAction"
+                    class="org.jetbrains.bunches.idea.actions.BunchNavigateAction">
+                <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl J"/>
+            </action>
         </group>
     </actions>
 </idea-plugin>

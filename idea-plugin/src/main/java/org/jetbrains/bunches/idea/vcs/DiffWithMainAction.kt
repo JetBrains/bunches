@@ -64,7 +64,7 @@ class DiffWithMainAction : AnAction(
     }
 
     private fun AnActionEvent.getChange(): Change? {
-        return this.getRequiredData(VcsDataKeys.SELECTED_CHANGES).singleOrNull()
+        return this.getData(VcsDataKeys.SELECTED_CHANGES)?.singleOrNull()
     }
 
     private fun getMainFile(project: Project?, path: String): VirtualFile? {

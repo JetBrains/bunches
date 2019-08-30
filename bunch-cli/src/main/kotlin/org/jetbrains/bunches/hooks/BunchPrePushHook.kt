@@ -4,8 +4,6 @@ import org.jetbrains.bunches.git.readCommits
 
 data class PushInfo(val localRef: String, val localSha: String, val remoteRef: String, val remoteSha: String)
 
-private const val NON_EXISTENT_COMMIT = "0000000000000000000000000000000000000000"
-private const val estimatedMaxCommitCount = 50
 internal fun checkBeforePush(args: Array<String>) {
     val repoPath = args[0]
 
@@ -22,17 +20,12 @@ internal fun checkBeforePush(args: Array<String>) {
             remoteRef = it[2],
             remoteSha = it[3]
         )
-    }
+    }.filter { it.remoteRef.split("/").last() == "master" }
 
     for (info in branchesInfo) {
-        val commits =
-            if (info.remoteSha == NON_EXISTENT_COMMIT) {
-                readCommits(repoPath) { this.setMaxCount(estimatedMaxCommitCount) }
-            } else {
-                readCommits(repoPath, info.localSha, info.remoteSha)
-            }
+        val commits = readCommits(repoPath, info.localSha, info.remoteSha)
         if (commits.any { (it.message ?: "").contains(GENERATED_COMMIT_MARK) }) {
-            exitWithMessage(1, "Impossible to push with $GENERATED_COMMIT_MARK in history")
+            exitWithMessage(1, "Impossible to push to master with $GENERATED_COMMIT_MARK in history")
         }
     }
 

@@ -2,15 +2,26 @@ package org.jetbrains.bunches
 
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.Status
+import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.revwalk.RevCommit
 import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.readCommits
+import org.jetbrains.bunches.git.resolveOrFail
 import java.io.File
 
 class GitCommandManager(private val directory: File, private val output: StringBuilder) {
     private val userName = "name"
     private val userEmail = "email@mail.ru"
     private val git: Git
+
+    companion object {
+        fun readCommits(repositoryPath: String, untilQuery: String? = null): List<CommitInfo> {
+            return readCommits(repositoryPath) { git ->
+                val untilCommitObjectId = git.repository.resolveOrFail(untilQuery ?: Constants.HEAD)
+                add(untilCommitObjectId)
+            }
+        }
+    }
 
     init {
         val initCommand = Git.init()

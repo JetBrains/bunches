@@ -1,5 +1,6 @@
 package org.jetbrains.bunches
 
+import org.jetbrains.bunches.GitCommandManager.Companion.readCommits
 import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.FileAction
 import org.jetbrains.bunches.git.readCommits

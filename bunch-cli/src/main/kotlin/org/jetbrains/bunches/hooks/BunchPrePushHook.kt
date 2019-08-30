@@ -5,7 +5,7 @@ import org.jetbrains.bunches.git.readCommits
 data class PushInfo(val localRef: String, val localSha: String, val remoteRef: String, val remoteSha: String)
 
 private const val NON_EXISTENT_COMMIT = "0000000000000000000000000000000000000000"
-
+private const val estimatedMaxCommitCount = 50
 internal fun checkBeforePush(args: Array<String>) {
     val repoPath = args[0]
 
@@ -27,7 +27,7 @@ internal fun checkBeforePush(args: Array<String>) {
     for (info in branchesInfo) {
         val commits =
             if (info.remoteSha == NON_EXISTENT_COMMIT) {
-                readCommits(repoPath, info.localSha)
+                readCommits(repoPath) { this.setMaxCount(estimatedMaxCommitCount) }
             } else {
                 readCommits(repoPath, info.localSha, info.remoteSha)
             }

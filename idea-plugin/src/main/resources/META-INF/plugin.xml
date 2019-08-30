@@ -63,8 +63,7 @@
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift D"/>
             </action>
             <action id="ApplyPatchToBunchFilesAction"
-                    class="org.jetbrains.bunches.idea.actions.ApplyChangesAction"
-                    text="Apply main changes to all">
+                    class="org.jetbrains.bunches.idea.actions.ApplyChangesAction">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift P"/>
             </action>
             <action id="BunchCompareFilesWithLocalMainFile"

@@ -89,7 +89,7 @@ object BunchFileUtils {
         bunchFileCache[bunchFile] = ExtensionsData(timeStamp, extensions)
 
         val invalidFiles = bunchFileCache.keys.filter { !it.isValid }
-        if (invalidFiles.isEmpty()) {
+        if (invalidFiles.isNotEmpty()) {
             for (invalidFile in invalidFiles) {
                 bunchFileCache.remove(invalidFile)
             }

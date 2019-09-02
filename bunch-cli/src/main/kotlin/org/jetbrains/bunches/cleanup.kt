@@ -63,8 +63,10 @@ fun main(args: Array<String>) {
 }
 
 fun cleanup(settings: Settings) {
-    if (hasUncommittedChanges(settings.repoPath) && !settings.isNoCommit) {
-        exitWithError("Can not commit changes for cleanup with uncommitted changes.")
+    if (!settings.isNoCommit) {
+        uncommittedChanges(settings.repoPath).checkAndExitIfNeeded {
+            exitWithError("Can not commit changes for cleanup with uncommitted changes.")
+        }
     }
 
     val extensions = if (settings.extension != null) {

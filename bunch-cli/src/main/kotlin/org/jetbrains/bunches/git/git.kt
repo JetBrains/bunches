@@ -187,7 +187,7 @@ fun readCommitsSeq(repositoryPath: String, logCommandSetup: LogCommand.(git: Git
 }
 
 
-internal fun generatePickedCommitMessage(commit : CommitInfo, bunch: String): String {
+internal fun generatePickedCommitMessage(commit: CommitInfo, bunch: String): String {
     return "$bunch: ${commit.message}"
 }
 
@@ -222,7 +222,12 @@ class FileChange(val type: ChangeType, val file: File) {
     }
 }
 
-fun commitChanges(repositoryPath: String, changeFiles: Collection<FileChange>, title: String, noVerify: Boolean = false) {
+fun commitChanges(
+    repositoryPath: String,
+    changeFiles: Collection<FileChange>,
+    title: String,
+    noVerify: Boolean = false
+) {
     val repoPath = File(repositoryPath)
 
     val repository = configureRepository(repositoryPath)
@@ -307,13 +312,41 @@ fun collectActions(git: Git, commit: RevCommit): List<FileAction> {
     }
 }
 
-fun hasUncommittedChanges(repositoryPath: String): Boolean {
-    val repository = configureRepository(repositoryPath)
-    val git = Git(repository)
+data class UncommittedChanges(val errors: String, val output: String) {
+    fun isEmpty(): Boolean {
+        return errors.isEmpty() && output.isEmpty()
+    }
+}
 
-    val statusCommand = git.status()
-    val status = statusCommand.call()
-    return status.hasUncommittedChanges()
+fun UncommittedChanges.printResultOrExit() {
+    if (errors.isNotEmpty()) {
+        exitWithError(errors)
+    }
+    if (output.isNotEmpty()) {
+        println(output)
+    }
+}
+
+fun UncommittedChanges.checkAndExitIfNeeded(runnable: () -> Nothing) {
+    if (!isEmpty()) {
+        printResultOrExit()
+        runnable.invoke()
+    }
+}
+
+fun uncommittedChanges(repositoryPath: String): UncommittedChanges {
+    val directory = configureRepository(repositoryPath).workTree
+    val process = ProcessBuilder("git", "status", "-s", "--untracked-files=no")
+        .directory(directory).start()
+    process.waitFor()
+
+    val result = UncommittedChanges(
+        process.errorStream.bufferedReader().readText(),
+        process.inputStream.bufferedReader().readText()
+    )
+
+    process.destroy()
+    return result
 }
 
 fun DiffEntry.readNewContent(git: Git): String {

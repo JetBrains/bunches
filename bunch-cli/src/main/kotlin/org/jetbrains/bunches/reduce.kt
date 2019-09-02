@@ -131,8 +131,10 @@ fun getReducibleFiles(repoPath: String, bunchPath: String): ArrayList<File> {
 }
 
 fun doReduce(settings: Settings) {
-    if (hasUncommittedChanges(settings.repoPath) && settings.action == ReduceAction.COMMIT) {
-        exitWithError(UNCOMMITTED_CHANGES_MESSAGE)
+    if (settings.action == ReduceAction.COMMIT) {
+        uncommittedChanges(settings.repoPath).checkAndExitIfNeeded {
+            exitWithError(UNCOMMITTED_CHANGES_MESSAGE)
+        }
     }
 
     val files = getReducibleFiles(settings.repoPath, settings.bunchPath)

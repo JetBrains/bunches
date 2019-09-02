@@ -97,7 +97,7 @@ class SwitchCommand : BunchSubCommand(
 }
 
 fun doSwitch(settings: Settings) {
-    if (hasUncommittedChanges(settings.repoPath)) {
+    uncommittedChanges(settings.repoPath).checkAndExitIfNeeded {
         exitWithError("Can not do switch with uncommitted changes.")
     }
 

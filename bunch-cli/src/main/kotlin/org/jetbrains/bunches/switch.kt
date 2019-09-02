@@ -323,7 +323,8 @@ fun doOneStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: Strin
     commitChanges(
         repoPath,
         changedFiles,
-        commitTitle.replace("{target}", suffixes.last())
+        commitTitle.replace("{target}", suffixes.last()),
+        noVerify = true
     )
 }
 

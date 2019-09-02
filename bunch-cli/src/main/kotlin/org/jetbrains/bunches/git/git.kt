@@ -49,11 +49,14 @@ private fun CommitCommandEx.nativeCall(dir: File) {
         args.add("--author=${author.toExternalString()}")
     }
 
+    if (isNoVerify()) {
+        args.add("--no-verify")
+    }
+
     (when {
         committer != null -> "committer"
         isAll() -> "-a"
         isAllowEmpty() -> "--allow-empty"
-        isNoVerify() -> "--no-verify"
         isAmend() -> "--amend"
         onlyPaths().isNotEmpty() -> "--only"
         else -> null
@@ -219,7 +222,7 @@ class FileChange(val type: ChangeType, val file: File) {
     }
 }
 
-fun commitChanges(repositoryPath: String, changeFiles: Collection<FileChange>, title: String) {
+fun commitChanges(repositoryPath: String, changeFiles: Collection<FileChange>, title: String, noVerify: Boolean = false) {
     val repoPath = File(repositoryPath)
 
     val repository = configureRepository(repositoryPath)
@@ -255,6 +258,7 @@ fun commitChanges(repositoryPath: String, changeFiles: Collection<FileChange>, t
     }
 
     git.commitEx()
+        .setNoVerify(noVerify)
         .setMessage(title)
         .callEx()
 }

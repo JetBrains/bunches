@@ -222,7 +222,8 @@ fun doStepByStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: St
             commitChanges(
                 repoPath,
                 branchChanges,
-                commitTitle.replace("{target}", extension)
+                commitTitle.replace("{target}", extension),
+                noVerify = true
             )
         }
     }

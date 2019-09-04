@@ -28,7 +28,6 @@ class BunchCPTest : BunchBaseTest() {
             )
         )
         System.out.flush()
-        System.out.flush()
         System.setOut(savedOutput)
         testOutput.append(tempOutputStream.toString())
         return getLastCommit()

@@ -5,8 +5,11 @@ package org.jetbrains.bunches.cp
 
 import com.github.ajalt.clikt.parameters.arguments.argument
 import org.jetbrains.bunches.general.BunchSubCommand
+import org.jetbrains.bunches.general.exitWithError
+import org.jetbrains.bunches.git.checkAndExitIfNeeded
 import org.jetbrains.bunches.git.reCommitChanges
 import org.jetbrains.bunches.git.readCommits
+import org.jetbrains.bunches.git.uncommittedChanges
 
 data class Settings(
     val gitPath: String,
@@ -61,6 +64,10 @@ class CherryPickCommand : BunchSubCommand(
 }
 
 fun cherryPick(settings: Settings) {
+    uncommittedChanges(settings.gitPath).checkAndExitIfNeeded {
+        exitWithError("Can not create new commit in cp with uncommitted changes.")
+    }
+
     with(settings) {
         val commits = readCommits(gitPath, sinceHash, untilHash)
 

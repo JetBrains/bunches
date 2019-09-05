@@ -51,7 +51,7 @@ class BunchRestoreTest : BunchBaseTest() {
         doSwitch(branch)
     }
 
-    private fun restore(commit: CommitInfo? = null, extension: String? = null, backup: Boolean = true) {
+    private fun restore(commit: CommitInfo? = null, extension: String? = null, backup: Boolean = true, bunch: Boolean = false) {
         savedCommits = getAllCommits(mainBranch)
         val untilRef = commit?.hash ?: ""
         if (extension != null) {
@@ -62,7 +62,7 @@ class BunchRestoreTest : BunchBaseTest() {
         val savedOutput = System.out
         System.setOut(PrintStream(tempOutputStream))
 
-        doRestore(getSettings(directory.absolutePath, untilRef, extension, backup))
+        doRestore(getSettings(directory.absolutePath, untilRef, extension, backup, bunch))
 
         System.out.flush()
         System.setOut(savedOutput)
@@ -337,5 +337,59 @@ class BunchRestoreTest : BunchBaseTest() {
 
         switchCommit = droppedCommit
         restore(commit = initCommit, extension = "b")
+    }
+
+    @Test
+    fun creatingBunchFilesOneFileRestoreTest() {
+        val file = createAndAddFile("file")
+        val otherFile = createAndAddFile("otherFile")
+        createAndAddBunchFile(otherFile, "b")
+
+        switchToBranch("b")
+        writeTextAndCommitChanges(file, "new text")
+        val bunchFile = getFile(file.name, "b")
+        addFileAfterRestore(file, bunchFile)
+        saveFileText(bunchFile, file)
+
+        restore(bunch = true)
+    }
+
+    @Test
+    fun creatingBunchFilesBunchFileRestoreTest() {
+        val file = createAndAddFile("file")
+        val bunchFile = createAndAddBunchFile(file, "c")
+        val otherFile = createAndAddFile("otherFile")
+        createAndAddBunchFile(otherFile, "b")
+
+        switchToBranch("b")
+        writeTextAndCommitChanges(bunchFile, "new text")
+        addFileAfterRestore(bunchFile, bunchFile)
+        saveFileText(bunchFile)
+
+        restore(bunch = true)
+    }
+
+    @Test
+    fun creatingBunchFilesSeveralTypesInOneCommitRestoreTest() {
+        val file = createAndAddFile("file")
+        val bunchFile = createAndAddBunchFile(file, "c")
+        val otherFile = createAndAddFile("otherFile")
+        val otherBunchFile = createAndAddBunchFile(otherFile, "b")
+        val singleFile = createAndAddFile("singleFile")
+
+        switchToBranch("b")
+        writeTextAndCommitChanges(bunchFile, "new text")
+        addFileAfterRestore(bunchFile, bunchFile)
+        saveFileText(bunchFile)
+
+        writeTextAndCommitChanges(otherFile, "new text")
+        addFileAfterRestore(otherFile, otherBunchFile)
+        saveFileText(otherBunchFile, otherFile)
+
+        touch(singleFile)
+        addFileAfterRestore(singleFile, getFile(singleFile.name, "b"))
+        saveFileText(getFile(singleFile.name, "b"), singleFile)
+        commitCurrentChanges()
+        restore(bunch = true)
     }
 }

@@ -21,7 +21,8 @@ data class Settings(
     val repoPath: String,
     val untilRef: String,
     val extension: String,
-    val backup: Boolean
+    val backup: Boolean,
+    val bunch: Boolean
 )
 
 fun main(args: Array<String>) {
@@ -51,15 +52,20 @@ class RestoreCommand : BunchSubCommand(
         "--ext", help = "Branch to move all commits in the interval." +
                 " Default value will be taken from latest switch commit."
     )
+
+    private val bunch by option(
+        "--all", "-a", help = "Create bunch files for all files without bunch extension."
+    ).flag()
+
     private val backup by option("--no-backup", help = "Do not create backup git branch with old commits").flag()
 
     override fun run() {
-        val settings = getSettings(repoPath.toString(), untilRef, extension, !backup)
+        val settings = getSettings(repoPath.toString(), untilRef, extension, !backup, bunch)
         process { doRestore(settings) }
     }
 }
 
-internal fun getSettings(repoPath: String, untilRef: String, extension: String?, backup: Boolean): Settings {
+internal fun getSettings(repoPath: String, untilRef: String, extension: String?, backup: Boolean, bunch: Boolean): Settings {
     return if (untilRef.isBlank()) {
         val lastCommit = findLastSwitchCommit(repoPath)
             ?: exitWithError("No until ref or switch commit found")
@@ -69,14 +75,16 @@ internal fun getSettings(repoPath: String, untilRef: String, extension: String?,
             extension = extension
                 ?: parseExtensionFromCommit(lastCommit.title!!)
                 ?: exitWithError("Failed to parse branch from switch commit"),
-            backup = backup
+            backup = backup,
+            bunch = bunch
         )
     } else {
         Settings(
             repoPath = repoPath,
             untilRef = untilRef,
             extension = extension ?: exitWithError("No extension given for custom until ref."),
-            backup = backup
+            backup = backup,
+            bunch = bunch
         )
     }
 }
@@ -101,17 +109,25 @@ internal fun doRestore(settings: Settings) {
         for (commit in commits.reversed()) {
             val actions = commit.fileActions.map {
                 val path = it.newPath ?: return@map it
-                val fileName = if (withoutBunchFiles(path, extensions, repoPath) || isBunchFile(path, extensions)) {
-                    it.newPath
-                } else {
-                    it.newPath + "." + extension
-                }
+                val fileName = newChangesPath(path, extensions, repoPath, bunch, extension)
                 it.copy(newPath = fileName)
             }
 
             println("Copy: ${commit.hash} ${commit.title}")
             reCommitChanges(repoPath, actions, commit, prefix = "changes in $extension")
         }
+    }
+}
+
+private fun newChangesPath(path: String,
+                           extensions: List<String>,
+                           repoPath: String,
+                           bunch: Boolean,
+                           extension: String): String {
+    return if (isBunchFile(path, extensions) || (!bunch && withoutBunchFiles(path, extensions, repoPath))) {
+        path
+    } else {
+        "$path.$extension"
     }
 }
 

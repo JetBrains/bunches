@@ -118,7 +118,6 @@ open class GitRepositoryBuilder : BaseRepositoryBuilder<GitRepositoryBuilder, Re
             if (!isWorkTree) {
                 return FileRepositoryBuilder.create(gitFile)
             }
-
             try {
                 return GitRepositoryBuilder()
                     .setWorkTree(gitFile.parentFile)
@@ -168,15 +167,18 @@ fun RevCommit.toCommitInfo(git: Git): CommitInfo {
     )
 }
 
-fun readCommits(repositoryPath: String, logCommandSetup: LogCommand.(git: Git) -> LogCommand): List<CommitInfo> {
-    return readCommitsSeq(repositoryPath, logCommandSetup).toList()
+fun readCommits(repositoryPath: String, sinceHead: Boolean = false, logCommandSetup: LogCommand.(git: Git) -> LogCommand): List<CommitInfo> {
+    return readCommitsSeq(repositoryPath, sinceHead, logCommandSetup).toList()
 }
 
-fun readCommitsSeq(repositoryPath: String, logCommandSetup: LogCommand.(git: Git) -> LogCommand): Sequence<CommitInfo> {
+fun readCommitsSeq(repositoryPath: String, sinceHead: Boolean = false, logCommandSetup: LogCommand.(git: Git) -> LogCommand): Sequence<CommitInfo> {
     val repository = configureRepository(repositoryPath)
-
     Git(repository).use { git ->
-        return git.log()
+        val logCommand = git.log()
+        if (sinceHead) {
+            logCommand.add(repository.resolveOrFail(Constants.HEAD))
+        }
+        return logCommand
             .logCommandSetup(git)
             .call()
             .asSequence()

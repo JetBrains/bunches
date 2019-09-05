@@ -346,7 +346,7 @@ private fun getFilesWithExtensions(root: File, gitIgnoreParseResult: IgnoreNode?
     .toList()
 
 fun findLastSwitchCommit(repoPath: String): CommitInfo? {
-    val lastCommits = readCommits(repoPath) { this.setMaxCount(checkingCommitCount) }
+    val lastCommits = readCommits(repoPath, true) { this.setMaxCount(checkingCommitCount) }
     val switchCommitsRegex = Regex(RESTORE_COMMIT_TITLE.replace("{target}", ".+"))
     for (commit in lastCommits) {
         val title = commit.title ?: continue

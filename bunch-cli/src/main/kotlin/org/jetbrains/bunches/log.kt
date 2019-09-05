@@ -97,7 +97,7 @@ private fun doLogStats(settings: Settings) {
 
     val gitLogFilter = getGitLogFilter(settings)
 
-    val commits = readCommitsSeq(settings.repoPath, gitLogFilter).processWithConsoleProgressBar()
+    val commits = readCommitsSeq(settings.repoPath, true, gitLogFilter).processWithConsoleProgressBar()
     println("%d commits processed".format(commits.size))
 
     for (commit in commits) {

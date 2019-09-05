@@ -12,6 +12,8 @@ public class SwitchDialog extends DialogWrapper {
     protected JCheckBox checkStepByStep;
     protected JCheckBox checkCleanup;
     protected JTextField textFieldCommitMessage;
+    protected JComboBox vcsRootComboBox;
+    protected JLabel vcsRootLabel;
 
     public SwitchDialog(Project project) {
         super(project, false);

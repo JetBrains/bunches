@@ -24,7 +24,7 @@ object BunchFileUtils {
         return baseDir.findChild(BUNCH_FILE_NAME)
     }
 
-    private fun getGitRoots(project: Project): List<VcsRoot> {
+    fun getGitRoots(project: Project): List<VcsRoot> {
         return ServiceManager.getService(project, VcsRootDetector::class.java)
             .detect()
             .filter { v -> isGitRoot(File(simplePath(v))) }

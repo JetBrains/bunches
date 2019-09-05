@@ -1,10 +1,11 @@
 package org.jetbrains.bunches.idea.actions
 
 import com.intellij.openapi.project.Project
+import org.jetbrains.bunches.BunchException
 import org.jetbrains.bunches.switch.RESTORE_COMMIT_TITLE
 import javax.swing.JComponent
 
-class SwitchDialogKt(project: Project, bunches: Collection<String>) : SwitchDialog(project) {
+class SwitchDialogKt(project: Project, bunches: Collection<String>, private val vcsRoots: List<String>) : SwitchDialog(project) {
     init {
         title = "Switch Bunches"
         if (bunches.isNotEmpty())
@@ -13,20 +14,36 @@ class SwitchDialogKt(project: Project, bunches: Collection<String>) : SwitchDial
             comboSwitch.addItem("Nothing to show")
             comboSwitch.isEnabled = false
         }
+        if (vcsRoots.size > 1) {
+            vcsRoots.forEach { vcsRootComboBox.addItem(it) }
+        } else {
+            vcsRootComboBox.isVisible = false
+            vcsRootComboBox.isEnabled = false
+            vcsRootLabel.isVisible = false
+        }
         textFieldCommitMessage.text = RESTORE_COMMIT_TITLE
-
     }
 
     override fun getPreferredFocusedComponent(): JComponent? {
         return comboSwitch
     }
 
+    private fun getVcsRoot(): String {
+        val root = when {
+            vcsRoots.size == 1 -> vcsRoots.first()
+            vcsRoots.size > 1 -> vcsRootComboBox.selectedItem as String
+            else -> null
+        }
+        return root ?: throw BunchException("No VCS root found for project")
+    }
+
     fun getParameters(): SwitchParameters {
         return SwitchParameters(
-            comboSwitch.selectedItem as String,
-            checkStepByStep.isSelected,
-            checkCleanup.isSelected,
-            textFieldCommitMessage.text
+            repoPath = getVcsRoot(),
+            branch = comboSwitch.selectedItem as String,
+            stepByStep = checkStepByStep.isSelected,
+            doCleanup = checkCleanup.isSelected,
+            commitMessage = textFieldCommitMessage.text
         )
     }
 }

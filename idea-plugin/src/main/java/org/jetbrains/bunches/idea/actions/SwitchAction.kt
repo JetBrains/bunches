@@ -9,7 +9,6 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.ui.Messages
 import org.jetbrains.bunches.idea.util.BunchFileUtils
-import org.jetbrains.bunches.idea.util.BunchFileUtils.vcsRootPath
 import org.jetbrains.bunches.switch.Settings
 import org.jetbrains.bunches.switch.doSwitch
 
@@ -28,14 +27,13 @@ class SwitchAction : AnAction() {
             Messages.showMessageDialog("Can't find list of supported bunches", "Switch error", Messages.getErrorIcon())
             return
         }
-
-        val dialog = SwitchDialogKt(project, extensions)
-        if (!dialog.showAndGet()) {
+        val vcsRoots = BunchFileUtils.getGitRoots(project).mapNotNull { it.path }
+        if (vcsRoots.isEmpty()) {
+            Messages.showMessageDialog("No git root for project found", "Switch error", Messages.getErrorIcon())
             return
         }
-
-        val repoPath = vcsRootPath(project)
-        if (repoPath == null) {
+        val dialog = SwitchDialogKt(project, extensions, vcsRoots.map { it.path })
+        if (!dialog.showAndGet()) {
             return
         }
 
@@ -46,7 +44,7 @@ class SwitchAction : AnAction() {
 
         val switchSettings = dialog.getParameters()
         val settings = Settings(
-            repoPath,
+            switchSettings.repoPath,
             bunchPath,
             switchSettings.branch,
             switchSettings.commitMessage,

@@ -183,6 +183,10 @@ fun doStepByStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: St
             }
         }
 
+        if (backupChanges.isEmpty()) {
+            exitWithError("No bunch files for switch found")
+        }
+
         commitChanges(
             repoPath,
             backupChanges,
@@ -319,6 +323,10 @@ fun doOneStepSwitch(suffixes: List<String>, repoPath: String, commitTitle: Strin
                 }
             }
         }
+    }
+
+    if (changedFiles.isEmpty()) {
+        exitWithError("No bunch files for switch found")
     }
 
     commitChanges(

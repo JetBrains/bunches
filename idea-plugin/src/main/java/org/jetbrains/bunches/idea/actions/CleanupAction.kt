@@ -23,7 +23,7 @@ class CleanupAction : AnAction() {
             Messages.showMessageDialog("BasePath not found", "Cleanup error", Messages.getErrorIcon())
             return
         }
-        val extensions = BunchFileUtils.bunchExtensions(project)
+        val extensions = BunchFileUtils.bunchExtensions(project, true)
         if (extensions == null) {
             Messages.showMessageDialog("Can't find list of supported bunches", "Cleanup error", Messages.getErrorIcon())
             return

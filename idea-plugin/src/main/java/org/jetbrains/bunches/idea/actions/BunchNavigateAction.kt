@@ -24,7 +24,7 @@ class BunchNavigateAction : AnAction("Navigate to related") {
             currentFile
         }
 
-        val files = BunchFileUtils.getAllBunchFiles(mainFile, project)
+        val files = BunchFileUtils.getAllBunchFiles(mainFile, project, true)
         val filesPopupList = ListPopupImpl(MyItemsList(project, currentFile, mainFile, files))
         DebuggerUIUtil.registerExtraHandleShortcuts(filesPopupList, "BunchNavigateAction")
 

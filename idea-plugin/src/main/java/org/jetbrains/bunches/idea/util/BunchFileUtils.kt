@@ -42,7 +42,7 @@ object BunchFileUtils {
     }
 
     fun isBunchFile(file: VirtualFile, project: Project): Boolean {
-        return file.extension in ( bunchExtensions(project) ?: return false)
+        return file.extension in ( bunchExtensions(project, true) ?: return false)
     }
 
     fun getMainFile(file: VirtualFile, project: Project): VirtualFile? {
@@ -52,8 +52,8 @@ object BunchFileUtils {
         return VirtualFileManager.getInstance().findFileByUrl(file.url.substringBeforeLast('.'))
     }
 
-    fun getAllBunchFiles(file: VirtualFile, project: Project): List<VirtualFile> {
-        val extensions = bunchExtensions(project) ?: return listOf()
+    fun getAllBunchFiles(file: VirtualFile, project: Project, includeMain: Boolean = false): List<VirtualFile> {
+        val extensions = bunchExtensions(project, includeMain) ?: return listOf()
         return extensions.mapNotNull {
             VirtualFileManager.getInstance().findFileByUrl(file.url + ".$it")
         }
@@ -67,9 +67,10 @@ object BunchFileUtils {
         return project.basePath.toString()
     }
 
-    fun bunchExtensions(project: Project): Set<String>? {
+    fun bunchExtensions(project: Project, includeMain: Boolean = false): Set<String>? {
         val bunchFile: VirtualFile = bunchFile(project) ?: return null
-        val extensions = bunchExtensionsWithCache(bunchFile)
+        val allExtensions = bunchExtensionsWithCache(bunchFile)
+        val extensions = if (includeMain) allExtensions else allExtensions.drop(1).toSet()
         if (extensions.isEmpty()) return null
         return extensions
     }
@@ -105,7 +106,7 @@ object BunchFileUtils {
         val lines = file.readLines().map { it.trim() }.filter { it.isNotEmpty() }
         if (lines.size <= 1) return emptySet()
 
-        return lines.drop(1).map { it.split('_').first() }.toSet()
+        return lines.map { it.split('_').first() }.toSet()
     }
 
     private fun simplePath(root: VcsRoot) : String {

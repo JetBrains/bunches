@@ -9,6 +9,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import org.jetbrains.bunches.idea.actions.ReduceActionWindow
+import org.jetbrains.bunches.idea.actions.StatLogActionWindow
 
 class BunchToolWindowFactory : ToolWindowFactory {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
@@ -76,7 +77,27 @@ class BunchToolWindowFactory : ToolWindowFactory {
         }
     }
 
+    fun createStaLogActionWindow(
+        toolWindow: ToolWindow,
+        project: Project,
+        repoPath: String
+    ) {
+        val window = StatLogActionWindow(project, repoPath)
+        val contentFactory = ContentFactory.SERVICE.getInstance()
+        val content = contentFactory.createContent(window.content, statLogDisplayName, false)
+        toolWindow.contentManager.apply {
+            var index = contentCount
+            val oldContent = findContent(statLogDisplayName)
+            if (oldContent != null) {
+                index = getIndexOfContent(oldContent)
+                removeContent(oldContent, true)
+            }
+            toolWindow.setContent(content, index)
+        }
+    }
+
     companion object {
         private const val reduceDisplayName = "Reduce"
+        private const val statLogDisplayName = "StatLog"
     }
 }

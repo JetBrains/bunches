@@ -19,12 +19,14 @@ import org.jetbrains.bunches.file.readExtensionsFromFile
 import org.jetbrains.bunches.file.resultWithExit
 import org.jetbrains.bunches.general.BunchSubCommand
 import org.jetbrains.bunches.general.exitWithUsageError
+import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.readCommitsSeq
+import org.jetbrains.bunches.isBunchFile
 import org.jetbrains.bunches.processWithConsoleProgressBar
 import java.text.ParseException
 import java.util.*
 
-data class Settings(val repoPath: String, val startDate: Date?, val amount: Int?)
+data class Settings(val repoPath: String, val startDate: Date? = null, val amount: Int? = null)
 
 fun main(args: Array<String>) {
     LogCommand().main(args)
@@ -74,8 +76,8 @@ class LogCommand : BunchSubCommand(
     }
 }
 
-private fun getGitLogFilter(settings: Settings): LogCommand.(Git) -> LogCommand {
-    val filterList: MutableList<RevFilter> = mutableListOf(RevFilter.ALL)
+fun getGitLogFilter(settings: Settings): LogCommand.(Git) -> LogCommand {
+    val filterList: MutableList<RevFilter> = mutableListOf(RevFilter.ALL, RevFilter.ALL)
     if (settings.startDate != null) {
         filterList.add(CommitTimeRevFilter.after(settings.startDate))
     }
@@ -86,14 +88,18 @@ private fun getGitLogFilter(settings: Settings): LogCommand.(Git) -> LogCommand 
     return { this.setRevFilter(filter) }
 }
 
+fun countBunchChanges(commit: CommitInfo, changeType: DiffEntry.ChangeType, extensions: List<String>) =
+    commit.fileActions.count {
+        it.changeType == changeType
+                && it.newPath != null
+                && isBunchFile(it.newPath, extensions)
+}
+
 private fun doLogStats(settings: Settings) {
     val extensions = readExtensionsFromFile(settings.repoPath)
         .resultWithExit()
         .toSet()
         .map { ".$it" }
-
-    fun isBunchFile(filename: String?): Boolean =
-        filename != null && extensions.any { filename.endsWith(it) }
 
     val gitLogFilter = getGitLogFilter(settings)
 
@@ -101,14 +107,10 @@ private fun doLogStats(settings: Settings) {
     println("%d commits processed".format(commits.size))
 
     for (commit in commits) {
-        val addedCount = commit.fileActions.count {
-            it.changeType == DiffEntry.ChangeType.ADD
-                    && isBunchFile(it.newPath)
-        }
-        val deletedCount = commit.fileActions.count {
-            it.changeType == DiffEntry.ChangeType.DELETE
-                    && isBunchFile(it.newPath)
-        }
+        val addedCount =
+            countBunchChanges(commit, DiffEntry.ChangeType.ADD, extensions)
+        val deletedCount =
+            countBunchChanges(commit, DiffEntry.ChangeType.DELETE, extensions)
 
         if (addedCount == 0 && deletedCount == 0) {
             continue

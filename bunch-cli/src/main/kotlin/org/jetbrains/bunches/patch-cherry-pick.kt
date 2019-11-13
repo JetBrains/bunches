@@ -69,7 +69,11 @@ fun cherryPick(settings: Settings) {
     }
 
     with(settings) {
-        val commits = readCommits(gitPath, sinceHash, untilHash)
+        val commits = readCommits(
+            repositoryPath = gitPath,
+            sinceRevString = sinceHash,
+            untilRevString = untilHash
+        )
 
         for (commit in commits.reversed()) {
             println("Apply: ${commit.hash} ${commit.title}")

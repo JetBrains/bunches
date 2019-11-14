@@ -84,7 +84,11 @@ class BunchCPTest : BunchBaseTest() {
 
         val newText = mainFile.readText() + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         val modCommit = writeTextAndCommitChanges(mainFile, newText)
-        runCPWithRedirectedOutput(modCommit, initCommit, "234")
+        runCPWithRedirectedOutput(
+            sinceCommit = initCommit,
+            utilCommit = modCommit,
+            suffix = "234"
+        )
 
         assertContentEquals(mainFile, newText)
         assertContentEquals(bunchFile, newText)
@@ -100,7 +104,11 @@ class BunchCPTest : BunchBaseTest() {
 
         val changeCommit = addAndCommitChanges(mainFile, "\nfixed line")
         val newText = mainFile.readText()
-        runCPWithRedirectedOutput(changeCommit, initCommit, "122")
+        runCPWithRedirectedOutput(
+            sinceCommit = initCommit,
+            utilCommit = changeCommit,
+            suffix = "122"
+        )
 
         val bunchFile = File(directory, "main.122")
         assertContentEquals(bunchFile, newText)
@@ -125,7 +133,11 @@ class BunchCPTest : BunchBaseTest() {
         """.trimIndent()
         val changeCommit = writeTextAndCommitChanges(mainFile, text)
 
-        runCPWithRedirectedOutput(changeCommit, initCommit, "346")
+        runCPWithRedirectedOutput(
+            sinceCommit = initCommit,
+            utilCommit = changeCommit,
+            suffix = "346"
+        )
         checkCommitsAfterCP("346", changeCommit)
 
         assertContentEquals(mainFile, text)
@@ -146,7 +158,11 @@ class BunchCPTest : BunchBaseTest() {
         }
         val finalMainFileText = mainFile.readText()
 
-        runCPWithRedirectedOutput(changeCommits.last(), initCommit, "12")
+        runCPWithRedirectedOutput(
+            sinceCommit = initCommit,
+            utilCommit = changeCommits.last(),
+            suffix = "12"
+        )
         checkCommitsAfterCP("12", changeCommits.reversed())
         assertEquals(finalMainFileText, mainFile.readText())
         assertContentEquals(mainFile, bunchFile)
@@ -168,7 +184,11 @@ class BunchCPTest : BunchBaseTest() {
         val bunchFileChangeCommit = addAndCommitChanges(mainFile, "sovsem ne kot")
         val bunchFileText = mainFile.readText()
 
-        runCPWithRedirectedOutput(bunchFileChangeCommit, switchCommit, "394")
+        runCPWithRedirectedOutput(
+            sinceCommit = switchCommit,
+            utilCommit = bunchFileChangeCommit,
+            suffix = "394"
+        )
         mainFile.writeText(getFile("file.300").readText())
         expect {
             getFile("file.300").delete()
@@ -191,7 +211,11 @@ class BunchCPTest : BunchBaseTest() {
         }
 
         val changesCommit = commitCurrentChanges()
-        runCPWithRedirectedOutput(changesCommit, initCommit, "42")
+        runCPWithRedirectedOutput(
+            sinceCommit = initCommit,
+            utilCommit = changesCommit,
+            suffix = "42"
+        )
 
         for ((text, file) in texts.zip(files)) {
             expectThat(file).isContentEqualsTo(text)
@@ -209,10 +233,18 @@ class BunchCPTest : BunchBaseTest() {
 
         val modCommit = addAndCommitChanges(file, "info")
 
-        val firstCPCommit = runCPWithRedirectedOutput(modCommit, initCommit, "42")
+        val firstCPCommit = runCPWithRedirectedOutput(
+            sinceCommit = initCommit,
+            utilCommit = modCommit,
+            suffix = "42"
+        )
         compareCommitsWithoutHashAndTime(copiedCommit = firstCPCommit, initialCommit = modCommit, extension = "42")
 
-        val secondCPCommit = runCPWithRedirectedOutput(modCommit, initCommit, "43")
+        val secondCPCommit = runCPWithRedirectedOutput(
+            sinceCommit = initCommit,
+            utilCommit = modCommit,
+            suffix = "43"
+        )
         compareCommitsWithoutHashAndTime(secondCPCommit, modCommit, "43")
 
         val firstBunchFile = getFile(file.name, "42")
@@ -238,8 +270,16 @@ class BunchCPTest : BunchBaseTest() {
         val thirdModCommit = addAndCommitChanges(mainFile, "another text")
         val thirdText = mainFile.readText()
 
-        val firstCPCommit = runCPWithRedirectedOutput(firstModCommit, initCommit, "32")
-        val secondCPCommit = runCPWithRedirectedOutput(thirdModCommit, secondModCommit, "33")
+        val firstCPCommit = runCPWithRedirectedOutput(
+            sinceCommit = initCommit,
+            utilCommit = firstModCommit,
+            suffix = "32"
+        )
+        val secondCPCommit = runCPWithRedirectedOutput(
+            sinceCommit = secondModCommit,
+            utilCommit = thirdModCommit,
+            suffix = "33"
+        )
 
         val firstCommitBunchFile = getFile(mainFile.name, "32")
         val secondCommitBunchFile = getFile(mainFile.name, "33")

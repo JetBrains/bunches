@@ -4,7 +4,7 @@ import org.jetbrains.bunches.GitCommandManager.Companion.readCommits
 import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.FileAction
 import org.jetbrains.bunches.git.readCommits
-import org.junit.Assert.assertTrue
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.ExtensionContext

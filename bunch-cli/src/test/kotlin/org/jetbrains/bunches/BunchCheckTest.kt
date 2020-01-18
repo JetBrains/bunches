@@ -3,7 +3,7 @@ package org.jetbrains.bunches
 import org.jetbrains.bunches.check.checkOneCommit
 import org.jetbrains.bunches.check.getCreateFileCommitIndexMap
 import org.jetbrains.bunches.git.CommitInfo
-import org.junit.Assert.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.containsExactly

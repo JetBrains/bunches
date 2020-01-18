@@ -7,7 +7,7 @@ import org.jetbrains.bunches.cleanup.Settings
 import org.jetbrains.bunches.cleanup.cleanup
 import org.jetbrains.bunches.git.CommitInfo
 import org.jetbrains.bunches.git.FileAction
-import org.junit.Assert.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.containsExactlyInAnyOrder

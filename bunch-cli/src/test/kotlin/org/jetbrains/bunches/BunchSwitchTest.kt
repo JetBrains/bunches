@@ -3,7 +3,7 @@ package org.jetbrains.bunches
 import org.eclipse.jgit.diff.DiffEntry
 import org.jetbrains.bunches.git.FileAction
 import org.jetbrains.bunches.switch.*
-import org.junit.Assert.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir

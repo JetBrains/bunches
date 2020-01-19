@@ -125,7 +125,7 @@ object BunchFileUtils {
     fun updateGitLog(project: Project) {
         val roots = getGitRoots(project)
         val vcsLogData = VcsProjectLog.getInstance(project).dataManager ?: return
-        vcsLogData.refresh(roots.mapNotNull { it.path })
+        vcsLogData.refresh(roots.map { it.path })
     }
 
     fun refreshFileSystem(files: List<VirtualFile>) {

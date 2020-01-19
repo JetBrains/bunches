@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
+import com.intellij.openapi.util.Ref
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.psi.PsiManager
@@ -15,6 +16,10 @@ import org.jetbrains.bunches.idea.util.getVirtualFile
 
 
 class BunchNavigateAction : AnAction("Navigate to related") {
+    companion object {
+        private val SHOW_AD: Ref<Boolean> = Ref(true)
+    }
+
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
         val currentFile = e.getVirtualFile() ?: return
@@ -25,20 +30,25 @@ class BunchNavigateAction : AnAction("Navigate to related") {
         }
 
         val files = BunchFileUtils.getAllBunchFiles(mainFile, project, true)
-        val filesPopupList = ListPopupImpl(MyItemsList(project, currentFile, mainFile, files))
-        DebuggerUIUtil.registerExtraHandleShortcuts(filesPopupList, "BunchNavigateAction")
+        val filesPopupList = ListPopupImpl(project, MyItemsList(project, currentFile, mainFile, files))
+        DebuggerUIUtil.registerExtraHandleShortcuts(filesPopupList, SHOW_AD,"BunchNavigateAction")
 
         val window = WindowManager.getInstance().suggestParentWindow(project) ?: return
         filesPopupList.showInCenterOf(window)
     }
 
-    private class MyItemsList(val project: Project,
-                              file: VirtualFile,
-                              mainFile: VirtualFile,
-                              bunchFiles: List<VirtualFile>)
-        : BaseListPopupStep<VirtualFile>("Navigate to ", getList(file, mainFile, bunchFiles), mainFile.fileType.icon) {
+    private class MyItemsList(
+        val project: Project,
+        file: VirtualFile,
+        mainFile: VirtualFile,
+        bunchFiles: List<VirtualFile>
+    ) : BaseListPopupStep<VirtualFile>("Navigate to ", getList(file, mainFile, bunchFiles), mainFile.fileType.icon) {
         companion object {
-            private fun getList(file: VirtualFile, mainFile: VirtualFile, bunchFiles: List<VirtualFile>): MutableList<VirtualFile> {
+            private fun getList(
+                file: VirtualFile,
+                mainFile: VirtualFile,
+                bunchFiles: List<VirtualFile>
+            ): MutableList<VirtualFile> {
                 val list = mutableListOf<VirtualFile>()
                 if (file != mainFile) {
                     list.add(mainFile)

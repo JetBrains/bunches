@@ -22,7 +22,10 @@
     <vendor url="http://www.jetbrains.com">JetBrains</vendor>
 
     <extensions defaultExtensionNs="com.intellij">
-        <fileTypeFactory implementation="org.jetbrains.bunches.idea.highlighting.BunchFileTypeFactory"/>
+        <fileType
+                name="Bunch"
+                implementationClass="org.jetbrains.bunches.idea.highlighting.BunchFileType"
+                fieldName="INSTANCE"/>
         <lang.substitutor
                 language="TEXT"
                 implementationClass="org.jetbrains.bunches.idea.highlighting.BunchLanguageSubstitutor"/>

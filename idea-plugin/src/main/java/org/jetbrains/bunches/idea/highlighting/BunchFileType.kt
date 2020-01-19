@@ -12,7 +12,7 @@ import org.jetbrains.bunches.idea.util.BunchFileUtils
 import javax.swing.Icon
 
 class BunchFileType :
-    LanguageFileType(PlainTextLanguage.INSTANCE),
+    LanguageFileType(PlainTextLanguage.INSTANCE, true),
     FileTypeIdentifiableByVirtualFile,
     InternalFileType {
 
@@ -37,6 +37,8 @@ class BunchFileType :
     override fun getCharset(file: VirtualFile, content: ByteArray): String? = null
 
     companion object {
+        @Suppress("unused")
+        @JvmStatic
         val INSTANCE: LanguageFileType = BunchFileType()
     }
 }

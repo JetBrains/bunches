@@ -21,6 +21,10 @@
 
     <vendor url="http://www.jetbrains.com">JetBrains</vendor>
 
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.vcs</depends>
+
     <extensions defaultExtensionNs="com.intellij">
         <fileType
                 name="Bunch"

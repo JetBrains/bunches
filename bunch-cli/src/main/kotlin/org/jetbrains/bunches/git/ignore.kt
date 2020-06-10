@@ -20,8 +20,11 @@ fun parseGitIgnore(baseGitRoot: File): IgnoreNode? {
 
 // If '.gitignore' file doesn't exist 'ignore' will be null and '==' returns false
 // We skip '.gitignore' check in this case
-fun checkIgnoreList(dir: File, ignore: IgnoreNode?) =
-    ignore?.isIgnored(dir.name, dir.isDirectory) == IgnoreNode.MatchResult.IGNORED
+fun checkIgnoreList(dir: File, baseGitRoot: File, ignore: IgnoreNode?): Boolean {
+    if (ignore == null) return false
+    val repoPath = dir.relativeTo(baseGitRoot).path.replace(File.pathSeparatorChar, '/')
+    return ignore.isIgnored(repoPath, dir.isDirectory) == IgnoreNode.MatchResult.IGNORED
+}
 
 // Git root directory contains ".git" sub-directory.
 // Git worktree directory contains ".git" file.
@@ -32,4 +35,4 @@ fun isNestedGitRoot(dir: File, baseGitRoot: File) =
     isGitRoot(dir) && dir != baseGitRoot
 
 fun shouldIgnoreDir(dir: File, baseGitRoot: File, ignore: IgnoreNode?) =
-    isGitDir(dir) || isNestedGitRoot(dir, baseGitRoot) || checkIgnoreList(dir, ignore)
+    isGitDir(dir) || isNestedGitRoot(dir, baseGitRoot) || checkIgnoreList(dir, baseGitRoot, ignore)

@@ -22,7 +22,7 @@ fun parseGitIgnore(baseGitRoot: File): IgnoreNode? {
 // We skip '.gitignore' check in this case
 fun checkIgnoreList(dir: File, baseGitRoot: File, ignore: IgnoreNode?): Boolean {
     if (ignore == null) return false
-    val repoPath = dir.relativeTo(baseGitRoot).path.replace(File.pathSeparatorChar, '/')
+    val repoPath = dir.relativeTo(baseGitRoot).path.replace(File.separatorChar, '/')
     return ignore.isIgnored(repoPath, dir.isDirectory) == IgnoreNode.MatchResult.IGNORED
 }
 

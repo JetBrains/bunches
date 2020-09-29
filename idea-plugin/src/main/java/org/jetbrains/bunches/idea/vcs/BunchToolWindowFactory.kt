@@ -30,7 +30,7 @@ class BunchToolWindowFactory : ToolWindowFactory {
                 setSelectedContent(content)
             }
 
-            isToHideOnEmptyContent = true
+            setToHideOnEmptyContent(true)
             show(null)
         }
     }

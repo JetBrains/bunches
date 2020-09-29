@@ -107,11 +107,14 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
             )) {
                 YES -> {
                     val window = ToolWindowManager.getInstance(project).getToolWindow("Bunch Tool")
-                    ServiceManager.getService(project, BunchToolWindowFactory::class.java)
+                        ?: error("Window with ID = `Bunch Tool` should be registered")
+                    ServiceManager
+                        .getService(project, BunchToolWindowFactory::class.java)
                         .createCommitCheckToolWindowContent(
-                        window, forgottenFiles, allFiles,
-                        checkInProjectPanel
-                    )
+                            window, forgottenFiles, allFiles,
+                            checkInProjectPanel
+                        )
+
                     return ReturnResult.CLOSE_WINDOW
                 }
                 NO -> return ReturnResult.COMMIT

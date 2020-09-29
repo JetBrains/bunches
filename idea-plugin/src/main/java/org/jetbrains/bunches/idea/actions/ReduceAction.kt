@@ -12,7 +12,7 @@ import java.io.File
 class ReduceAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
-        val window = ToolWindowManager.getInstance(project).getToolWindow("Bunch Tool")
+        val window = ToolWindowManager.getInstance(project).getToolWindow("Bunch Tool") ?: return
         val repoPath = BunchFileUtils.vcsRootPath(project)
         if (repoPath == null) {
             Messages.showMessageDialog("No git root found", "Reduce error", Messages.getErrorIcon())

@@ -59,7 +59,7 @@ class SimpleCheckToolWindow(
 
         toolWindow.apply {
             setDefaultContentUiType(ToolWindowContentUiType.TABBED)
-            isToHideOnEmptyContent = true
+            setToHideOnEmptyContent(true)
         }
     }
 

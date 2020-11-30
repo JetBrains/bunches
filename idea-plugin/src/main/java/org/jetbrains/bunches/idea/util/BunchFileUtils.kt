@@ -19,116 +19,121 @@ import org.jetbrains.bunches.git.isGitRoot
 import java.io.File
 
 object BunchFileUtils {
-    fun bunchFile(project: Project): VirtualFile? {
-        val baseDir = project.baseDir ?: return null
-        return baseDir.findChild(BUNCH_FILE_NAME)
-    }
+    fun bunchFile(project: Project): VirtualFile? =
+        project.baseDir?.findChild(BUNCH_FILE_NAME) // baseDir is deprecated!
 
-    fun getGitRoots(project: Project): List<VcsRoot> {
-        return ServiceManager.getService(project, VcsRootDetector::class.java)
+    fun getGitRoots(project: Project): List<VcsRoot> =
+        ServiceManager
+            .getService(project, VcsRootDetector::class.java)
             .detect()
             .filter { v -> isGitRoot(File(simplePath(v))) }
-    }
 
-    fun vcsRootPath(project: Project) : String? {
-        val roots = getGitRoots(project)
+    fun vcsRootPath(project: Project): String? =
+        getGitRoots(project)
+            .takeIf { it.isNotEmpty() }
+            ?.let {
+                simplePath(it.first())
+            }
+            ?: null.also {
+                Messages.showMessageDialog(
+                    "No VCS roots detected",
+                    "Project  error",
+                    Messages.getErrorIcon()
+                )
+            }
 
-        if (roots.isEmpty()) {
-            Messages.showMessageDialog("No vcs roots detected", "Project  error", Messages.getErrorIcon())
-            return null
-        }
+    fun isBunchFile(file: VirtualFile, project: Project): Boolean =
+        bunchExtensions(project, true)
+            ?.let { file.extension in it }
+            ?: false
 
-        return simplePath(roots.first())
-    }
+    fun getMainFile(file: VirtualFile, project: Project): VirtualFile? =
+        takeIf { isBunchFile(file, project) }
+            ?.let {
+                VirtualFileManager.getInstance()
+                    .findFileByUrl(file.url.substringBeforeLast('.'))
+            }
 
-    fun isBunchFile(file: VirtualFile, project: Project): Boolean {
-        return file.extension in ( bunchExtensions(project, true) ?: return false)
-    }
+    fun getAllBunchFiles(file: VirtualFile, project: Project, includeMain: Boolean = false): List<VirtualFile> =
+        bunchExtensions(project, includeMain)
+            ?.let { extensions ->
+                extensions.mapNotNull {
+                    VirtualFileManager.getInstance().findFileByUrl(file.url + ".$it")
+                }
+            }
+            ?: emptyList()
 
-    fun getMainFile(file: VirtualFile, project: Project): VirtualFile? {
-        if (!isBunchFile(file, project)) {
-            return null
-        }
-        return VirtualFileManager.getInstance().findFileByUrl(file.url.substringBeforeLast('.'))
-    }
+    fun bunchPath(project: Project): String? =
+        project.basePath
+            ?: null.also {
+                Messages.showMessageDialog(
+                    "No project base path found",
+                    "Project  error",
+                    Messages.getErrorIcon()
+                )
+            }
 
-    fun getAllBunchFiles(file: VirtualFile, project: Project, includeMain: Boolean = false): List<VirtualFile> {
-        val extensions = bunchExtensions(project, includeMain) ?: return listOf()
-        return extensions.mapNotNull {
-            VirtualFileManager.getInstance().findFileByUrl(file.url + ".$it")
-        }
-    }
+    fun bunchExtensions(project: Project, includeMain: Boolean = false): Set<String>? =
+        bunchFile(project)
+            ?.let { bunchFile ->
+                bunchExtensionsWithCache(bunchFile)
+                    .let { allExtensions ->
+                        if (includeMain) allExtensions else allExtensions.drop(1).toSet()
+                    }
+                    .takeIf { it.isNotEmpty() }
+            }
 
-    fun bunchPath(project: Project) : String? {
-        if (project.basePath == null) {
-            Messages.showMessageDialog("No project base path found", "Project  error", Messages.getErrorIcon())
-            return null
-        }
-        return project.basePath.toString()
-    }
-
-    fun bunchExtensions(project: Project, includeMain: Boolean = false): Set<String>? {
-        val bunchFile: VirtualFile = bunchFile(project) ?: return null
-        val allExtensions = bunchExtensionsWithCache(bunchFile)
-        val extensions = if (includeMain) allExtensions else allExtensions.drop(1).toSet()
-        if (extensions.isEmpty()) return null
-        return extensions
-    }
-
-    private class ExtensionsData(val timeStamp: Long, val extensions: Set<String>)
+    private data class ExtensionsData(val timeStamp: Long, val extensions: Set<String>)
 
     private val bunchFileCache = ContainerUtil.createConcurrentWeakMap<VirtualFile, ExtensionsData>()
 
-    private fun bunchExtensionsWithCache(bunchFile: VirtualFile): Set<String> {
-        val timeStamp = bunchFile.timeStamp
-        val extensionsData = bunchFileCache[bunchFile]
-        if (extensionsData != null && extensionsData.timeStamp == timeStamp) {
-            return extensionsData.extensions
+    private fun bunchExtensionsWithCache(bunchFile: VirtualFile): Set<String> =
+        bunchFile.timeStamp.let { ts ->
+            bunchFileCache[bunchFile]
+                ?.takeIf { it.timeStamp == ts }
+                ?.extensions
+                ?: bunchExtensions(bunchFile)
+                    .also { extensions ->
+                        bunchFileCache[bunchFile] = ExtensionsData(ts, extensions)
+                    }
+                    .also { _ ->
+                        bunchFileCache.keys
+                            .filter { !it.isValid }
+                            .forEach { invalidFile -> bunchFileCache.remove(invalidFile) }
+                    }
         }
 
-        val extensions = bunchExtensions(bunchFile)
-        bunchFileCache[bunchFile] = ExtensionsData(timeStamp, extensions)
+    private fun bunchExtensions(bunchFile: VirtualFile): Set<String> =
+        File(bunchFile.path).takeIf { it.exists() }
+            ?.let {
+                it.readLines()
+                    .map { line -> line.trim() }
+                    .filter { line -> line.isNotEmpty() }
+                    .takeIf { lines -> lines.size > 1 }
+            }?.map {
+                it.split('_').first()
+            }?.toSet()
+            ?: emptySet()
 
-        val invalidFiles = bunchFileCache.keys.filter { !it.isValid }
-        if (invalidFiles.isNotEmpty()) {
-            for (invalidFile in invalidFiles) {
-                bunchFileCache.remove(invalidFile)
+    private fun simplePath(root: VcsRoot): String =
+        root.path.toString().removePrefix("file:")
+
+    fun toPsiFile(file: File, project: Project): PsiFile? =
+        LocalFileSystem.getInstance().findFileByIoFile(file)
+            ?.let { virtualFile -> PsiManager.getInstance(project).findFile(virtualFile) }
+
+    fun getMainFile(file: PsiFile): PsiFile? =
+        toPsiFile(File(file.parent?.virtualFile?.path, file.virtualFile.nameWithoutExtension), file.project)
+
+
+    fun updateGitLog(project: Project) =
+        VcsProjectLog.getInstance(project).dataManager
+            ?.let {
+                it.refresh(
+                    getGitRoots(project).map { root -> root.path }
+                )
             }
-        }
 
-        return extensions
-    }
-
-    private fun bunchExtensions(bunchFile: VirtualFile): Set<String> {
-        val file = File(bunchFile.path)
-        if (!file.exists()) return emptySet()
-
-        val lines = file.readLines().map { it.trim() }.filter { it.isNotEmpty() }
-        if (lines.size <= 1) return emptySet()
-
-        return lines.map { it.split('_').first() }.toSet()
-    }
-
-    private fun simplePath(root: VcsRoot) : String {
-        return root.path.toString().removePrefix("file:")
-    }
-
-    fun toPsiFile(file: File, project: Project): PsiFile? {
-        val virtualFile = LocalFileSystem.getInstance().findFileByIoFile(file) ?: return null
-        return PsiManager.getInstance(project).findFile(virtualFile)
-    }
-
-    fun getMainFile(file: PsiFile): PsiFile? {
-        return toPsiFile(File(file.parent?.virtualFile?.path, file.virtualFile.nameWithoutExtension), file.project)
-    }
-
-    fun updateGitLog(project: Project) {
-        val roots = getGitRoots(project)
-        val vcsLogData = VcsProjectLog.getInstance(project).dataManager ?: return
-        vcsLogData.refresh(roots.map { it.path })
-    }
-
-    fun refreshFileSystem(files: List<VirtualFile>) {
+    fun refreshFileSystem(files: List<VirtualFile>) =
         LocalFileSystem.getInstance().refreshFiles(files)
-    }
 }

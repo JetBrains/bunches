@@ -5,7 +5,8 @@ import org.jetbrains.bunches.BunchException
 import org.jetbrains.bunches.switch.RESTORE_COMMIT_TITLE
 import javax.swing.JComponent
 
-class SwitchDialogKt(project: Project, bunches: Collection<String>, private val vcsRoots: List<String>) : SwitchDialog(project) {
+class SwitchDialogKt(project: Project, bunches: Collection<String>, private val vcsRoots: List<String>) :
+    SwitchDialog(project) {
     init {
         title = "Switch Bunches"
         if (bunches.isNotEmpty())
@@ -24,26 +25,21 @@ class SwitchDialogKt(project: Project, bunches: Collection<String>, private val 
         textFieldCommitMessage.text = RESTORE_COMMIT_TITLE
     }
 
-    override fun getPreferredFocusedComponent(): JComponent? {
-        return comboSwitch
-    }
+    override fun getPreferredFocusedComponent(): JComponent? = comboSwitch
 
-    private fun getVcsRoot(): String {
-        val root = when {
+    private fun getVcsRoot(): String =
+        when {
             vcsRoots.size == 1 -> vcsRoots.first()
             vcsRoots.size > 1 -> vcsRootComboBox.selectedItem as String
-            else -> null
+            else -> throw BunchException("No VCS root found for project")
         }
-        return root ?: throw BunchException("No VCS root found for project")
-    }
 
-    fun getParameters(): SwitchParameters {
-        return SwitchParameters(
+    fun getParameters() =
+        SwitchParameters(
             repoPath = getVcsRoot(),
             branch = comboSwitch.selectedItem as String,
             stepByStep = checkStepByStep.isSelected,
             doCleanup = checkCleanup.isSelected,
             commitMessage = textFieldCommitMessage.text
         )
-    }
 }

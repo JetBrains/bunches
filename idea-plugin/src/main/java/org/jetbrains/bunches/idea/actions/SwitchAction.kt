@@ -58,15 +58,13 @@ class SwitchAction : AnAction() {
                     doSwitch(settings)
                 }
 
-                override fun onThrowable(error: Throwable) {
-                    Messages.showErrorDialog(project, error.message, "Switch error")
+                override fun onThrowable(error: Throwable) =
                     Notification(
                         "Bunch tool",
                         "Switch error",
                         error.message ?: "Switch fail",
                         NotificationType.ERROR
                     ).notify(project)
-                }
 
                 override fun onSuccess() {
                     BunchFileUtils.updateGitLog(project)
